@@ -1,0 +1,403 @@
+/* ==========================================================================
+   Baldur's Gate 3 (BG3) Inspired Character Creator & Level-Up Styling
+   Gothic Obsidian Slate, Burnished Gold Filigree & Ornate RPG Layout
+   ========================================================================== */
+
+.bg3-creator-container {
+  display: grid;
+  grid-template-columns: 240px 1fr 320px;
+  gap: 1.25rem;
+  min-height: calc(100vh - 120px);
+  background: radial-gradient(circle at 50% 20%, #151b26 0%, #0b0e14 100%);
+  border: 1.5px solid var(--border-gold);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), inset 0 0 80px rgba(0, 0, 0, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (max-width: 1200px) {
+  .bg3-creator-container {
+    grid-template-columns: 200px 1fr 280px;
+  }
+}
+
+@media (max-width: 900px) {
+  .bg3-creator-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Left Pillar: Step Navigation Column */
+.bg3-steps-pillar {
+  background: linear-gradient(180deg, rgba(21, 27, 38, 0.9) 0%, rgba(13, 16, 23, 0.95) 100%);
+  border: 1px solid rgba(223, 184, 90, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  backdrop-filter: blur(8px);
+}
+
+.bg3-step-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #c9cbcf;
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+}
+
+.bg3-step-item:hover {
+  background: rgba(223, 184, 90, 0.08);
+  color: var(--text-gold);
+  border-color: rgba(223, 184, 90, 0.2);
+}
+
+.bg3-step-item.active {
+  background: linear-gradient(90deg, rgba(223, 184, 90, 0.2) 0%, rgba(223, 184, 90, 0.05) 100%);
+  color: var(--text-gold);
+  border-color: var(--border-gold);
+  box-shadow: inset 3px 0 0 var(--accent-gold), 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.bg3-step-badge {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 10px;
+  font-family: var(--font-ui);
+  font-weight: 800;
+}
+
+.bg3-step-badge.complete {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.bg3-step-badge.pending {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+/* Center Stage: The Interactive Selection Workspace */
+.bg3-stage-panel {
+  background: linear-gradient(180deg, rgba(23, 29, 41, 0.75) 0%, rgba(15, 18, 26, 0.85) 100%);
+  border: 1px solid rgba(223, 184, 90, 0.35);
+  border-radius: 8px;
+  padding: 1.5rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 160px);
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.bg3-section-title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-gold);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.bg3-section-subtitle {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: #a0aec0;
+  margin-bottom: 1.25rem;
+  line-height: 1.4;
+}
+
+/* BG3 Cards Grid */
+.bg3-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.bg3-card {
+  background: linear-gradient(145deg, #18202d 0%, #11151e 100%);
+  border: 1.5px solid rgba(223, 184, 90, 0.25);
+  border-radius: 8px;
+  padding: 1rem 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.bg3-card:hover {
+  border-color: var(--border-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 12px rgba(223, 184, 90, 0.2);
+}
+
+.bg3-card.selected {
+  border-color: var(--border-gold);
+  background: linear-gradient(145deg, #242f42 0%, #151a24 100%);
+  box-shadow: 0 0 0 1px var(--border-gold), 0 8px 25px rgba(0, 0, 0, 0.6), 0 0 20px rgba(223, 184, 90, 0.3);
+}
+
+.bg3-card.selected::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #dfb85a 0%, #ffd874 50%, #dfb85a 100%);
+}
+
+.bg3-card-header {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.03em;
+  margin-bottom: 0.25rem;
+}
+
+.bg3-card.selected .bg3-card-header {
+  color: var(--text-gold);
+}
+
+.bg3-card-desc {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  line-height: 1.35;
+  margin-top: 0.25rem;
+}
+
+.bg3-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: var(--font-ui);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(223, 184, 90, 0.15);
+  color: var(--text-gold);
+  border: 1px solid rgba(223, 184, 90, 0.3);
+  margin-top: 0.4rem;
+  width: fit-content;
+}
+
+/* BG3 Right Pillar: Character Summary / Inspector */
+.bg3-summary-pillar {
+  background: linear-gradient(180deg, rgba(21, 27, 38, 0.95) 0%, rgba(13, 16, 23, 0.98) 100%);
+  border: 1px solid rgba(223, 184, 90, 0.35);
+  border-radius: 8px;
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.bg3-portrait-frame {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid var(--border-gold);
+  background: radial-gradient(circle, #2a3447 0%, #11141c 100%);
+  box-shadow: 0 0 15px rgba(223, 184, 90, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto 0.75rem auto;
+}
+
+.bg3-summary-name {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-gold);
+  text-align: center;
+  margin-bottom: 0.15rem;
+  letter-spacing: 0.04em;
+}
+
+.bg3-summary-subtitle {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: #94a3b8;
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+/* Vitals Row */
+.bg3-vitals-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.bg3-vital-cell {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(223, 184, 90, 0.2);
+  border-radius: 6px;
+  padding: 0.4rem 0.2rem;
+  text-align: center;
+}
+
+.bg3-vital-val {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.bg3-vital-lbl {
+  font-size: 0.65rem;
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-top: 0.15rem;
+}
+
+/* Ability Scores Mini Table in BG3 Pillar */
+.bg3-abilities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
+  flex: 1;
+}
+
+.bg3-ability-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0.65rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.bg3-ability-row.primary-stat {
+  border-color: rgba(223, 184, 90, 0.4);
+  background: rgba(223, 184, 90, 0.06);
+}
+
+.bg3-ability-mod {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text-gold);
+}
+
+/* BG3 Grand Golden Action Button */
+.bg3-btn-venture {
+  background: linear-gradient(180deg, #e5c158 0%, #b8861e 100%);
+  color: #0b0e14;
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.85rem 1.25rem;
+  border: 1.5px solid #ffe58f;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(184, 134, 30, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.bg3-btn-venture:hover {
+  background: linear-gradient(180deg, #f2d26f 0%, #c99527 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 25px rgba(184, 134, 30, 0.6);
+}
+
+.bg3-btn-venture:active {
+  transform: translateY(1px);
+}
+
+/* ==========================================================================
+   BG3 Character Companion Inspector (In-Game Screen)
+   ========================================================================== */
+
+.bg3-inspector-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: radial-gradient(circle at 50% 10%, #151b26 0%, #0b0e14 100%);
+  border: 1.5px solid var(--border-gold);
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), inset 0 0 80px rgba(0, 0, 0, 0.6);
+  min-height: calc(100vh - 120px);
+}
+
+.bg3-inspector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(223, 184, 90, 0.3);
+}
+
+.bg3-inspector-grid {
+  display: grid;
+  grid-template-columns: 290px 1fr 310px;
+  gap: 1.25rem;
+  flex: 1;
+}
+
+@media (max-width: 1100px) {
+  .bg3-inspector-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bg3-panel-box {
+  background: linear-gradient(180deg, rgba(23, 29, 41, 0.75) 0%, rgba(15, 18, 26, 0.85) 100%);
+  border: 1px solid rgba(223, 184, 90, 0.25);
+  border-radius: 8px;
+  padding: 1rem;
+  backdrop-filter: blur(8px);
+}
+
+dialog:modal,
+.modal-overlay {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+

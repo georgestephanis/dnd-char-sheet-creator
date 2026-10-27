@@ -1,0 +1,1353 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Shield, Sword, Wand2, Sparkles, User, BookOpen, Check,
+  Dices, Star, Heart, Zap, Wind, ChevronRight, ChevronLeft, Award, Plus, Trash2, ArrowLeft, RefreshCw, Flame
+} from 'lucide-react';
+import { SRD_RACES } from '../../data/srdRaces';
+import { SRD_CLASSES } from '../../data/srdClasses';
+import { SRD_BACKGROUNDS } from '../../data/srdBackgrounds';
+import { SRD_FEATS } from '../../data/srdFeats';
+import { SRD_SPELLS } from '../../data/srdSpells';
+import { SAMPLE_CHARACTERS } from '../../data/sampleCharacters';
+import {
+  POINT_BUY_COSTS, POINT_BUY_TOTAL, STANDARD_ARRAY,
+  roll4d6DropLowest, getAbilityModifier, formatModifier,
+  calculateArmorClass, getProficiencyBonus
+} from '../../utils/dndRules';
+
+// Recommended 27-point buy scores per class (BG3 & 5e optimal arrays)
+const CLASS_RECOMMENDED_SCORES = {
+  barbarian: { str: 15, con: 14, dex: 13, wis: 12, cha: 10, int: 8 },
+  bard: { cha: 15, dex: 14, con: 13, wis: 12, int: 10, str: 8 },
+  cleric: { wis: 15, con: 14, str: 13, dex: 12, cha: 10, int: 8 },
+  druid: { wis: 15, con: 14, dex: 13, int: 12, cha: 10, str: 8 },
+  fighter: { str: 15, con: 14, dex: 13, wis: 12, cha: 10, int: 8 },
+  monk: { dex: 15, wis: 14, con: 13, str: 12, int: 10, cha: 8 },
+  paladin: { str: 15, cha: 14, con: 13, wis: 12, dex: 10, int: 8 },
+  ranger: { dex: 15, wis: 14, con: 13, str: 12, int: 10, cha: 8 },
+  rogue: { dex: 15, con: 14, int: 13, wis: 12, cha: 10, str: 8 },
+  sorcerer: { cha: 15, con: 14, dex: 13, wis: 12, int: 10, str: 8 },
+  warlock: { cha: 15, con: 14, dex: 13, wis: 12, int: 10, str: 8 },
+  wizard: { int: 15, dex: 14, con: 13, wis: 12, cha: 10, str: 8 },
+};
+
+const FANTASY_NAMES = {
+  dwarf: ['Bruenor', 'Thorin', 'Morgran', 'Balin', 'Brakka', 'Helga', 'Vondal', 'Duerg', 'Thorgar', 'Orsik'],
+  elf: ['Altea', 'Astarion', 'Aelar', 'Caelynn', 'Feyre', 'Legolas', 'Elysia', 'Valerius', 'Theadrin', 'Xiloscient'],
+  human: ['Tav', 'Gale', 'Wyll', 'Valen', 'Seraphina', 'Rowan', 'Kaelen', 'Aric', 'Gareth', 'Lyra'],
+  tiefling: ['Karlach', 'Akmenos', 'Barakas', 'Damakos', 'Kallista', 'Lilith', 'Malakor', 'Vesper', 'Zephyr', 'Mephist'],
+  halfling: ['Corin', 'Alton', 'Cade', 'Eldon', 'Lyle', 'Bree', 'Callie', 'Kithri', 'Verna', 'Finnick'],
+  dragonborn: ['Arjhan', 'Balasar', 'Donaar', 'Ghesh', 'Heskan', 'Kriv', 'Medrash', 'Patrin', 'Rhogar', 'Torinn'],
+  gnome: ['Boddynock', 'Dimble', 'Fonkin', 'Gimble', 'Gnim', 'Namfoodle', 'Seebo', 'Wrenn', 'Zook', 'Ellywick'],
+  'half-elf': ['Shadowheart', 'Tanis', 'Rhiannon', 'Faerand', 'Silas', 'Corvin', 'Vaelin', 'Aria', 'Dorian', 'Kyra'],
+  'half-orc': ['Krag', 'Gore', 'Dench', 'Feng', 'Gell', 'Henk', 'Holg', 'Imsh', 'Mhurren', 'Ront', 'Thokk']
+};
+
+const FANTASY_AVATARS = [
+  { id: 'av-knight', label: 'Knight', icon: '🛡️', role: 'Paladin / Fighter' },
+  { id: 'av-wizard', label: 'Mage', icon: '🧙‍♂️', role: 'Wizard / Sorcerer' },
+  { id: 'av-rogue', label: 'Rogue', icon: '🗡️', role: 'Rogue / Assassin' },
+  { id: 'av-ranger', label: 'Ranger', icon: '🏹', role: 'Ranger / Scout' },
+  { id: 'av-cleric', label: 'Cleric', icon: '✨', role: 'Cleric / Healer' },
+  { id: 'av-druid', label: 'Druid', icon: '🌿', role: 'Druid / Shaman' },
+  { id: 'av-barbarian', label: 'Barbarian', icon: '🪓', role: 'Barbarian / Berserker' },
+  { id: 'av-bard', label: 'Bard', icon: '🎶', role: 'Bard / Skald' },
+  { id: 'av-warlock', label: 'Warlock', icon: '👁️', role: 'Warlock / Occultist' },
+  { id: 'av-monk', label: 'Monk', icon: '🥋', role: 'Monk / Ascetic' },
+  { id: 'av-dragonborn', label: 'Dragonborn', icon: '🐉', role: 'Draconic Champion' },
+  { id: 'av-tiefling', label: 'Tiefling', icon: '😈', role: 'Fiendish Spellblade' },
+  { id: 'av-dwarf', label: 'Dwarf', icon: '🧔', role: 'Dwarven Thane' },
+  { id: 'av-elf', label: 'Elf', icon: '🧝‍♀️', role: 'Elven Noble' }
+];
+
+export default function BG3CharacterBuilder({
+  isOpen,
+  onClose,
+  onCharacterCreated,
+  initialCharacter = null
+}) {
+  const [activeTab, setActiveTab] = useState('origin'); // 'origin', 'race', 'class', 'abilities', 'background', 'skills', 'spells', 'equipment', 'identity'
+
+  // Origin Type
+  const [originType, setOriginType] = useState('custom'); // 'custom' or preset character id
+
+  // Identity
+  const [charName, setCharName] = useState('Tav');
+  const [playerName, setPlayerName] = useState('Player');
+  const [alignment, setAlignment] = useState('Neutral Good');
+  const [avatarIcon, setAvatarIcon] = useState('⚔️');
+  const [customAvatarUrl, setCustomAvatarUrl] = useState('');
+
+  // Race
+  const [selectedRaceId, setSelectedRaceId] = useState('human');
+  const [selectedSubraceId, setSelectedSubraceId] = useState('human-standard');
+  const [dragonbornAncestry, setDragonbornAncestry] = useState('Red');
+  const [variantHumanStats, setVariantHumanStats] = useState(['str', 'dex']);
+  const [variantHumanFeatId, setVariantHumanFeatId] = useState('alert');
+
+  // Class & Level
+  const [selectedClassId, setSelectedClassId] = useState('fighter');
+  const [startingLevel, setStartingLevel] = useState(1);
+  const [selectedSubclassId, setSelectedSubclassId] = useState('');
+  const [fightingStyle, setFightingStyle] = useState('defense');
+
+  // Ability Scores
+  const [scoreMethod, setScoreMethod] = useState('pointbuy'); // 'pointbuy', 'standard', 'roll', 'manual'
+  const [pointBuyScores, setPointBuyScores] = useState({ str: 14, dex: 13, con: 14, int: 10, wis: 12, cha: 10 });
+  const [baseScores, setBaseScores] = useState({ str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 });
+
+  // Background
+  const [selectedBackgroundId, setSelectedBackgroundId] = useState('soldier');
+
+  // Skills
+  const [selectedClassSkills, setSelectedClassSkills] = useState(['Athletics', 'Perception']);
+
+  // Spells
+  const [selectedCantrips, setSelectedCantrips] = useState([]);
+  const [selectedFirstLevelSpells, setSelectedFirstLevelSpells] = useState([]);
+
+  // Equipment package
+  const [selectedEquipIndex, setSelectedEquipIndex] = useState(0);
+
+  // If initialCharacter is provided, populate state once
+  useEffect(() => {
+    if (initialCharacter) {
+      setCharName(initialCharacter.name || 'Tav');
+      setPlayerName(initialCharacter.player || 'Player');
+      setAlignment(initialCharacter.alignment || 'Neutral Good');
+      setAvatarIcon(initialCharacter.avatarIcon || '⚔️');
+      setCustomAvatarUrl(initialCharacter.avatarUrl || '');
+      setSelectedRaceId(initialCharacter.raceId || 'human');
+      setSelectedSubraceId(initialCharacter.subraceId || 'human-standard');
+      setSelectedClassId(initialCharacter.classId || 'fighter');
+      setSelectedSubclassId(initialCharacter.subclassId || '');
+      setStartingLevel(initialCharacter.level || 1);
+      setSelectedBackgroundId(initialCharacter.backgroundId || 'soldier');
+      if (initialCharacter.abilityScores) {
+        setPointBuyScores({ ...initialCharacter.abilityScores });
+        setBaseScores({ ...initialCharacter.abilityScores });
+      }
+      if (initialCharacter.skillProficiencies) {
+        setSelectedClassSkills([...initialCharacter.skillProficiencies]);
+      }
+      setOriginType('custom');
+    }
+  }, [initialCharacter]);
+
+  if (!isOpen) return null;
+
+  const currentRace = SRD_RACES.find(r => r.id === selectedRaceId) || SRD_RACES[0];
+  const currentSubrace = currentRace.subraces?.find(s => s.id === selectedSubraceId) || currentRace.subraces?.[0];
+  const currentClass = SRD_CLASSES.find(c => c.id === selectedClassId) || SRD_CLASSES[0];
+  const currentBackground = SRD_BACKGROUNDS.find(b => b.id === selectedBackgroundId) || SRD_BACKGROUNDS[0];
+
+  // Calculate racial bonuses
+  const racialBonuses = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
+  if (currentRace.abilityScoreBonuses) {
+    Object.entries(currentRace.abilityScoreBonuses).forEach(([k, v]) => {
+      racialBonuses[k] = (racialBonuses[k] || 0) + v;
+    });
+  }
+  if (currentSubrace?.abilityScoreBonuses) {
+    Object.entries(currentSubrace.abilityScoreBonuses).forEach(([k, v]) => {
+      racialBonuses[k] = (racialBonuses[k] || 0) + v;
+    });
+  }
+  if (selectedRaceId === 'human' && selectedSubraceId === 'human-variant') {
+    variantHumanStats.forEach(stat => {
+      racialBonuses[stat] = 1;
+    });
+  }
+
+  // Active base scores depending on method
+  const activeBaseScores = scoreMethod === 'pointbuy' ? pointBuyScores : baseScores;
+
+  // Final scores & modifiers
+  const finalScores = {};
+  for (const ab of ['str', 'dex', 'con', 'int', 'wis', 'cha']) {
+    finalScores[ab] = (activeBaseScores[ab] || 10) + (racialBonuses[ab] || 0);
+  }
+
+  // Point buy budget math
+  const pointBuySpent = Object.values(pointBuyScores).reduce((acc, score) => {
+    return acc + (POINT_BUY_COSTS[score] ?? 0);
+  }, 0);
+  const pointBuyRemaining = POINT_BUY_TOTAL - pointBuySpent;
+
+  const handlePointBuyChange = (ab, delta) => {
+    const current = pointBuyScores[ab] || 8;
+    const target = current + delta;
+    if (target < 8 || target > 15) return;
+    const currentCost = POINT_BUY_COSTS[current];
+    const targetCost = POINT_BUY_COSTS[target];
+    const costDiff = targetCost - currentCost;
+    if (pointBuyRemaining - costDiff < 0) return;
+
+    setPointBuyScores(prev => ({ ...prev, [ab]: target }));
+  };
+
+  const handleApplyClassRecommendedScores = () => {
+    const rec = CLASS_RECOMMENDED_SCORES[currentClass.id] || CLASS_RECOMMENDED_SCORES.fighter;
+    setPointBuyScores({ ...rec });
+    setScoreMethod('pointbuy');
+  };
+
+  const handleResetScoresToEight = () => {
+    setPointBuyScores({ str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8 });
+    setScoreMethod('pointbuy');
+  };
+
+  const handleRollAllScores = () => {
+    const newScores = {};
+    ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(ab => {
+      newScores[ab] = roll4d6DropLowest().total;
+    });
+    setBaseScores(newScores);
+    setScoreMethod('roll');
+  };
+
+  // Class Selection Handler: Cleans up skills, spells, equipment
+  const handleSelectClass = (classId) => {
+    const newClass = SRD_CLASSES.find(c => c.id === classId);
+    if (!newClass) return;
+
+    setSelectedClassId(classId);
+    setSelectedSubclassId(newClass.subclasses?.[0]?.id || '');
+
+    // Reconcile skills: keep any currently selected class skills that are valid for the new class
+    const availableOptions = newClass.skillChoices?.options || [];
+    const bgSkills = currentBackground.skillProficiencies || [];
+    const preserved = selectedClassSkills.filter(sk => availableOptions.includes(sk) && !bgSkills.includes(sk));
+
+    const countNeeded = newClass.skillChoices?.count || 2;
+    const neededMore = countNeeded - preserved.length;
+    const candidateSkills = availableOptions.filter(sk => !bgSkills.includes(sk) && !preserved.includes(sk));
+    const nextSkills = [...preserved, ...candidateSkills.slice(0, Math.max(0, neededMore))];
+    setSelectedClassSkills(nextSkills);
+
+    // Reconcile spells
+    if (newClass.spellcaster) {
+      const classCantrips = SRD_SPELLS.filter(s => s.level === 0 && s.classes.includes(classId));
+      setSelectedCantrips(classCantrips.slice(0, 3).map(s => s.id));
+      const classLevel1 = SRD_SPELLS.filter(s => s.level === 1 && s.classes.includes(classId));
+      setSelectedFirstLevelSpells(classLevel1.slice(0, 4).map(s => s.id));
+    } else {
+      setSelectedCantrips([]);
+      setSelectedFirstLevelSpells([]);
+    }
+
+    setSelectedEquipIndex(0);
+  };
+
+  // Background Selection Handler
+  const handleSelectBackground = (bgId) => {
+    const newBg = SRD_BACKGROUNDS.find(b => b.id === bgId);
+    if (!newBg) return;
+
+    setSelectedBackgroundId(bgId);
+
+    const bgSkills = newBg.skillProficiencies || [];
+    const availableClassOptions = currentClass.skillChoices?.options || [];
+    const preserved = selectedClassSkills.filter(sk => !bgSkills.includes(sk) && availableClassOptions.includes(sk));
+    const countNeeded = currentClass.skillChoices?.count || 2;
+    const neededMore = countNeeded - preserved.length;
+    const candidates = availableClassOptions.filter(sk => !bgSkills.includes(sk) && !preserved.includes(sk));
+
+    setSelectedClassSkills([...preserved, ...candidates.slice(0, Math.max(0, neededMore))]);
+  };
+
+  // Skill Toggle Handler: prevents lockouts by swapping if full
+  const handleToggleSkill = (sk) => {
+    const isBgSkill = currentBackground.skillProficiencies?.includes(sk);
+    if (isBgSkill) return;
+
+    const availableClassOptions = currentClass.skillChoices?.options || [];
+    const isSelected = selectedClassSkills.includes(sk);
+    const maxCount = currentClass.skillChoices?.count || 2;
+
+    if (isSelected) {
+      setSelectedClassSkills(prev => prev.filter(s => s !== sk));
+    } else {
+      if (selectedClassSkills.length < maxCount) {
+        setSelectedClassSkills(prev => [...prev, sk]);
+      } else {
+        // Swap oldest selected skill to maintain intuitive interactivity
+        setSelectedClassSkills(prev => [...prev.slice(1), sk]);
+      }
+    }
+  };
+
+  // Load an Origin Preset Hero (Bruenor, Altea, Corin)
+  const handleSelectOrigin = (originId) => {
+    if (originId === 'custom') {
+      setOriginType('custom');
+      return;
+    }
+    const sample = SAMPLE_CHARACTERS.find(s => s.id === originId);
+    if (sample) {
+      setOriginType(originId);
+      setCharName(sample.name);
+      setAlignment(sample.alignment);
+      setSelectedRaceId(sample.raceId);
+      setSelectedSubraceId(sample.subraceId || '');
+      setSelectedClassId(sample.classId);
+      setSelectedSubclassId(sample.subclassId || '');
+      setSelectedBackgroundId(sample.backgroundId);
+      setPointBuyScores({ ...sample.abilityScores });
+      setBaseScores({ ...sample.abilityScores });
+      setSelectedClassSkills([...sample.skillProficiencies]);
+    }
+  };
+
+  // Random Fantasy Name Generator
+  const handleRandomizeName = () => {
+    const racePool = FANTASY_NAMES[selectedRaceId] || FANTASY_NAMES.human;
+    const rand = racePool[Math.floor(Math.random() * racePool.length)];
+    setCharName(rand);
+  };
+
+  // Vitals calculation for right inspector
+  const conMod = getAbilityModifier(finalScores.con);
+  const dexMod = getAbilityModifier(finalScores.dex);
+  const isHillDwarf = selectedSubraceId === 'hill-dwarf';
+  const bonusHpPerLevel = isHillDwarf ? 1 : 0;
+  const startingHp = (currentClass.hitDie || 8) + conMod + bonusHpPerLevel;
+  const speed = currentSubrace?.speed || currentRace.speed || 30;
+
+  // Mock character for AC calculation
+  const mockChar = {
+    classId: currentClass.id,
+    subclassId: selectedSubclassId,
+    equippedArmor: currentClass.id === 'fighter' || currentClass.id === 'paladin'
+      ? { ac: 16, category: 'Heavy' }
+      : currentClass.id === 'rogue' || currentClass.id === 'ranger'
+      ? { ac: 11, category: 'Light' }
+      : null,
+    equippedShield: currentClass.id === 'fighter' || currentClass.id === 'cleric',
+    fightingStyle: fightingStyle
+  };
+  const calculatedAc = calculateArmorClass(mockChar, finalScores);
+
+  // Validation checks for pillar badges
+  const isSkillsComplete = selectedClassSkills.length === (currentClass.skillChoices?.count || 2);
+  const isAbilitiesComplete = scoreMethod === 'pointbuy' ? pointBuyRemaining === 0 : true;
+
+  // Handle finalize character
+  const handleVentureForth = () => {
+    const features = [];
+    currentRace.traits?.forEach((t, i) => {
+      features.push({ id: `rf-${i}`, name: t.name, source: currentRace.name, description: t.description });
+    });
+    currentSubrace?.traits?.forEach((st, i) => {
+      features.push({ id: `srf-${i}`, name: st.name, source: currentSubrace.name, description: st.description });
+    });
+    if (currentClass.featuresByLevel?.[1]) {
+      currentClass.featuresByLevel[1].forEach((cf, i) => {
+        features.push({ id: `cf-1-${i}`, name: cf.name, source: `${currentClass.name} (Lvl 1)`, description: cf.description });
+      });
+    }
+    if (currentBackground.feature) {
+      features.push({
+        id: `bg-feat`,
+        name: currentBackground.feature.name,
+        source: `Background (${currentBackground.name})`,
+        description: currentBackground.feature.description
+      });
+    }
+    if (selectedRaceId === 'human' && selectedSubraceId === 'human-variant') {
+      const feat = SRD_FEATS.find(f => f.id === variantHumanFeatId);
+      if (feat) {
+        features.push({ id: `vf-1`, name: `Feat: ${feat.name}`, source: 'Variant Human Feat', description: feat.description });
+      }
+    }
+
+    const attacks = [];
+    if (currentClass.startingEquipmentPackages?.[selectedEquipIndex]) {
+      const pack = currentClass.startingEquipmentPackages[selectedEquipIndex];
+      pack.items.forEach((item, idx) => {
+        if (item.includes('Sword') || item.includes('Bow') || item.includes('Axe') || item.includes('Staff') || item.includes('Dagger') || item.includes('Crossbow')) {
+          const isDex = item.includes('Bow') || item.includes('Crossbow') || item.includes('Dagger') || item.includes('Rapier');
+          attacks.push({
+            id: `atk-init-${idx}`,
+            name: item,
+            ability: isDex ? 'dex' : 'str',
+            isProficient: true,
+            bonusToHit: 0,
+            damageDice: item.includes('Greataxe') ? '1d12' : item.includes('Greatsword') ? '2d6' : item.includes('Dagger') ? '1d4' : '1d8',
+            damageType: item.includes('Bow') || item.includes('Crossbow') || item.includes('Dagger') ? 'piercing' : 'slashing',
+            notes: isDex ? 'Finesse / Ranged' : 'Melee'
+          });
+        }
+      });
+    }
+    if (attacks.length === 0) {
+      attacks.push({
+        id: 'atk-unarmed',
+        name: 'Unarmed Strike',
+        ability: 'str',
+        isProficient: true,
+        bonusToHit: 0,
+        damageDice: '1',
+        damageType: 'bludgeoning',
+        notes: 'Melee weapon attack'
+      });
+    }
+
+    const inventory = [];
+    if (currentClass.startingEquipmentPackages?.[selectedEquipIndex]) {
+      currentClass.startingEquipmentPackages[selectedEquipIndex].items.forEach((it, idx) => {
+        inventory.push({ id: `eq-${idx}`, name: it, quantity: 1, weight: 3, equipped: idx < 2 });
+      });
+    }
+
+    const spells = [];
+    selectedCantrips.forEach(id => {
+      const sp = SRD_SPELLS.find(s => s.id === id);
+      if (sp) spells.push({ ...sp, prepared: true });
+    });
+    selectedFirstLevelSpells.forEach(id => {
+      const sp = SRD_SPELLS.find(s => s.id === id);
+      if (sp) spells.push({ ...sp, prepared: true });
+    });
+
+    const newCharacter = {
+      id: initialCharacter?.id || `char-${Date.now()}`,
+      name: charName.trim() || 'Tav',
+      raceId: currentRace.id,
+      subraceId: currentSubrace?.id || '',
+      raceName: currentSubrace?.name || currentRace.name,
+      classId: currentClass.id,
+      className: currentClass.name,
+      subclassId: selectedSubclassId || currentClass.subclasses?.[0]?.id || '',
+      subclassName: currentClass.subclasses?.find(s => s.id === selectedSubclassId)?.name || '',
+      level: startingLevel,
+      backgroundId: currentBackground.id,
+      backgroundName: currentBackground.name,
+      alignment,
+      player: playerName.trim() || 'Player',
+      xp: '0',
+      inspiration: false,
+      abilityScores: activeBaseScores,
+      racialBonuses,
+      customAbilityBonuses: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
+      savingThrowsProficient: currentClass.savingThrows || ['str', 'con'],
+      skillProficiencies: Array.from(new Set([...(currentBackground.skillProficiencies || []), ...selectedClassSkills])),
+      expertiseSkills: currentClass.id === 'rogue' ? selectedClassSkills.slice(0, 2) : [],
+      equippedArmor: mockChar.equippedArmor,
+      equippedShield: mockChar.equippedShield,
+      fightingStyle: fightingStyle,
+      maxHp: startingHp,
+      currentHp: startingHp,
+      tempHp: 0,
+      hitDiceMax: `${startingLevel}d${currentClass.hitDie || 8}`,
+      hitDiceUsed: 0,
+      speed: speed,
+      deathSaves: { successes: 0, failures: 0 },
+      exhaustion: 0,
+      attacks,
+      features,
+      spells,
+      spellSlotsUsed: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+      equipment: inventory,
+      currency: { cp: 0, sp: 0, ep: 0, gp: currentBackground.gold || 15, pp: 0 },
+      proficienciesText: `Armor: ${currentClass.armorProficiencies?.join(', ') || 'None'}\nWeapons: ${currentClass.weaponProficiencies?.join(', ') || 'Simple'}\nLanguages: ${currentRace.languages?.join(', ')}`,
+      personality: currentBackground.suggestedCharacteristics?.traits?.[0] || '',
+      ideals: currentBackground.suggestedCharacteristics?.ideals?.[0] || '',
+      bonds: currentBackground.suggestedCharacteristics?.bonds?.[0] || '',
+      flaws: currentBackground.suggestedCharacteristics?.flaws?.[0] || '',
+      backstory: '',
+      avatarIcon: avatarIcon,
+      avatarUrl: customAvatarUrl
+    };
+
+    onCharacterCreated(newCharacter);
+    onClose();
+  };
+
+  const stepsList = [
+    { id: 'origin', label: 'Origin', badge: originType === 'custom' ? 'Custom Hero' : 'Origin Hero', status: 'complete', icon: User },
+    { id: 'race', label: 'Race', badge: currentSubrace?.name || currentRace.name, status: 'complete', icon: Sparkles },
+    { id: 'class', label: 'Class', badge: currentClass.name, status: 'complete', icon: Sword },
+    { id: 'abilities', label: 'Abilities', badge: scoreMethod === 'pointbuy' && pointBuyRemaining !== 0 ? `${pointBuyRemaining} pts` : 'Ready', status: isAbilitiesComplete ? 'complete' : 'pending', icon: Award },
+    { id: 'background', label: 'Background', badge: currentBackground.name, status: 'complete', icon: BookOpen },
+    { id: 'skills', label: 'Skills', badge: `${selectedClassSkills.length}/${currentClass.skillChoices?.count || 2}`, status: isSkillsComplete ? 'complete' : 'pending', icon: Check },
+    ...(currentClass.spellcaster ? [{ id: 'spells', label: 'Spells', badge: `${selectedCantrips.length} Cantrips`, status: 'complete', icon: Wand2 }] : []),
+    { id: 'equipment', label: 'Equipment', badge: 'Selected', status: 'complete', icon: Shield },
+    { id: 'identity', label: 'Identity', badge: charName || 'Tav', status: 'complete', icon: User }
+  ];
+
+  const currentStepIndex = stepsList.findIndex(s => s.id === activeTab);
+  const handlePrevStep = () => {
+    if (currentStepIndex > 0) setActiveTab(stepsList[currentStepIndex - 1].id);
+  };
+  const handleNextStep = () => {
+    if (currentStepIndex < stepsList.length - 1) setActiveTab(stepsList[currentStepIndex + 1].id);
+  };
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(5, 7, 10, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(8px)', overscrollBehavior: 'contain' }}>
+      <div className="bg3-creator-container" style={{ width: '96vw', maxWidth: '1440px', height: '94vh' }}>
+
+        {/* PILLAR 1: STEP CATEGORIES */}
+        <div className="bg3-steps-pillar">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.6rem', borderBottom: '1px solid rgba(223, 184, 90, 0.25)', marginBottom: '0.5rem' }}>
+            <span style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 800, fontSize: '0.95rem' }}>
+              CHARACTER FORGE
+            </span>
+            <button
+              type="button"
+              className="btn btn-secondary btn-icon btn-sm"
+              onClick={onClose}
+              title="Close Builder"
+            >
+              <ArrowLeft size={16} />
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', flex: 1, overflowY: 'auto' }}>
+            {stepsList.map(step => {
+              const StepIcon = step.icon;
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  className={`bg3-step-item ${activeTab === step.id ? 'active' : ''}`}
+                  onClick={() => setActiveTab(step.id)}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <StepIcon size={16} style={{ color: activeTab === step.id ? 'var(--accent-gold)' : '#94a3b8' }} />
+                    <div>
+                      <div>{step.label}</div>
+                      <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontWeight: 500 }}>{step.badge}</div>
+                    </div>
+                  </div>
+                  <span className={`bg3-step-badge ${step.status}`}>
+                    {step.status === 'complete' ? <Check size={12} /> : '!'}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            style={{ width: '100%', justifyContent: 'center', fontSize: '0.8rem', marginTop: 'auto' }}
+            onClick={onClose}
+          >
+            Cancel &amp; Return
+          </button>
+        </div>
+
+        {/* PILLAR 2: CENTER STAGE (THE INTERACTIVE WORKSPACE) */}
+        <div className="bg3-stage-panel" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            {/* TAB: ORIGIN */}
+            {activeTab === 'origin' && (
+              <div>
+                <div className="bg3-section-title">
+                  <User size={24} />
+                  <span>CHOOSE ORIGIN ARCHETYPE</span>
+                </div>
+                <div className="bg3-section-subtitle">
+                  Forge your own legend from scratch as a Custom Adventurer, or embark on your journey as an iconic pre-made hero.
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                  {/* Custom Hero Card */}
+                  <div
+                    className={`bg3-card ${originType === 'custom' ? 'selected' : ''}`}
+                    onClick={() => handleSelectOrigin('custom')}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
+                      <div style={{ fontSize: '1.6rem' }}>⚔️</div>
+                      <div>
+                        <div className="bg3-card-header">Custom Adventurer (Tav)</div>
+                        <div className="bg3-badge-pill">Free Choice</div>
+                      </div>
+                    </div>
+                    <div className="bg3-card-desc">
+                      Create your hero from the ground up. Choose your own lineage, class, ability scores, background, and spells.
+                    </div>
+                  </div>
+
+                  {/* Origin Starter Heroes */}
+                  {SAMPLE_CHARACTERS.map(orig => (
+                    <div
+                      key={orig.id}
+                      className={`bg3-card ${originType === orig.id ? 'selected' : ''}`}
+                      onClick={() => handleSelectOrigin(orig.id)}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
+                        <div style={{ fontSize: '1.6rem' }}>{orig.classId === 'fighter' ? '🛡️' : orig.classId === 'wizard' ? '🧙‍♂️' : '🗡️'}</div>
+                        <div>
+                          <div className="bg3-card-header">{orig.name}</div>
+                          <div className="bg3-badge-pill">{orig.raceName} &bull; {orig.className}</div>
+                        </div>
+                      </div>
+                      <div className="bg3-card-desc">
+                        {orig.backstory?.substring(0, 110)}...
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB: RACE */}
+            {activeTab === 'race' && (
+              <div>
+                <div className="bg3-section-title">
+                  <Sparkles size={24} />
+                  <span>CHOOSE RACE &amp; LINEAGE</span>
+                </div>
+                <div className="bg3-section-subtitle">
+                  Select your physical ancestry. Your lineage shapes your senses, innate talents, and biological resilience.
+                </div>
+
+                <div className="bg3-cards-grid">
+                  {SRD_RACES.map(r => (
+                    <div
+                      key={r.id}
+                      className={`bg3-card ${selectedRaceId === r.id ? 'selected' : ''}`}
+                      onClick={() => {
+                        setSelectedRaceId(r.id);
+                        if (r.subraces && r.subraces.length > 0) {
+                          setSelectedSubraceId(r.subraces[0].id);
+                        } else {
+                          setSelectedSubraceId('');
+                        }
+                      }}
+                    >
+                      <div className="bg3-card-header">{r.name}</div>
+                      <div className="bg3-card-desc">{r.description}</div>
+                      <div className="bg3-badge-pill">
+                        Speed: {r.speed}ft &bull; {r.subraces ? `${r.subraces.length} Subraces` : 'Standard'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Subrace Picker */}
+                {currentRace.subraces && currentRace.subraces.length > 0 && (
+                  <div style={{ background: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(223, 184, 90, 0.3)', borderRadius: '8px', padding: '1.25rem', marginBottom: '1.25rem' }}>
+                    <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.75rem' }}>
+                      SUBRACE / LINEAGE ({currentRace.name})
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
+                      {currentRace.subraces.map(sub => (
+                        <div
+                          key={sub.id}
+                          className={`bg3-card ${selectedSubraceId === sub.id ? 'selected' : ''}`}
+                          onClick={() => setSelectedSubraceId(sub.id)}
+                        >
+                          <div className="bg3-card-header">{sub.name}</div>
+                          <div className="bg3-card-desc">{sub.description}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Dragonborn Ancestry */}
+                {selectedRaceId === 'dragonborn' && (
+                  <div style={{ background: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(223, 184, 90, 0.3)', borderRadius: '8px', padding: '1.25rem', marginBottom: '1.25rem' }}>
+                    <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.75rem' }}>
+                      DRACONIC ANCESTRY
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.5rem' }}>
+                      {['Black (Acid)', 'Blue (Lightning)', 'Brass (Fire)', 'Bronze (Lightning)', 'Copper (Acid)', 'Gold (Fire)', 'Green (Poison)', 'Red (Fire)', 'Silver (Cold)', 'White (Cold)'].map(anc => {
+                        const color = anc.split(' ')[0];
+                        return (
+                          <div
+                            key={color}
+                            className={`bg3-card ${dragonbornAncestry === color ? 'selected' : ''}`}
+                            onClick={() => setDragonbornAncestry(color)}
+                          >
+                            <div className="bg3-card-header">{anc}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Variant Human Options */}
+                {selectedRaceId === 'human' && selectedSubraceId === 'human-variant' && (
+                  <div style={{ background: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(223, 184, 90, 0.3)', borderRadius: '8px', padding: '1.25rem', marginBottom: '1.25rem' }}>
+                    <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.75rem' }}>
+                      VARIANT HUMAN TALENTS
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.75rem' }}>
+                      Choose 2 different ability scores to increase by +1, and select 1 bonus Feat.
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                      <div>
+                        <label className="form-label">Ability Bonus #1</label>
+                        <select className="form-select" value={variantHumanStats[0]} onChange={(e) => setVariantHumanStats([e.target.value, variantHumanStats[1]])}>
+                          {['str', 'dex', 'con', 'int', 'wis', 'cha'].map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="form-label">Ability Bonus #2</label>
+                        <select className="form-select" value={variantHumanStats[1]} onChange={(e) => setVariantHumanStats([variantHumanStats[0], e.target.value])}>
+                          {['str', 'dex', 'con', 'int', 'wis', 'cha'].map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="form-label">Bonus Feat</label>
+                      <select className="form-select" value={variantHumanFeatId} onChange={(e) => setVariantHumanFeatId(e.target.value)}>
+                        {SRD_FEATS.map(f => <option key={f.id} value={f.id}>{f.name} &bull; {f.description.substring(0, 60)}...</option>)}
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB: CLASS */}
+            {activeTab === 'class' && (
+              <div>
+                <div className="bg3-section-title">
+                  <Sword size={24} />
+                  <span>CHOOSE CLASS &amp; DISCIPLINE</span>
+                </div>
+                <div className="bg3-section-subtitle">
+                  Your class governs your combat style, hit die, saving throw masteries, and magical gifts.
+                </div>
+
+                <div className="bg3-cards-grid">
+                  {SRD_CLASSES.map(c => {
+                    const isSelected = selectedClassId === c.id;
+                    return (
+                      <div
+                        key={c.id}
+                        className={`bg3-card ${isSelected ? 'selected' : ''}`}
+                        onClick={() => handleSelectClass(c.id)}
+                      >
+                        <div className="bg3-card-header">{c.name}</div>
+                        <div className="bg3-card-desc">{c.description}</div>
+                        <div className="bg3-badge-pill">
+                          Hit Die: d{c.hitDie} &bull; Saves: {c.savingThrows?.map(s => s.toUpperCase()).join(', ')}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Subclass Selection if available at Level 1 */}
+                {currentClass.subclasses && currentClass.subclasses.length > 0 && (
+                  <div style={{ background: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(223, 184, 90, 0.3)', borderRadius: '8px', padding: '1.25rem', marginBottom: '1.25rem' }}>
+                    <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.75rem' }}>
+                      SUBCLASS / ARCHETYPE ({currentClass.name})
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
+                      {currentClass.subclasses.map(sub => (
+                        <div
+                          key={sub.id}
+                          className={`bg3-card ${selectedSubclassId === sub.id ? 'selected' : ''}`}
+                          onClick={() => setSelectedSubclassId(sub.id)}
+                        >
+                          <div className="bg3-card-header">{sub.name}</div>
+                          <div className="bg3-card-desc">{sub.description}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Fighter Fighting Style */}
+                {currentClass.id === 'fighter' && (
+                  <div style={{ background: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(223, 184, 90, 0.3)', borderRadius: '8px', padding: '1.25rem', marginBottom: '1.25rem' }}>
+                    <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.75rem' }}>
+                      FIGHTING STYLE
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem' }}>
+                      {[
+                        { id: 'defense', name: 'Defense', desc: '+1 bonus to AC while wearing armor.' },
+                        { id: 'dueling', name: 'Dueling', desc: '+2 damage when wielding one melee weapon.' },
+                        { id: 'greatweapon', name: 'Great Weapon Fighting', desc: 'Reroll 1s and 2s on two-handed damage dice.' },
+                        { id: 'archery', name: 'Archery', desc: '+2 bonus to attack rolls with ranged weapons.' }
+                      ].map(fs => (
+                        <div
+                          key={fs.id}
+                          className={`bg3-card ${fightingStyle === fs.id ? 'selected' : ''}`}
+                          onClick={() => setFightingStyle(fs.id)}
+                        >
+                          <div className="bg3-card-header">{fs.name}</div>
+                          <div className="bg3-card-desc">{fs.desc}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB: ABILITIES */}
+            {activeTab === 'abilities' && (
+              <div>
+                <div className="bg3-section-title">
+                  <Award size={24} />
+                  <span>ABILITY SCORES ALLOCATION</span>
+                </div>
+                <div className="bg3-section-subtitle">
+                  Allocate your core attributes. Primary stats recommended for {currentClass.name} are marked with a ⭐ star.
+                </div>
+
+                {/* Toolbar */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.25rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      type="button"
+                      className={`btn ${scoreMethod === 'pointbuy' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+                      onClick={() => setScoreMethod('pointbuy')}
+                    >
+                      Point Buy (27 pts)
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn ${scoreMethod === 'standard' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+                      onClick={() => {
+                        setScoreMethod('standard');
+                        setBaseScores({ str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 });
+                      }}
+                    >
+                      Standard Array
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn ${scoreMethod === 'roll' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+                      onClick={handleRollAllScores}
+                    >
+                      <Dices size={14} />
+                      <span>Roll 4d6 Drop Lowest</span>
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      style={{ color: 'var(--text-gold)', borderColor: 'var(--border-gold)', fontWeight: 700 }}
+                      onClick={handleApplyClassRecommendedScores}
+                      title="Instantly allocate optimal 27 point buy for your class"
+                    >
+                      <Star size={14} fill="var(--accent-gold)" />
+                      <span>Use Recommended</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={handleResetScoresToEight}
+                      title="Reset all stats to base 8"
+                    >
+                      <RefreshCw size={14} />
+                      <span>Reset to 8s</span>
+                    </button>
+                  </div>
+                </div>
+
+                {scoreMethod === 'pointbuy' && (
+                  <div style={{ background: 'rgba(0, 0, 0, 0.5)', border: '1.5px solid var(--border-gold)', borderRadius: '8px', padding: '0.85rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                    <span style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 700 }}>
+                      POINT BUY BUDGET
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Points Remaining:</span>
+                      <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 800, color: pointBuyRemaining === 0 ? 'var(--accent-green)' : pointBuyRemaining < 0 ? 'var(--accent-red)' : 'var(--text-gold)' }}>
+                        {pointBuyRemaining} / {POINT_BUY_TOTAL}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* 6 Ability Cards */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.85rem' }}>
+                  {[
+                    { id: 'str', name: 'Strength', desc: 'Athletics, melee attack & damage' },
+                    { id: 'dex', name: 'Dexterity', desc: 'Initiative, Armor Class, ranged attacks, stealth' },
+                    { id: 'con', name: 'Constitution', desc: 'Hit points, concentration checks' },
+                    { id: 'int', name: 'Intelligence', desc: 'Arcana, history, investigation, wizard magic' },
+                    { id: 'wis', name: 'Wisdom', desc: 'Perception, insight, cleric/druid magic' },
+                    { id: 'cha', name: 'Charisma', desc: 'Persuasion, deception, sorcerer/warlock magic' }
+                  ].map(stat => {
+                    const isPrimary = currentClass.primaryAbility?.includes(stat.id);
+                    const base = activeBaseScores[stat.id] || 10;
+                    const bonus = racialBonuses[stat.id] || 0;
+                    const total = base + bonus;
+                    const mod = getAbilityModifier(total);
+
+                    return (
+                      <div
+                        key={stat.id}
+                        style={{
+                          background: isPrimary ? 'linear-gradient(145deg, #1f2737 0%, #11151f 100%)' : 'linear-gradient(145deg, #161c26 0%, #0e1219 100%)',
+                          border: isPrimary ? '1.5px solid var(--border-gold)' : '1px solid rgba(223, 184, 90, 0.25)',
+                          borderRadius: '8px',
+                          padding: '1rem',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          boxShadow: isPrimary ? '0 0 15px rgba(223, 184, 90, 0.15)' : 'none'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                          <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1rem', color: isPrimary ? 'var(--text-gold)' : 'var(--text-main)' }}>
+                            {stat.name.toUpperCase()}
+                          </span>
+                          {isPrimary && (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.68rem', color: 'var(--accent-gold)', fontWeight: 800, background: 'rgba(223, 184, 90, 0.15)', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
+                              <Star size={10} fill="var(--accent-gold)" /> Recommended
+                            </span>
+                          )}
+                        </div>
+
+                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '0.75rem' }}>
+                          {stat.desc}
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+                          {scoreMethod === 'pointbuy' ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <button
+                                type="button"
+                                className="btn btn-secondary btn-icon btn-sm"
+                                style={{ width: '28px', height: '28px' }}
+                                disabled={base <= 8}
+                                onClick={() => handlePointBuyChange(stat.id, -1)}
+                              >
+                                -
+                              </button>
+                              <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 800, width: '26px', textAlign: 'center' }}>
+                                {base}
+                              </span>
+                              <button
+                                type="button"
+                                className="btn btn-secondary btn-icon btn-sm"
+                                style={{ width: '28px', height: '28px' }}
+                                disabled={base >= 15 || pointBuyRemaining - (POINT_BUY_COSTS[base + 1] - POINT_BUY_COSTS[base]) < 0}
+                                onClick={() => handlePointBuyChange(stat.id, 1)}
+                              >
+                                +
+                              </button>
+                            </div>
+                          ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Base:</span>
+                              <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 800 }}>{base}</span>
+                            </div>
+                          )}
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {bonus > 0 && (
+                              <span style={{ fontSize: '0.72rem', color: 'var(--accent-gold)', fontWeight: 700, background: 'rgba(223, 184, 90, 0.15)', padding: '0.15rem 0.4rem', borderRadius: '4px' }}>
+                                +{bonus} {currentRace.name.split(' ')[0]}
+                              </span>
+                            )}
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontFamily: 'var(--font-heading)', fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-gold)', lineHeight: 1 }}>
+                                {formatModifier(mod)}
+                              </div>
+                              <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>Total {total}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* TAB: BACKGROUND */}
+            {activeTab === 'background' && (
+              <div>
+                <div className="bg3-section-title">
+                  <BookOpen size={24} />
+                  <span>CHOOSE BACKGROUND &amp; ORIGIN LORE</span>
+                </div>
+                <div className="bg3-section-subtitle">
+                  Your background reveals where you came from, your place in the world, and your core proficiencies.
+                </div>
+
+                <div className="bg3-cards-grid">
+                  {SRD_BACKGROUNDS.map(b => (
+                    <div
+                      key={b.id}
+                      className={`bg3-card ${selectedBackgroundId === b.id ? 'selected' : ''}`}
+                      onClick={() => handleSelectBackground(b.id)}
+                    >
+                      <div className="bg3-card-header">{b.name}</div>
+                      <div className="bg3-card-desc">{b.description}</div>
+                      <div className="bg3-badge-pill">
+                        Skills: {b.skillProficiencies?.join(', ')}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {currentBackground.feature && (
+                  <div style={{ background: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(223, 184, 90, 0.3)', borderRadius: '8px', padding: '1rem', marginTop: '1rem' }}>
+                    <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.35rem' }}>
+                      BACKGROUND FEATURE: {currentBackground.feature?.name}
+                    </div>
+                    <div style={{ fontSize: '0.85rem', color: '#94a3b8', lineHeight: '1.4' }}>
+                      {currentBackground.feature?.description}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB: SKILLS */}
+            {activeTab === 'skills' && (
+              <div>
+                <div className="bg3-section-title">
+                  <Check size={24} />
+                  <span>CHOOSE CLASS SKILLS</span>
+                </div>
+                <div className="bg3-section-subtitle">
+                  Select {currentClass.skillChoices?.count || 2} skill proficiencies granted by the {currentClass.name} class. Skills already granted by your background are marked with a lock.
+                </div>
+
+                {/* Background Skills Preview */}
+                {currentBackground.skillProficiencies && currentBackground.skillProficiencies.length > 0 && (
+                  <div style={{ marginBottom: '1.25rem' }}>
+                    <div style={{ fontSize: '0.78rem', fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                      Granted by Background ({currentBackground.name})
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      {currentBackground.skillProficiencies.map(sk => (
+                        <span key={sk} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: 'rgba(223, 184, 90, 0.15)', border: '1px solid var(--border-gold)', color: 'var(--text-gold)', padding: '0.3rem 0.65rem', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 600 }}>
+                          <Shield size={14} /> {sk} (Background)
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 700 }}>
+                    Class Choices: {selectedClassSkills.length} of {currentClass.skillChoices?.count || 2} Selected
+                  </div>
+                  {selectedClassSkills.length > (currentClass.skillChoices?.count || 2) && (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--accent-red)' }}>Too many selected</span>
+                  )}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.75rem' }}>
+                  {currentClass.skillChoices?.options.map(sk => {
+                    const isBgSkill = currentBackground.skillProficiencies?.includes(sk);
+                    const isSelected = selectedClassSkills.includes(sk);
+
+                    return (
+                      <div
+                        key={sk}
+                        onClick={() => handleToggleSkill(sk)}
+                        className={`bg3-card ${isSelected || isBgSkill ? 'selected' : ''}`}
+                        style={{ opacity: isBgSkill ? 0.75 : 1, cursor: isBgSkill ? 'not-allowed' : 'pointer' }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span className="bg3-card-header" style={{ margin: 0 }}>{sk}</span>
+                          {(isSelected || isBgSkill) && <Check size={16} style={{ color: 'var(--text-gold)' }} />}
+                        </div>
+                        <div className="bg3-card-desc">
+                          {isBgSkill ? 'Granted by Background' : isSelected ? 'Proficient' : 'Click to select'}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* TAB: SPELLS */}
+            {activeTab === 'spells' && (
+              <div>
+                <div className="bg3-section-title">
+                  <Wand2 size={24} />
+                  <span>SELECT CANTRIPS &amp; SPELLS</span>
+                </div>
+                <div className="bg3-section-subtitle">
+                  Draw upon arcane or divine power. Choose your starting cantrips and 1st-level spells.
+                </div>
+
+                <div className="form-label" style={{ color: 'var(--text-gold)', marginBottom: '0.5rem' }}>Cantrips (Pick up to 3)</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                  {SRD_SPELLS.filter(s => s.level === 0 && s.classes.includes(currentClass.id)).map(sp => {
+                    const isSelected = selectedCantrips.includes(sp.id);
+                    return (
+                      <div
+                        key={sp.id}
+                        className={`bg3-card ${isSelected ? 'selected' : ''}`}
+                        onClick={() => {
+                          if (isSelected) setSelectedCantrips(prev => prev.filter(id => id !== sp.id));
+                          else setSelectedCantrips(prev => [...prev, sp.id]);
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span className="bg3-card-header">{sp.name}</span>
+                          {isSelected && <Check size={16} style={{ color: 'var(--text-gold)' }} />}
+                        </div>
+                        <div className="bg3-badge-pill">{sp.school} &bull; {sp.castingTime}</div>
+                        <div className="bg3-card-desc" style={{ marginTop: '0.4rem' }}>{sp.description.substring(0, 110)}...</div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="form-label" style={{ color: 'var(--text-gold)', marginBottom: '0.5rem' }}>1st Level Spells (Pick up to 4)</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '0.75rem' }}>
+                  {SRD_SPELLS.filter(s => s.level === 1 && s.classes.includes(currentClass.id)).map(sp => {
+                    const isSelected = selectedFirstLevelSpells.includes(sp.id);
+                    return (
+                      <div
+                        key={sp.id}
+                        className={`bg3-card ${isSelected ? 'selected' : ''}`}
+                        onClick={() => {
+                          if (isSelected) setSelectedFirstLevelSpells(prev => prev.filter(id => id !== sp.id));
+                          else setSelectedFirstLevelSpells(prev => [...prev, sp.id]);
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span className="bg3-card-header">{sp.name}</span>
+                          {isSelected && <Check size={16} style={{ color: 'var(--text-gold)' }} />}
+                        </div>
+                        <div className="bg3-badge-pill">{sp.school} &bull; {sp.castingTime}</div>
+                        <div className="bg3-card-desc" style={{ marginTop: '0.4rem' }}>{sp.description.substring(0, 110)}...</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* TAB: EQUIPMENT */}
+            {activeTab === 'equipment' && (
+              <div>
+                <div className="bg3-section-title">
+                  <Shield size={24} />
+                  <span>STARTING EQUIPMENT PACKAGE</span>
+                </div>
+                <div className="bg3-section-subtitle">
+                  Select your starting loadout of arms, armor, and adventuring packs.
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  {currentClass.startingEquipmentPackages?.map((pkg, idx) => (
+                    <div
+                      key={pkg.id || idx}
+                      className={`bg3-card ${selectedEquipIndex === idx ? 'selected' : ''}`}
+                      onClick={() => setSelectedEquipIndex(idx)}
+                    >
+                      <div className="bg3-card-header">{pkg.label}</div>
+                      <div className="bg3-card-desc" style={{ color: 'var(--text-gold)', fontWeight: 600 }}>
+                        Included: {pkg.items.join(', ')}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* TAB: IDENTITY */}
+            {activeTab === 'identity' && (
+              <div>
+                <div className="bg3-section-title">
+                  <User size={24} />
+                  <span>APPEARANCE &amp; IDENTITY</span>
+                </div>
+                <div className="bg3-section-subtitle">
+                  Give your fledgling hero a name, alignment, portrait, and roleplay traits.
+                </div>
+
+                {/* Hero Name & Random Generator */}
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
+                  <div className="form-group">
+                    <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span>Hero&rsquo;s Name *</span>
+                      <button
+                        type="button"
+                        onClick={handleRandomizeName}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-gold)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.78rem' }}
+                      >
+                        <Dices size={14} /> Random Name
+                      </button>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={charName}
+                      placeholder="e.g. Tav, Gale, Shadowheart"
+                      onChange={(e) => setCharName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Alignment</label>
+                    <select
+                      className="form-select"
+                      value={alignment}
+                      onChange={(e) => setAlignment(e.target.value)}
+                    >
+                      {['Lawful Good', 'Neutral Good', 'Chaotic Good', 'Lawful Neutral', 'True Neutral', 'Chaotic Neutral', 'Lawful Evil', 'Neutral Evil', 'Chaotic Evil'].map(al => (
+                        <option key={al} value={al}>{al}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Avatar Gallery */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <label className="form-label" style={{ color: 'var(--text-gold)', marginBottom: '0.5rem' }}>
+                    Choose Character Portrait
+                  </label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.65rem', marginBottom: '0.75rem' }}>
+                    {FANTASY_AVATARS.map(av => {
+                      const isSel = avatarIcon === av.icon;
+                      return (
+                        <div
+                          key={av.id}
+                          className={`bg3-card ${isSel ? 'selected' : ''}`}
+                          style={{ textAlign: 'center', padding: '0.65rem 0.4rem', cursor: 'pointer' }}
+                          onClick={() => {
+                            setAvatarIcon(av.icon);
+                            setCustomAvatarUrl('');
+                          }}
+                        >
+                          <div style={{ fontSize: '1.8rem', marginBottom: '0.2rem' }}>{av.icon}</div>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: isSel ? 'var(--text-gold)' : 'var(--text-main)' }}>{av.label}</div>
+                          <div style={{ fontSize: '0.65rem', color: '#94a3b8' }}>{av.role}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="form-group" style={{ maxWidth: '480px' }}>
+                    <label className="form-label">Or Custom Image URL</label>
+                    <input
+                      type="url"
+                      className="form-input"
+                      placeholder="https://example.com/portrait.jpg"
+                      value={customAvatarUrl}
+                      onChange={(e) => setCustomAvatarUrl(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* BOTTOM STEP NAVIGATION BUTTONS */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(223, 184, 90, 0.25)', paddingTop: '1rem', marginTop: '1.5rem' }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={currentStepIndex === 0}
+              onClick={handlePrevStep}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              <ChevronLeft size={16} />
+              <span>Previous: {currentStepIndex > 0 ? stepsList[currentStepIndex - 1].label : 'Start'}</span>
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={currentStepIndex === stepsList.length - 1}
+              onClick={handleNextStep}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text-gold)', borderColor: 'var(--border-gold)' }}
+            >
+              <span>Next: {currentStepIndex < stepsList.length - 1 ? stepsList[currentStepIndex + 1].label : 'Finish'}</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* PILLAR 3: RIGHT CHARACTER SUMMARY (BG3 LIVE INSPECTOR) */}
+        <div className="bg3-summary-pillar">
+          <div className="bg3-portrait-frame">
+            {customAvatarUrl ? (
+              <img src={customAvatarUrl} alt={charName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+            ) : (
+              avatarIcon || '⚔️'
+            )}
+          </div>
+          <div className="bg3-summary-name">
+            {charName || 'Tav'}
+          </div>
+          <div className="bg3-summary-subtitle">
+            Level {startingLevel} &bull; {currentSubrace?.name || currentRace.name} &bull; {currentClass.name}
+          </div>
+
+          {/* Vitals Row */}
+          <div className="bg3-vitals-row">
+            <div className="bg3-vital-cell">
+              <div className="bg3-vital-val" style={{ color: 'var(--accent-red)' }}>{startingHp}</div>
+              <div className="bg3-vital-lbl">Hit Points</div>
+            </div>
+            <div className="bg3-vital-cell">
+              <div className="bg3-vital-val">{calculatedAc}</div>
+              <div className="bg3-vital-lbl">AC</div>
+            </div>
+            <div className="bg3-vital-cell">
+              <div className="bg3-vital-val">{formatModifier(dexMod)}</div>
+              <div className="bg3-vital-lbl">Init</div>
+            </div>
+            <div className="bg3-vital-cell">
+              <div className="bg3-vital-val">{speed}ft</div>
+              <div className="bg3-vital-lbl">Speed</div>
+            </div>
+          </div>
+
+          {/* Ability Scores Mini Table */}
+          <div className="bg3-abilities-list">
+            <div style={{ fontFamily: 'var(--font-heading)', fontSize: '0.8rem', color: 'var(--text-gold)', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.2rem' }}>
+              Ability Scores
+            </div>
+            {[
+              { id: 'str', label: 'STR' },
+              { id: 'dex', label: 'DEX' },
+              { id: 'con', label: 'CON' },
+              { id: 'int', label: 'INT' },
+              { id: 'wis', label: 'WIS' },
+              { id: 'cha', label: 'CHA' }
+            ].map(stat => {
+              const isPrimary = currentClass.primaryAbility?.includes(stat.id);
+              const total = finalScores[stat.id];
+              const mod = getAbilityModifier(total);
+
+              return (
+                <div key={stat.id} className={`bg3-ability-row ${isPrimary ? 'primary-stat' : ''}`}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    {isPrimary && <Star size={12} fill="var(--accent-gold)" color="var(--accent-gold)" />}
+                    <span style={{ fontWeight: 700, color: isPrimary ? 'var(--text-gold)' : 'var(--text-main)' }}>
+                      {stat.label}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                    <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>{total}</span>
+                    <span className="bg3-ability-mod">{formatModifier(mod)}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Grand Venture Forth Golden Button */}
+          <button
+            type="button"
+            className="bg3-btn-venture"
+            onClick={handleVentureForth}
+          >
+            <span>{initialCharacter ? 'Save Changes' : 'Venture Forth'}</span>
+            <ChevronRight size={18} />
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+}
