@@ -79,8 +79,8 @@ export default function CustomItemModal({ isOpen, onClose, onSaveItem }) {
 
         <div className="modal-body">
           <div className="form-group">
-            <label className="form-label">Fill from SRD Equipment Preset</label>
-            <select className="form-select" onChange={handleSelectPreset}>
+            <label htmlFor="customitemmodal-fill-from-srd-equipment-preset" className="form-label">Fill from SRD Equipment Preset</label>
+            <select id="customitemmodal-fill-from-srd-equipment-preset" className="form-select" onChange={handleSelectPreset}>
               <option value="">-- Choose item preset or write your own --</option>
               <optgroup label="Armor & Shields">
                 {SRD_ARMOR.map(a => (
@@ -101,8 +101,8 @@ export default function CustomItemModal({ isOpen, onClose, onSaveItem }) {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Item Name *</label>
-            <input
+            <label htmlFor="customitemmodal-item-name" className="form-label">Item Name *</label>
+            <input id="customitemmodal-item-name"
               type="text"
               className="form-input"
               required
@@ -114,8 +114,8 @@ export default function CustomItemModal({ isOpen, onClose, onSaveItem }) {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             <div className="form-group">
-              <label className="form-label">Quantity</label>
-              <input
+              <label htmlFor="customitemmodal-quantity" className="form-label">Quantity</label>
+              <input id="customitemmodal-quantity"
                 type="number"
                 min="1"
                 className="form-input"
@@ -125,8 +125,8 @@ export default function CustomItemModal({ isOpen, onClose, onSaveItem }) {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Weight each (lbs)</label>
-              <input
+              <label htmlFor="customitemmodal-weight-each-lbs" className="form-label">Weight each (lbs)</label>
+              <input id="customitemmodal-weight-each-lbs"
                 type="number"
                 step="0.1"
                 min="0"
@@ -138,8 +138,8 @@ export default function CustomItemModal({ isOpen, onClose, onSaveItem }) {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Notes / Attunement / Description</label>
-            <input
+            <label htmlFor="customitemmodal-notes-attunement-description" className="form-label">Notes / Attunement / Description</label>
+            <input id="customitemmodal-notes-attunement-description"
               type="text"
               className="form-input"
               placeholder="e.g. Attuned, Consumable, Magic Item"

@@ -9,6 +9,7 @@ import {
   getSkillBonus, getHitDiceLabel, getCalculatedAbilityScores, hasFeat,
   SKILLS
 } from '../../utils/dndRules';
+import { activateOnKey } from '../../utils/a11y';
 
 export default function BG3CharacterInspector({
   character,
@@ -231,7 +232,7 @@ export default function BG3CharacterInspector({
                 const isSaveProf = character.savingThrowsProficient?.includes(stat.id);
 
                 return (
-                  <div
+                  <div role="button" tabIndex={0} onKeyDown={activateOnKey}
                     key={stat.id}
                     onClick={() => onRollCheck(stat.label, mod)}
                     style={{
@@ -277,7 +278,7 @@ export default function BG3CharacterInspector({
                 const bonus = getSkillBonus(character, sk.name, finalScores[sk.ability]);
 
                 return (
-                  <div
+                  <div role="button" tabIndex={0} onKeyDown={activateOnKey}
                     key={sk.name}
                     onClick={() => onRollSkill(sk.name, bonus)}
                     style={{

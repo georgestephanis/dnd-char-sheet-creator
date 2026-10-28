@@ -395,6 +395,13 @@ html, body {
   outline: none;
 }
 
+.meta-value:focus-visible,
+.char-name-input:focus-visible,
+.char-selector-select:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
 /* 3-Column Character Sheet Layout */
 .sheet-columns-grid {
   display: grid;
@@ -556,6 +563,48 @@ html, body {
   flex: 1;
   color: var(--parchment-text);
   cursor: pointer;
+}
+
+/* Unstyled <button> for controls that keep their visual design */
+.btn-reset {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.stat-roll-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  text-align: left;
+}
+
+.ability-modifier.btn-reset {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0.2rem 0;
+}
+
+.pip-btn {
+  padding: 0;
+  flex-shrink: 0;
+}
+
+/* Visible keyboard focus for every interactive control */
+button:focus-visible,
+[role="button"]:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
 }
 
 .stat-ability-badge {

@@ -65,8 +65,8 @@ export default function CustomAttackModal({ isOpen, onClose, onSaveAttack }) {
         <div className="modal-body">
           {/* Quick SRD Weapon Picker */}
           <div className="form-group">
-            <label className="form-label">Select from SRD Weapons (Optional)</label>
-            <select
+            <label htmlFor="customattackmodal-select-from-srd-weapons-option" className="form-label">Select from SRD Weapons (Optional)</label>
+            <select id="customattackmodal-select-from-srd-weapons-option"
               className="form-select"
               value={selectedPreset}
               onChange={(e) => handlePresetSelect(e.target.value)}
@@ -82,8 +82,8 @@ export default function CustomAttackModal({ isOpen, onClose, onSaveAttack }) {
 
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.75rem' }}>
             <div className="form-group">
-              <label className="form-label">Attack / Weapon Name *</label>
-              <input
+              <label htmlFor="customattackmodal-attack-weapon-name" className="form-label">Attack / Weapon Name *</label>
+              <input id="customattackmodal-attack-weapon-name"
                 type="text"
                 className="form-input"
                 required
@@ -94,8 +94,8 @@ export default function CustomAttackModal({ isOpen, onClose, onSaveAttack }) {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Governing Ability</label>
-              <select
+              <label htmlFor="customattackmodal-governing-ability" className="form-label">Governing Ability</label>
+              <select id="customattackmodal-governing-ability"
                 className="form-select"
                 value={ability}
                 onChange={(e) => setAbility(e.target.value)}
@@ -112,8 +112,8 @@ export default function CustomAttackModal({ isOpen, onClose, onSaveAttack }) {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
             <div className="form-group">
-              <label className="form-label">Damage Formula</label>
-              <input
+              <label htmlFor="customattackmodal-damage-formula" className="form-label">Damage Formula</label>
+              <input id="customattackmodal-damage-formula"
                 type="text"
                 className="form-input"
                 placeholder="1d8, 2d6, 1d10"
@@ -123,8 +123,8 @@ export default function CustomAttackModal({ isOpen, onClose, onSaveAttack }) {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Damage Type</label>
-              <input
+              <label htmlFor="customattackmodal-damage-type" className="form-label">Damage Type</label>
+              <input id="customattackmodal-damage-type"
                 type="text"
                 className="form-input"
                 placeholder="slashing, piercing..."
@@ -134,8 +134,8 @@ export default function CustomAttackModal({ isOpen, onClose, onSaveAttack }) {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Extra Bonus to Hit</label>
-              <input
+              <label htmlFor="customattackmodal-extra-bonus-to-hit" className="form-label">Extra Bonus to Hit</label>
+              <input id="customattackmodal-extra-bonus-to-hit"
                 type="number"
                 className="form-input"
                 placeholder="0"
@@ -159,8 +159,8 @@ export default function CustomAttackModal({ isOpen, onClose, onSaveAttack }) {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Properties / Range / Notes</label>
-            <input
+            <label htmlFor="customattackmodal-properties-range-notes" className="form-label">Properties / Range / Notes</label>
+            <input id="customattackmodal-properties-range-notes"
               type="text"
               className="form-input"
               placeholder="e.g. Finesse, Versatile (1d10), Range 80/320 ft"

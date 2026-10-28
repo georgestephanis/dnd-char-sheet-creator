@@ -21,23 +21,22 @@ export default function SkillsList({ character, scores, onRollSkill, onCycleSkil
 
           return (
             <div key={sk.id} className="stat-list-item">
-              <span
-                className={`proficiency-indicator ${indicatorClass}`}
+              <button
+                type="button"
+                className={`proficiency-indicator btn-reset ${indicatorClass}`}
                 title="Click to cycle: Proficient &rarr; Expertise &rarr; None"
+                aria-label={`${sk.name} proficiency: ${isExp ? 'expertise' : isProf ? 'proficient' : 'none'}. Activate to change.`}
                 onClick={() => onCycleSkillProficiency && onCycleSkillProficiency(sk.name)}
               />
-              <span
-                className="stat-mod-value"
+              <button
+                type="button"
+                className="stat-roll-btn btn-reset"
+                aria-label={`Roll ${sk.name} check, ${formatModifier(totalMod)}`}
                 onClick={() => onRollSkill && onRollSkill(sk.name, totalMod)}
               >
-                {formatModifier(totalMod)}
-              </span>
-              <span
-                className="stat-name-label"
-                onClick={() => onRollSkill && onRollSkill(sk.name, totalMod)}
-              >
-                {sk.name}
-              </span>
+                <span className="stat-mod-value">{formatModifier(totalMod)}</span>
+                <span className="stat-name-label">{sk.name}</span>
+              </button>
               <span className="stat-ability-badge">
                 ({sk.ability})
               </span>

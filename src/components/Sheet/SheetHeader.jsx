@@ -11,7 +11,7 @@ export default function SheetHeader({ character, onUpdateCharacter }) {
     <div className="sheet-header-box">
       {/* Left: Character Name */}
       <div className="char-name-block">
-        <input
+        <input aria-label="Character name"
           type="text"
           className="char-name-input"
           value={character.name || ''}
@@ -38,7 +38,7 @@ export default function SheetHeader({ character, onUpdateCharacter }) {
         </div>
 
         <div className="meta-field">
-          <input
+          <input aria-label="Player name"
             type="text"
             className="meta-value"
             value={character.player || ''}
@@ -56,7 +56,7 @@ export default function SheetHeader({ character, onUpdateCharacter }) {
         </div>
 
         <div className="meta-field">
-          <input
+          <input aria-label="Alignment"
             type="text"
             className="meta-value"
             value={character.alignment || ''}
@@ -67,7 +67,7 @@ export default function SheetHeader({ character, onUpdateCharacter }) {
         </div>
 
         <div className="meta-field">
-          <input
+          <input aria-label="Experience points"
             type="text"
             className="meta-value"
             value={character.xp || '0'}

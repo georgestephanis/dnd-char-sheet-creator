@@ -74,7 +74,7 @@ export default function CombatVitals({ character, scores, onUpdateCharacter, onL
             {calculatedAc}
           </div>
           <div className="sheet-label">Armor Class</div>
-          <button
+          <button aria-label="Configure AC or Override"
             type="button"
             className="no-print"
             title="Configure AC or Override"
@@ -118,7 +118,7 @@ export default function CombatVitals({ character, scores, onUpdateCharacter, onL
               Reset to Auto
             </button>
           </div>
-          <input
+          <input aria-label="Armor class override"
             type="number"
             className="form-input"
             style={{ width: '80px', padding: '0.2rem', background: '#fff', color: '#111' }}
@@ -143,7 +143,7 @@ export default function CombatVitals({ character, scores, onUpdateCharacter, onL
 
         <div className="hp-input-row">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <input
+            <input aria-label="Current hit points"
               type="number"
               className="hp-large-input"
               value={currentHp}
@@ -160,7 +160,7 @@ export default function CombatVitals({ character, scores, onUpdateCharacter, onL
           {/* Quick Damage & Healing Controls (No-print) */}
           <div className="no-print" style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
             <div style={{ display: 'flex', gap: '0.3rem' }}>
-              <input
+              <input aria-label="Damage or healing amount"
                 type="number"
                 placeholder="Amt"
                 style={{ width: '55px', padding: '0.25rem', borderRadius: '4px', border: '1px solid var(--parchment-border)', textAlign: 'center', fontFamily: 'var(--font-ui)', fontWeight: 600 }}
@@ -188,7 +188,7 @@ export default function CombatVitals({ character, scores, onUpdateCharacter, onL
             {/* Temp HP */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.1rem' }}>
               <span style={{ fontSize: '0.7rem', color: 'var(--parchment-text-muted)' }}>Temp:</span>
-              <input
+              <input aria-label="Temporary hit points"
                 type="number"
                 placeholder="0"
                 style={{ width: '55px', padding: '0.15rem', borderRadius: '4px', border: '1px solid var(--parchment-border)', textAlign: 'center', fontFamily: 'var(--font-ui)' }}
@@ -233,7 +233,7 @@ export default function CombatVitals({ character, scores, onUpdateCharacter, onL
         <div className="section-box">
           <div className="section-box-title" style={{ fontSize: '0.75rem', marginBottom: '0.4rem' }}>
             <span>Death Saves</span>
-            <button
+            <button aria-label="Reset Death Saves"
               type="button"
               className="no-print"
               title="Reset Death Saves"
@@ -249,8 +249,12 @@ export default function CombatVitals({ character, scores, onUpdateCharacter, onL
               <span>Successes</span>
               <div style={{ display: 'flex', gap: '0.3rem' }}>
                 {[0, 1, 2].map(i => (
-                  <span
+                  <button
+                    type="button"
                     key={i}
+                    className="btn-reset pip-btn"
+                    aria-label={`Death save success ${i + 1}`}
+                    aria-pressed={i < deathSaves.successes}
                     onClick={() => toggleDeathSaveSuccess(i)}
                     style={{
                       width: '13px',
@@ -270,8 +274,12 @@ export default function CombatVitals({ character, scores, onUpdateCharacter, onL
               <span>Failures</span>
               <div style={{ display: 'flex', gap: '0.3rem' }}>
                 {[0, 1, 2].map(i => (
-                  <span
+                  <button
+                    type="button"
                     key={i}
+                    className="btn-reset pip-btn"
+                    aria-label={`Death save failure ${i + 1}`}
+                    aria-pressed={i < deathSaves.failures}
                     onClick={() => toggleDeathSaveFailure(i)}
                     style={{
                       width: '13px',

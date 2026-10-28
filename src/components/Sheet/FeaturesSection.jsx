@@ -38,7 +38,7 @@ export default function FeaturesSection({ character, onOpenAddFeature, onRemoveF
 
       {/* Filter and Search Bar (no-print) */}
       <div className="no-print" style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.65rem' }}>
-        <input
+        <input aria-label="Search features"
           type="text"
           className="form-input"
           style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', background: '#fff', color: '#111' }}
@@ -46,7 +46,7 @@ export default function FeaturesSection({ character, onOpenAddFeature, onRemoveF
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <select
+        <select aria-label="Filter features by source"
           className="form-select"
           style={{ width: '110px', padding: '0.25rem', fontSize: '0.75rem', background: '#fff', color: '#111' }}
           value={sourceFilter}
@@ -76,8 +76,11 @@ export default function FeaturesSection({ character, onOpenAddFeature, onRemoveF
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', flex: 1 }}
+                <button
+                  type="button"
+                  className="btn-reset"
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', flex: 1, textAlign: 'left' }}
+                  aria-expanded={isExpanded}
                   onClick={() => toggleExpand(feat.id)}
                 >
                   <span className="no-print" style={{ color: 'var(--parchment-text-muted)' }}>
@@ -91,9 +94,9 @@ export default function FeaturesSection({ character, onOpenAddFeature, onRemoveF
                       [{feat.source}]
                     </span>
                   )}
-                </div>
+                </button>
 
-                <button
+                <button aria-label="Remove feature"
                   type="button"
                   className="no-print"
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)', padding: '0.1rem' }}

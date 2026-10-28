@@ -6,6 +6,7 @@ import {
 import { SRD_CLASSES } from '../../data/srdClasses';
 import { SRD_FEATS } from '../../data/srdFeats';
 import { getAbilityModifier, getProficiencyBonus, hasFeat, getCalculatedAbilityScores } from '../../utils/dndRules';
+import { activateOnKey } from '../../utils/a11y';
 
 // Mount the dialog only while open, keyed to the character's current level, so every
 // opening starts from fresh state instead of the previous session's choices.
@@ -194,7 +195,7 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
-              <div
+              <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={hpMethod === 'average'}
                 onClick={() => setHpMethod('average')}
                 className={`bg3-card ${hpMethod === 'average' ? 'selected' : ''}`}
                 style={{ cursor: 'pointer' }}
@@ -207,7 +208,7 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
                 </div>
               </div>
 
-              <div
+              <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={hpMethod === 'rolled'}
                 onClick={() => { if (rolledDieValue === null) handleRollHitDie(); else setHpMethod('rolled'); }}
                 className={`bg3-card ${hpMethod === 'rolled' ? 'selected' : ''}`}
                 style={{ cursor: 'pointer' }}
@@ -241,7 +242,7 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
                 {classData.subclasses.map(sub => (
-                  <div
+                  <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={selectedSubclassId === sub.id}
                     key={sub.id}
                     className={`bg3-card ${selectedSubclassId === sub.id ? 'selected' : ''}`}
                     onClick={() => setSelectedSubclassId(sub.id)}
@@ -291,8 +292,8 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
 
               {asiType === 'plusTwo' && (
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Ability to increase by +2</label>
-                  <select
+                  <label htmlFor="bg3levelupmodal-ability-to-increase-by-2" className="form-label">Ability to increase by +2</label>
+                  <select id="bg3levelupmodal-ability-to-increase-by-2"
                     className="form-select"
                     value={plusTwoAbility}
                     onChange={(e) => setPlusTwoAbility(e.target.value)}
@@ -310,8 +311,8 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
               {asiType === 'plusOnePlusOne' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label">First Ability (+1)</label>
-                    <select className="form-select" value={plusOneFirst} onChange={(e) => setPlusOneFirst(e.target.value)}>
+                    <label htmlFor="bg3levelupmodal-first-ability-1" className="form-label">First Ability (+1)</label>
+                    <select id="bg3levelupmodal-first-ability-1" className="form-select" value={plusOneFirst} onChange={(e) => setPlusOneFirst(e.target.value)}>
                       <option value="str">Strength</option>
                       <option value="dex">Dexterity</option>
                       <option value="con">Constitution</option>
@@ -321,8 +322,8 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
                     </select>
                   </div>
                   <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label">Second Ability (+1)</label>
-                    <select className="form-select" value={plusOneSecond} onChange={(e) => setPlusOneSecond(e.target.value)}>
+                    <label htmlFor="bg3levelupmodal-second-ability-1" className="form-label">Second Ability (+1)</label>
+                    <select id="bg3levelupmodal-second-ability-1" className="form-select" value={plusOneSecond} onChange={(e) => setPlusOneSecond(e.target.value)}>
                       <option value="str">Strength</option>
                       <option value="dex">Dexterity</option>
                       <option value="con">Constitution</option>
@@ -336,8 +337,8 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
 
               {asiType === 'feat' && (
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Feat Selection</label>
-                  <select className="form-select" value={selectedFeatId} onChange={(e) => setSelectedFeatId(e.target.value)}>
+                  <label htmlFor="bg3levelupmodal-feat-selection" className="form-label">Feat Selection</label>
+                  <select id="bg3levelupmodal-feat-selection" className="form-select" value={selectedFeatId} onChange={(e) => setSelectedFeatId(e.target.value)}>
                     {SRD_FEATS.map(feat => (
                       <option key={feat.id} value={feat.id}>{feat.name} ({feat.prerequisite})</option>
                     ))}

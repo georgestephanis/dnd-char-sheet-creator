@@ -39,8 +39,8 @@ export default function CustomFeatureModal({ isOpen, onClose, onSaveFeature }) {
 
         <div className="modal-body">
           <div className="form-group">
-            <label className="form-label">Feature Name *</label>
-            <input
+            <label htmlFor="customfeaturemodal-feature-name" className="form-label">Feature Name *</label>
+            <input id="customfeaturemodal-feature-name"
               type="text"
               className="form-input"
               required
@@ -51,8 +51,8 @@ export default function CustomFeatureModal({ isOpen, onClose, onSaveFeature }) {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Source / Origin</label>
-            <select
+            <label htmlFor="customfeaturemodal-source-origin" className="form-label">Source / Origin</label>
+            <select id="customfeaturemodal-source-origin"
               className="form-select"
               value={source}
               onChange={(e) => setSource(e.target.value)}
@@ -68,8 +68,8 @@ export default function CustomFeatureModal({ isOpen, onClose, onSaveFeature }) {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Description & Rules *</label>
-            <textarea
+            <label htmlFor="customfeaturemodal-description-rules" className="form-label">Description & Rules *</label>
+            <textarea id="customfeaturemodal-description-rules"
               className="form-textarea"
               rows="4"
               required

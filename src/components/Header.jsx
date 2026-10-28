@@ -147,7 +147,7 @@ export default function Header({
         </button>
 
         {/* SRD Legal Modal */}
-        <button
+        <button aria-label="SRD 5.1 CC-BY-4.0 Attribution"
           type="button"
           className="btn btn-secondary btn-icon"
           onClick={onOpenLegalModal}

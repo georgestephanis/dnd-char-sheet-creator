@@ -89,8 +89,8 @@ export default function DiceRollerModal({ isOpen, onClose, onRollComplete }) {
         {/* Dice Controls */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
           <div>
-            <label className="form-label">Count</label>
-            <input
+            <label htmlFor="dicerollermodal-count" className="form-label">Count</label>
+            <input id="dicerollermodal-count"
               type="number"
               className="form-input"
               min="1"
@@ -101,8 +101,8 @@ export default function DiceRollerModal({ isOpen, onClose, onRollComplete }) {
           </div>
 
           <div>
-            <label className="form-label">Modifier</label>
-            <input
+            <label htmlFor="dicerollermodal-modifier" className="form-label">Modifier</label>
+            <input id="dicerollermodal-modifier"
               type="number"
               className="form-input"
               value={modifier}
@@ -111,8 +111,8 @@ export default function DiceRollerModal({ isOpen, onClose, onRollComplete }) {
           </div>
 
           <div>
-            <label className="form-label">Mode (d20)</label>
-            <select
+            <label htmlFor="dicerollermodal-mode-d20" className="form-label">Mode (d20)</label>
+            <select id="dicerollermodal-mode-d20"
               className="form-select"
               value={selectedDie !== 20 || dieCount > 1 ? 'normal' : rollMode}
               onChange={(e) => setRollMode(e.target.value)}

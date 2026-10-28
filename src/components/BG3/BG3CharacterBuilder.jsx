@@ -16,6 +16,7 @@ import {
   roll4d6DropLowest, getAbilityModifier, formatModifier,
   calculateArmorClass, getProficiencyBonus
 } from '../../utils/dndRules';
+import { activateOnKey } from '../../utils/a11y';
 
 // Recommended 27-point buy scores per class (BG3 & 5e optimal arrays)
 const CLASS_RECOMMENDED_SCORES = {
@@ -603,7 +604,7 @@ export default function BG3CharacterBuilder({
             <span id="bg3-forge-title" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 800, fontSize: '0.95rem' }}>
               CHARACTER FORGE
             </span>
-            <button
+            <button aria-label="Close Builder"
               type="button"
               className="btn btn-secondary btn-icon btn-sm"
               onClick={onClose}
@@ -664,7 +665,7 @@ export default function BG3CharacterBuilder({
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                   {/* Custom Hero Card */}
-                  <div
+                  <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={originType === 'custom'}
                     className={`bg3-card ${originType === 'custom' ? 'selected' : ''}`}
                     onClick={() => handleSelectOrigin('custom')}
                   >
@@ -682,7 +683,7 @@ export default function BG3CharacterBuilder({
 
                   {/* Origin Starter Heroes */}
                   {SAMPLE_CHARACTERS.map(orig => (
-                    <div
+                    <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={originType === orig.id}
                       key={orig.id}
                       className={`bg3-card ${originType === orig.id ? 'selected' : ''}`}
                       onClick={() => handleSelectOrigin(orig.id)}
@@ -716,7 +717,7 @@ export default function BG3CharacterBuilder({
 
                 <div className="bg3-cards-grid">
                   {SRD_RACES.map(r => (
-                    <div
+                    <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={selectedRaceId === r.id}
                       key={r.id}
                       className={`bg3-card ${selectedRaceId === r.id ? 'selected' : ''}`}
                       onClick={() => {
@@ -745,7 +746,7 @@ export default function BG3CharacterBuilder({
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
                       {currentRace.subraces.map(sub => (
-                        <div
+                        <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={selectedSubraceId === sub.id}
                           key={sub.id}
                           className={`bg3-card ${selectedSubraceId === sub.id ? 'selected' : ''}`}
                           onClick={() => setSelectedSubraceId(sub.id)}
@@ -768,7 +769,7 @@ export default function BG3CharacterBuilder({
                       {['Black (Acid)', 'Blue (Lightning)', 'Brass (Fire)', 'Bronze (Lightning)', 'Copper (Acid)', 'Gold (Fire)', 'Green (Poison)', 'Red (Fire)', 'Silver (Cold)', 'White (Cold)'].map(anc => {
                         const color = anc.split(' ')[0];
                         return (
-                          <div
+                          <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={dragonbornAncestry === color}
                             key={color}
                             className={`bg3-card ${dragonbornAncestry === color ? 'selected' : ''}`}
                             onClick={() => setDragonbornAncestry(color)}
@@ -792,21 +793,21 @@ export default function BG3CharacterBuilder({
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
                       <div>
-                        <label className="form-label">Ability Bonus #1</label>
-                        <select className="form-select" value={variantHumanStats[0]} onChange={(e) => setVariantHumanStats([e.target.value, variantHumanStats[1]])}>
+                        <label htmlFor="bg3characterbuilder-ability-bonus-1" className="form-label">Ability Bonus #1</label>
+                        <select id="bg3characterbuilder-ability-bonus-1" className="form-select" value={variantHumanStats[0]} onChange={(e) => setVariantHumanStats([e.target.value, variantHumanStats[1]])}>
                           {['str', 'dex', 'con', 'int', 'wis', 'cha'].map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
                         </select>
                       </div>
                       <div>
-                        <label className="form-label">Ability Bonus #2</label>
-                        <select className="form-select" value={variantHumanStats[1]} onChange={(e) => setVariantHumanStats([variantHumanStats[0], e.target.value])}>
+                        <label htmlFor="bg3characterbuilder-ability-bonus-2" className="form-label">Ability Bonus #2</label>
+                        <select id="bg3characterbuilder-ability-bonus-2" className="form-select" value={variantHumanStats[1]} onChange={(e) => setVariantHumanStats([variantHumanStats[0], e.target.value])}>
                           {['str', 'dex', 'con', 'int', 'wis', 'cha'].map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
                         </select>
                       </div>
                     </div>
                     <div>
-                      <label className="form-label">Bonus Feat</label>
-                      <select className="form-select" value={variantHumanFeatId} onChange={(e) => setVariantHumanFeatId(e.target.value)}>
+                      <label htmlFor="bg3characterbuilder-bonus-feat" className="form-label">Bonus Feat</label>
+                      <select id="bg3characterbuilder-bonus-feat" className="form-select" value={variantHumanFeatId} onChange={(e) => setVariantHumanFeatId(e.target.value)}>
                         {SRD_FEATS.map(f => <option key={f.id} value={f.id}>{f.name} &bull; {f.description.substring(0, 60)}...</option>)}
                       </select>
                     </div>
@@ -830,7 +831,7 @@ export default function BG3CharacterBuilder({
                   {SRD_CLASSES.map(c => {
                     const isSelected = selectedClassId === c.id;
                     return (
-                      <div
+                      <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={isSelected}
                         key={c.id}
                         className={`bg3-card ${isSelected ? 'selected' : ''}`}
                         onClick={() => handleSelectClass(c.id)}
@@ -853,7 +854,7 @@ export default function BG3CharacterBuilder({
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
                       {currentClass.subclasses.map(sub => (
-                        <div
+                        <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={selectedSubclassId === sub.id}
                           key={sub.id}
                           className={`bg3-card ${selectedSubclassId === sub.id ? 'selected' : ''}`}
                           onClick={() => setSelectedSubclassId(sub.id)}
@@ -879,7 +880,7 @@ export default function BG3CharacterBuilder({
                         { id: 'greatweapon', name: 'Great Weapon Fighting', desc: 'Reroll 1s and 2s on two-handed damage dice.' },
                         { id: 'archery', name: 'Archery', desc: '+2 bonus to attack rolls with ranged weapons.' }
                       ].map(fs => (
-                        <div
+                        <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={fightingStyle === fs.id}
                           key={fs.id}
                           className={`bg3-card ${fightingStyle === fs.id ? 'selected' : ''}`}
                           onClick={() => setFightingStyle(fs.id)}
@@ -1020,7 +1021,7 @@ export default function BG3CharacterBuilder({
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
                           {scoreMethod === 'pointbuy' ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                              <button
+                              <button aria-label={`Decrease ${stat.id.toUpperCase()}`}
                                 type="button"
                                 className="btn btn-secondary btn-icon btn-sm"
                                 style={{ width: '28px', height: '28px' }}
@@ -1032,7 +1033,7 @@ export default function BG3CharacterBuilder({
                               <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 800, width: '26px', textAlign: 'center' }}>
                                 {base}
                               </span>
-                              <button
+                              <button aria-label={`Increase ${stat.id.toUpperCase()}`}
                                 type="button"
                                 className="btn btn-secondary btn-icon btn-sm"
                                 style={{ width: '28px', height: '28px' }}
@@ -1083,7 +1084,7 @@ export default function BG3CharacterBuilder({
 
                 <div className="bg3-cards-grid">
                   {SRD_BACKGROUNDS.map(b => (
-                    <div
+                    <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={selectedBackgroundId === b.id}
                       key={b.id}
                       className={`bg3-card ${selectedBackgroundId === b.id ? 'selected' : ''}`}
                       onClick={() => handleSelectBackground(b.id)}
@@ -1152,7 +1153,7 @@ export default function BG3CharacterBuilder({
                     const isSelected = selectedClassSkills.includes(sk);
 
                     return (
-                      <div
+                      <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={isSelected || isBgSkill} aria-disabled={isBgSkill || undefined}
                         key={sk}
                         onClick={() => handleToggleSkill(sk)}
                         className={`bg3-card ${isSelected || isBgSkill ? 'selected' : ''}`}
@@ -1217,7 +1218,7 @@ export default function BG3CharacterBuilder({
                   {SRD_SPELLS.filter(s => s.level === 0 && s.classes.includes(currentClass.id)).map(sp => {
                     const isSelected = selectedCantrips.includes(sp.id);
                     return (
-                      <div
+                      <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={isSelected}
                         key={sp.id}
                         className={`bg3-card ${isSelected ? 'selected' : ''}`}
                         onClick={() => {
@@ -1241,7 +1242,7 @@ export default function BG3CharacterBuilder({
                   {SRD_SPELLS.filter(s => s.level === 1 && s.classes.includes(currentClass.id)).map(sp => {
                     const isSelected = selectedFirstLevelSpells.includes(sp.id);
                     return (
-                      <div
+                      <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={isSelected}
                         key={sp.id}
                         className={`bg3-card ${isSelected ? 'selected' : ''}`}
                         onClick={() => {
@@ -1275,7 +1276,7 @@ export default function BG3CharacterBuilder({
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                   {currentClass.startingEquipmentPackages?.map((pkg, idx) => (
-                    <div
+                    <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={selectedEquipIndex === idx}
                       key={pkg.id || idx}
                       className={`bg3-card ${selectedEquipIndex === idx ? 'selected' : ''}`}
                       onClick={() => setSelectedEquipIndex(idx)}
@@ -1304,7 +1305,7 @@ export default function BG3CharacterBuilder({
                 {/* Hero Name & Random Generator */}
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
                   <div className="form-group">
-                    <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <label htmlFor="bg3characterbuilder-heros-name-random-name" className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <span>Hero&rsquo;s Name *</span>
                       <button
                         type="button"
@@ -1314,7 +1315,7 @@ export default function BG3CharacterBuilder({
                         <Dices size={14} /> Random Name
                       </button>
                     </label>
-                    <input
+                    <input id="bg3characterbuilder-heros-name-random-name"
                       type="text"
                       className="form-input"
                       value={charName}
@@ -1324,8 +1325,8 @@ export default function BG3CharacterBuilder({
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Alignment</label>
-                    <select
+                    <label htmlFor="bg3characterbuilder-alignment" className="form-label">Alignment</label>
+                    <select id="bg3characterbuilder-alignment"
                       className="form-select"
                       value={alignment}
                       onChange={(e) => setAlignment(e.target.value)}
@@ -1346,7 +1347,7 @@ export default function BG3CharacterBuilder({
                     {FANTASY_AVATARS.map(av => {
                       const isSel = avatarIcon === av.icon;
                       return (
-                        <div
+                        <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={isSel}
                           key={av.id}
                           className={`bg3-card ${isSel ? 'selected' : ''}`}
                           style={{ textAlign: 'center', padding: '0.65rem 0.4rem', cursor: 'pointer' }}
@@ -1364,8 +1365,8 @@ export default function BG3CharacterBuilder({
                   </div>
 
                   <div className="form-group" style={{ maxWidth: '480px' }}>
-                    <label className="form-label">Or Custom Image URL</label>
-                    <input
+                    <label htmlFor="bg3characterbuilder-or-custom-image-url" className="form-label">Or Custom Image URL</label>
+                    <input id="bg3characterbuilder-or-custom-image-url"
                       type="url"
                       className="form-input"
                       placeholder="https://example.com/portrait.jpg"
