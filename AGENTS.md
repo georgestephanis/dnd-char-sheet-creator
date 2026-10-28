@@ -66,7 +66,7 @@ export PATH="/Users/georgestephanis/.nvm/versions/node/v22.22.2/bin:/opt/homebre
 A character is stored as a flat, portable JSON-serializable object:
 ```json
 {
-  "id": "char-1730000000000",
+  "id": "char-3f2c9a1e-7b4d-4e8a-9c21-5d6f0a8b7e14",
   "name": "Torvin Stonehelm",
   "srdVersion": "5.1",
   "raceId": "dwarf",
@@ -113,6 +113,7 @@ A character is stored as a flat, portable JSON-serializable object:
 }
 ```
 
+- `id` comes from `generateCharacterId()` (`char-` + `crypto.randomUUID()`, with a timestamp fallback where that's unavailable).
 - `racialBonuses` holds the ability increases applied on top of the base scores. In 5.1 they come from the race and subrace. In 5.2 they come from the background, and `backgroundBonus` records the choice (`{ "mode": "two-one" | "one-one-one", "two": "str", "one": "con" }`).
 
 ### Rules Engine (`src/utils/dndRules.js`)

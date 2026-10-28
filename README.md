@@ -14,7 +14,7 @@ A character keeps its rules version for life, including through a respec. To pla
 
 Featuring a **guided character creation & level-up interface**, an **illustrated Adventurer View** for play, and a **high-density tabletop character sheet** cleanly styled for physical printing.
 
-> **Design inspiration:** the creator and Adventurer View take visual cues from the character screens of *Baldur's Gate 3* (dark panels, gold filigree, a three-column layout). That's the only connection. This is an independent fan project, not affiliated with or endorsed by Larian Studios or Wizards of the Coast, and it uses no assets, names, or content from the game. All game content comes from the SRD 5.1.
+> **Design inspiration:** the creator and Adventurer View take visual cues from the character screens of *Baldur's Gate 3* (dark panels, gold filigree, a three-column layout). That's the only connection. This is an independent fan project, not affiliated with or endorsed by Larian Studios or Wizards of the Coast, and it uses no assets, names, or content from the game. All game content comes from SRD 5.1 and SRD 5.2.1.
 
 ---
 
