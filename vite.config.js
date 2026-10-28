@@ -9,4 +9,24 @@ export default defineConfig({
   plugins: [react()],
   server: { port, strictPort: false },
   preview: { port, strictPort: false },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+            return 'react-vendor';
+          }
+          if (id.includes('node_modules/lucide-react')) {
+            return 'lucide-vendor';
+          }
+          if (id.includes('src/data/srd51')) {
+            return 'srd51-data';
+          }
+          if (id.includes('src/data/srd52')) {
+            return 'srd52-data';
+          }
+        }
+      }
+    }
+  }
 })
