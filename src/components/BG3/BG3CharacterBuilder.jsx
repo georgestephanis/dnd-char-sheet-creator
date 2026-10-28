@@ -68,7 +68,7 @@ export default function BG3CharacterBuilder({
   initialCharacter = null
 }) {
   // The SRD version is fixed per character: chosen at creation, kept on respec
-  const [srdVersion] = useState(initialCharacter?.srdVersion || DEFAULT_SRD_VERSION);
+  const [srdVersion, setSrdVersion] = useState(initialCharacter?.srdVersion || DEFAULT_SRD_VERSION);
   const ruleset = getRuleset(srdVersion);
   const { races: SRD_RACES, classes: SRD_CLASSES, backgrounds: SRD_BACKGROUNDS, spells: SRD_SPELLS } = ruleset;
 
@@ -307,9 +307,12 @@ export default function BG3CharacterBuilder({
     const cls = next.classes.find(c => c.id === selectedClassId) || next.classes[0];
     setSelectedClassId(cls.id);
     setSelectedSubclassId('');
-    setSelectedClassSkills((cls.skillChoices?.options || []).slice(0, cls.skillChoices?.count || 2));
+    const nextBg = next.backgrounds[0];
+    const bgSkills = nextBg.skillProficiencies || [];
+    const classSkillOptions = (cls.skillChoices?.options || []).filter(sk => !bgSkills.includes(sk));
+    setSelectedClassSkills(classSkillOptions.slice(0, cls.skillChoices?.count || 2));
     setSelectedExpertise([]);
-    setSelectedBackgroundId(next.backgrounds[0].id);
+    setSelectedBackgroundId(nextBg.id);
     setBgBonusTwo('');
     setBgBonusOne('');
     setSelectedCantrips(next.spells.filter(sp => sp.level === 0 && sp.classes.includes(cls.id)).slice(0, 3).map(sp => sp.id));
