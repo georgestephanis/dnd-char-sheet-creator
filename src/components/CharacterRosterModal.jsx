@@ -26,6 +26,8 @@ export default function CharacterRosterModal({
 
     const reader = new FileReader();
     reader.onload = (event) => {
+      // The roster may have been closed (unmounted) while the file was being read
+      if (!fileInputRef.current) return;
       const text = event.target?.result;
       if (typeof text === 'string') {
         const res = importCharactersFromJson(text);
