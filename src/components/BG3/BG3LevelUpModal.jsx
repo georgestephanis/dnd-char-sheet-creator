@@ -170,12 +170,17 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
               <select
                 className="form-select"
                 style={{ width: '90px', fontWeight: 'bold', background: '#11151e', borderColor: 'var(--border-gold)', color: 'var(--text-gold)' }}
-                value={targetLevel}
+                value={isMaxLevel ? currentLevel : targetLevel}
+                disabled={isMaxLevel}
                 onChange={(e) => setTargetLevel(parseInt(e.target.value, 10))}
               >
-                {Array.from({ length: 20 - currentLevel }, (_, i) => currentLevel + 1 + i).map(lvl => (
-                  <option key={lvl} value={lvl}>Lvl {lvl}</option>
-                ))}
+                {isMaxLevel ? (
+                  <option value={currentLevel}>Lvl 20</option>
+                ) : (
+                  Array.from({ length: 20 - currentLevel }, (_, i) => currentLevel + 1 + i).map(lvl => (
+                    <option key={lvl} value={lvl}>Lvl {lvl}</option>
+                  ))
+                )}
               </select>
             </div>
           </div>
