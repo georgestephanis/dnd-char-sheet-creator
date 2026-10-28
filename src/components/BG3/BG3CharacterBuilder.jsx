@@ -140,7 +140,15 @@ export default function BG3CharacterBuilder({
         // Background skills are re-added on save; only class picks belong in this list
         const bg = SRD_BACKGROUNDS.find(b => b.id === initialCharacter.backgroundId);
         const bgSkills = bg?.skillProficiencies || [];
-        setSelectedClassSkills(initialCharacter.skillProficiencies.filter(sk => !bgSkills.includes(sk)));
+        // Keep only skills this class can pick, up to its quota, so the step starts out valid
+        const loadedClass = SRD_CLASSES.find(c => c.id === initialCharacter.classId);
+        const classOptions = loadedClass?.skillChoices?.options || [];
+        const quota = loadedClass?.skillChoices?.count || 2;
+        setSelectedClassSkills(
+          initialCharacter.skillProficiencies
+            .filter(sk => !bgSkills.includes(sk) && classOptions.includes(sk))
+            .slice(0, quota)
+        );
       }
       if (initialCharacter.expertiseSkills) {
         setSelectedExpertise([...initialCharacter.expertiseSkills]);
@@ -148,9 +156,11 @@ export default function BG3CharacterBuilder({
       if (initialCharacter.fightingStyle) {
         setFightingStyle(initialCharacter.fightingStyle);
       }
+      // Only preselect SRD spells on this class's list; others stay on the sheet untouched
       const knownSpells = initialCharacter.spells || [];
-      setSelectedCantrips(knownSpells.filter(sp => sp.level === 0 && SRD_SPELLS.some(s => s.id === sp.id)).map(sp => sp.id));
-      setSelectedFirstLevelSpells(knownSpells.filter(sp => sp.level === 1 && SRD_SPELLS.some(s => s.id === sp.id)).map(sp => sp.id));
+      const isClassSpell = (sp) => SRD_SPELLS.some(s => s.id === sp.id && s.classes.includes(initialCharacter.classId));
+      setSelectedCantrips(knownSpells.filter(sp => sp.level === 0 && isClassSpell(sp)).map(sp => sp.id));
+      setSelectedFirstLevelSpells(knownSpells.filter(sp => sp.level === 1 && isClassSpell(sp)).map(sp => sp.id));
       setOriginType('custom');
     }
   }, [initialCharacter]);
@@ -516,7 +526,9 @@ export default function BG3CharacterBuilder({
       !rebuiltNames.has((f.name || '').toLowerCase())
     );
     const keptSpells = (existing.spells || []).filter(sp =>
-      !builderSpellIds.has(sp.id) && !((sp.level === 0 || sp.level === 1) && SRD_SPELLS.some(s => s.id === sp.id))
+      // Drop only spells the builder offered (this class's SRD cantrips/1st-level) and that were deselected
+      !builderSpellIds.has(sp.id) &&
+      !((sp.level === 0 || sp.level === 1) && SRD_SPELLS.some(s => s.id === sp.id && s.classes.includes(existing.classId)))
     );
 
     // Max HP: level-1 value plus the fixed average for each further level
@@ -524,7 +536,11 @@ export default function BG3CharacterBuilder({
     // Tough grants +2 HP per level including 1st, so it's added for every level separately
     const hasTough = keptFeatures.some(f => /^feat:\s*tough$/i.test(f.name || ''));
     const level = rebuilt.level || 1;
-    const maxHp = Math.max(level, startingHp + (level - 1) * (Math.floor(hitDie / 2) + 1 + conMod + bonusHpPerLevel) + (hasTough ? 2 * level : 0));
+    // Same rules as level-up: each level grants at least 1 HP
+    const toughPerLevel = hasTough ? 2 : 0;
+    const firstLevelHp = Math.max(1, startingHp + toughPerLevel);
+    const perLevelHp = Math.max(1, Math.floor(hitDie / 2) + 1 + conMod + bonusHpPerLevel + toughPerLevel);
+    const maxHp = firstLevelHp + (level - 1) * perLevelHp;
     const damageTaken = Math.max(0, (existing.maxHp || 0) - (existing.currentHp ?? existing.maxHp ?? 0));
 
     return {
@@ -546,6 +562,7 @@ export default function BG3CharacterBuilder({
       flaws: existing.flaws ?? rebuilt.flaws,
       backstory: existing.backstory ?? rebuilt.backstory,
       deathSaves: existing.deathSaves || rebuilt.deathSaves,
+      tempHp: existing.tempHp ?? 0,
       exhaustion: existing.exhaustion ?? rebuilt.exhaustion,
       hitDiceUsed: Math.min(existing.hitDiceUsed || 0, level),
       maxHp,
