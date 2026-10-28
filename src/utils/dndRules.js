@@ -11,6 +11,13 @@ export const ABILITIES = [
   { id: 'cha', name: 'Charisma', short: 'CHA' }
 ];
 
+// The nine alignments (SRD 5.1 and 5.2.1)
+export const ALIGNMENTS = [
+  'Lawful Good', 'Neutral Good', 'Chaotic Good',
+  'Lawful Neutral', 'True Neutral', 'Chaotic Neutral',
+  'Lawful Evil', 'Neutral Evil', 'Chaotic Evil'
+];
+
 export const SKILLS = [
   { id: 'acrobatics', name: 'Acrobatics', ability: 'dex' },
   { id: 'animal-handling', name: 'Animal Handling', ability: 'wis' },

@@ -434,6 +434,13 @@ html, body {
   outline: none;
 }
 
+/* Alignment dropdown: sheet text styling on screen, plain text when printed */
+.meta-select {
+  cursor: pointer;
+  padding: 0;
+  width: 100%;
+}
+
 .meta-value:focus-visible,
 .char-name-input:focus-visible,
 .char-selector-select:focus-visible {
@@ -949,6 +956,11 @@ dialog.modal-dialog::backdrop {
   }
 
   /* Scrolling lists expand so nothing is clipped on paper */
+  .meta-select {
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
   .scroll-list {
     max-height: none !important;
     overflow: visible !important;

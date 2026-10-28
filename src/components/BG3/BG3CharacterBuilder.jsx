@@ -9,7 +9,7 @@ import { getRuleset, DEFAULT_SRD_VERSION, RULESET_LIST } from '../../data/rulese
 import { generateCharacterId } from '../../utils/storage';
 import {
   POINT_BUY_COSTS, POINT_BUY_TOTAL, roll4d6DropLowest, getAbilityModifier,
-  formatModifier, calculateArmorClass
+  formatModifier, calculateArmorClass, ALIGNMENTS
 } from '../../utils/dndRules';
 import { activateOnKey } from '../../utils/a11y';
 
@@ -570,7 +570,7 @@ export default function BG3CharacterBuilder({
       backgroundName: currentBackground.name,
       alignment,
       player: playerName.trim() || 'Player',
-      xp: '0',
+      xp: 0,
       inspiration: false,
       abilityScores: activeBaseScores,
       racialBonuses,
@@ -1489,7 +1489,7 @@ export default function BG3CharacterBuilder({
                       value={alignment}
                       onChange={(e) => setAlignment(e.target.value)}
                     >
-                      {['Lawful Good', 'Neutral Good', 'Chaotic Good', 'Lawful Neutral', 'True Neutral', 'Chaotic Neutral', 'Lawful Evil', 'Neutral Evil', 'Chaotic Evil'].map(al => (
+                      {ALIGNMENTS.map(al => (
                         <option key={al} value={al}>{al}</option>
                       ))}
                     </select>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { getRuleset } from '../../data/rulesets';
+import { ALIGNMENTS } from '../../utils/dndRules';
 
 export default function SheetHeader({ character, onUpdateCharacter }) {
   if (!character) return null;
@@ -60,23 +61,35 @@ export default function SheetHeader({ character, onUpdateCharacter }) {
         </div>
 
         <div className="meta-field">
-          <input aria-label="Alignment"
-            type="text"
-            className="meta-value"
+          <select aria-label="Alignment"
+            className="meta-value meta-select"
             value={character.alignment || ''}
-            placeholder="Alignment"
             onChange={(e) => onUpdateCharacter({ alignment: e.target.value })}
-          />
+          >
+            {!character.alignment && <option value="">Choose…</option>}
+            {/* Keep a hand-entered alignment from older saves selectable */}
+            {character.alignment && !ALIGNMENTS.includes(character.alignment) && (
+              <option value={character.alignment}>{character.alignment}</option>
+            )}
+            {ALIGNMENTS.map(al => <option key={al} value={al}>{al}</option>)}
+          </select>
           <div className="sheet-label">Alignment</div>
         </div>
 
         <div className="meta-field">
           <input aria-label="Experience points"
-            type="text"
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step={1}
             className="meta-value"
-            value={character.xp || '0'}
-            placeholder="XP"
-            onChange={(e) => onUpdateCharacter({ xp: e.target.value })}
+            value={character.xp ?? 0}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10);
+              // Allow clearing the field while typing; store whole, non-negative numbers
+              onUpdateCharacter({ xp: Number.isFinite(val) ? Math.max(0, val) : '' });
+            }}
+            onBlur={() => { if (character.xp === '') onUpdateCharacter({ xp: 0 }); }}
           />
           <div className="sheet-label">Experience Points</div>
         </div>
