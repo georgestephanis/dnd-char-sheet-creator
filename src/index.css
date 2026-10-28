@@ -825,10 +825,17 @@ dialog.modal-dialog::backdrop {
    Fits US Letter / A4 with no web chrome, crisp borders and pagination
    ========================================================================== */
 
+/* Sheet tabs: inactive panels are hidden on screen; print shows every page */
+.sheet-tab-panel.is-inactive,
+.feature-desc.is-collapsed,
+.filtered-out {
+  display: none;
+}
+
 @media print {
+  /* No fixed size: the printer's paper (US Letter or A4) is used */
   @page {
-    size: letter portrait;
-    margin: 0.35in 0.35in 0.35in 0.35in;
+    margin: 0.35in;
   }
 
   body, html {
@@ -885,5 +892,36 @@ dialog.modal-dialog::backdrop {
 
   .print-page-break {
     page-break-before: always;
+  }
+
+  .sheet-tab-panel.is-inactive,
+  .feature-desc.is-collapsed,
+  .filtered-out {
+    display: block !important;
+  }
+
+  .sheet-tab-panel + .sheet-tab-panel {
+    break-before: page;
+  }
+
+  .sheet-tab-panel:last-child {
+    page-break-after: auto;
+  }
+
+  /* Scrolling lists expand so nothing is clipped on paper */
+  .scroll-list {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* Keep filled dots: browsers drop backgrounds when printing by default */
+  .proficiency-indicator,
+  .pip-btn {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .bg3-inspector-container {
+    display: none !important;
   }
 }

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import Header from './components/Header';
 import CharacterSheet from './components/Sheet/CharacterSheet';
 import BG3CharacterBuilder from './components/BG3/BG3CharacterBuilder';
@@ -267,6 +268,30 @@ export default function App() {
   };
 
   // Print Character Sheet
+  // Printing always uses the tabletop sheet; the BG3 view is restored afterwards.
+  // Handles both the Print button and the browser's own Ctrl/Cmd+P.
+  const viewBeforePrintRef = useRef(null);
+  useEffect(() => {
+    const handleBeforePrint = () => {
+      if (viewMode !== 'sheet') {
+        viewBeforePrintRef.current = viewMode;
+        flushSync(() => setViewMode('sheet'));
+      }
+    };
+    const handleAfterPrint = () => {
+      if (viewBeforePrintRef.current) {
+        setViewMode(viewBeforePrintRef.current);
+        viewBeforePrintRef.current = null;
+      }
+    };
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+  }, [viewMode]);
+
   const handlePrint = () => {
     window.print();
   };

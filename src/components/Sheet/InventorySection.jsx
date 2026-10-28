@@ -85,7 +85,7 @@ export default function InventorySection({ character, scores, onUpdateCharacter,
       </div>
 
       {/* Inventory Items List */}
-      <div style={{ maxHeight: '280px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.3rem', marginBottom: '0.75rem' }}>
+      <div className="scroll-list" style={{ maxHeight: '280px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.3rem', marginBottom: '0.75rem' }}>
         {equipment.map(item => (
           <div
             key={item.id}

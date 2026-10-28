@@ -144,7 +144,8 @@ export default function CharacterSheet({
       </div>
 
       {/* PAGE 1: Core Character Sheet (Visible on screen if tab is 'core', or in print) */}
-      <div className={`sheet-page ${activeTab !== 'core' ? 'no-print-hide' : ''}`} style={activeTab !== 'core' ? { display: 'none' } : {}}>
+      {/* Inactive tabs are hidden on screen only; print renders all three pages */}
+      <div className={`sheet-page sheet-tab-panel ${activeTab !== 'core' ? 'is-inactive' : ''}`}>
         <SheetHeader character={character} onUpdateCharacter={onUpdateCharacter} />
 
         {/* Main 3-Column Sheet Body */}
@@ -251,7 +252,7 @@ export default function CharacterSheet({
       </div>
 
       {/* PAGE 2 / TAB: Spellbook & Magic */}
-      <div style={activeTab !== 'spells' ? { display: 'none' } : {}}>
+      <div className={`sheet-tab-panel ${activeTab !== 'spells' ? 'is-inactive' : ''}`}>
         <SpellsSheet
           character={character}
           scores={scores}
@@ -263,7 +264,7 @@ export default function CharacterSheet({
       </div>
 
       {/* PAGE 3 / TAB: Roleplay & Bio */}
-      <div className="sheet-page" style={activeTab !== 'roleplay' ? { display: 'none', marginTop: '1rem' } : { marginTop: '1rem' }}>
+      <div className={`sheet-page sheet-tab-panel ${activeTab !== 'roleplay' ? 'is-inactive' : ''}`} style={{ marginTop: '1rem' }}>
         <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--parchment-text)', marginBottom: '1rem', borderBottom: '2px solid var(--parchment-border-light)', paddingBottom: '0.5rem' }}>
           Roleplay, Traits &amp; Backstory
         </h3>
