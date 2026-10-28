@@ -17,7 +17,11 @@ const ARRAY_FIELDS = ['attacks', 'features', 'spells', 'equipment', 'skillProfic
 // Fill in fields older or hand-edited files may lack, so components can rely on their shape
 export function normalizeCharacter(raw) {
   const character = { ...raw };
-  if (!character.id) character.id = generateCharacterId();
+  // Downstream code compares ids and calls string methods on names
+  character.id = (typeof character.id === 'string' || typeof character.id === 'number') && String(character.id)
+    ? String(character.id)
+    : generateCharacterId();
+  character.name = typeof character.name === 'string' ? character.name : String(character.name ?? '');
   for (const field of ARRAY_FIELDS) {
     if (!Array.isArray(character[field])) character[field] = [];
   }
@@ -45,7 +49,7 @@ export function loadCharacters() {
       const entries = parsed.filter(c => c && typeof c === 'object' && !Array.isArray(c));
       const characters = entries.map(normalizeCharacter);
       // Persist ids generated for legacy entries so they stay stable across reloads
-      if (entries.some(c => !c.id)) saveCharacters(characters);
+      if (entries.some((c, i) => c.id !== characters[i].id || c.name !== characters[i].name)) saveCharacters(characters);
       return characters;
     }
     return SAMPLE_CHARACTERS;
