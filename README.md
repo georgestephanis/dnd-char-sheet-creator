@@ -1,13 +1,20 @@
-# D&D 5e Character Forge & Level-Up Sheet (SRD 5.1)
+# D&D 5e Character Forge & Level-Up Sheet (SRD 5.1 & 5.2.1)
 
 [![Try it live](https://img.shields.io/badge/try_it_live-dnd.stephanis.me-dfb85a?style=for-the-badge&labelColor=151b26)](https://dnd.stephanis.me)
-[![License: CC BY 4.0 (SRD content)](https://img.shields.io/badge/SRD_5.1-CC_BY_4.0-0b0e14?style=for-the-badge&labelColor=151b26)](https://creativecommons.org/licenses/by/4.0/)
+[![License: CC BY 4.0 (SRD content)](https://img.shields.io/badge/SRD_5.1_%26_5.2.1-CC_BY_4.0-0b0e14?style=for-the-badge&labelColor=151b26)](https://creativecommons.org/licenses/by/4.0/)
 
-A responsive, client-side web application for creating, managing, leveling up, and printing **Dungeons & Dragons 5th Edition** characters using official **System Reference Document 5.1 (SRD 5.1)** content under Creative Commons (CC-BY-4.0).
+A responsive, client-side web application for creating, managing, leveling up, and printing **Dungeons & Dragons 5th Edition** characters using official **System Reference Document** content under Creative Commons (CC-BY-4.0). Each character uses one of two rulesets, chosen when it's created:
+
+| Rules version | Matches | Key differences |
+|---|---|---|
+| **SRD 5.1** | 2014 *Player's Handbook* | Ability bonuses from race/subrace; Grappler is the only SRD feat; Acolyte is the only SRD background |
+| **SRD 5.2.1** | 2024 *Player's Handbook* | Ability increases (+2/+1 or +1/+1/+1) and an Origin feat from the background; species have no ability bonuses (Goliath and Orc added); weapon masteries; all subclasses at level 3; Paladins and Rangers cast from level 1 |
+
+A character keeps its rules version for life, including through a respec. To play the other version, create a new character.
 
 Featuring a **guided character creation & level-up interface**, an **illustrated Adventurer View** for play, and a **high-density tabletop character sheet** cleanly styled for physical printing.
 
-> **Design inspiration:** the creator and Adventurer View take visual cues from the character screens of *Baldur's Gate 3* (dark panels, gold filigree, a three-column layout). That's the only connection. This is an independent fan project, not affiliated with or endorsed by Larian Studios or Wizards of the Coast, and it uses no assets, names, or content from the game. All game content comes from the SRD 5.1.
+> **Design inspiration:** the creator and Adventurer View take visual cues from the character screens of *Baldur's Gate 3* (dark panels, gold filigree, a three-column layout). That's the only connection. This is an independent fan project, not affiliated with or endorsed by Larian Studios or Wizards of the Coast, and it uses no assets, names, or content from the game. All game content comes from SRD 5.1 and SRD 5.2.1.
 
 ---
 
@@ -15,15 +22,18 @@ Featuring a **guided character creation & level-up interface**, an **illustrated
 
 ### ⚔️ Character Creation Forge
 - **3-Pillar Layout**: Step navigation on the left, interactive selection stage in the center, and live character summary inspector on the right with the golden *"Create Hero"* button.
+- **Rules Version**: Pick SRD 5.1 (2014 PHB) or SRD 5.2.1 (2024 PHB) on the first step. The rest of the creator adapts to that version's species, backgrounds, feats and spells.
 - **Starting Point**: Build a custom adventurer or start from a sample hero (*Torvin Stonehelm*, *Altea Stardancer*, *Corin Underbough*).
-- **Lineage & Subraces**: All 9 SRD races (Dwarf, Elf, Halfling, Human, Dragonborn, Gnome, Half-Elf, Half-Orc, Tiefling) with their SRD subraces (Hill Dwarf, High Elf, Lightfoot Halfling, Rock Gnome), traits, Darkvision, speeds, and Draconic ancestries.
+- **Lineage & Subraces**:
+  - *SRD 5.1:* 9 races (Dwarf, Elf, Halfling, Human, Dragonborn, Gnome, Half-Elf, Half-Orc, Tiefling) with their SRD subraces (Hill Dwarf, High Elf, Lightfoot Halfling, Rock Gnome).
+  - *SRD 5.2.1:* 9 species (Dragonborn, Dwarf, Elf, Gnome, Goliath, Halfling, Human, Orc, Tiefling) with their lineages and ancestries.
 - **12 Classes & Level 1 Disciplines**: Barbarian, Bard, Cleric, Druid, Fighter, Monk, Paladin, Ranger, Rogue, Sorcerer, Warlock, Wizard with fighting styles, divine domains, and patrons.
 - **Ability Score Allocation**:
   - **Point Buy (27 Points)** with standard costs (8 to 15), live budget progress meter, and `[-]`/`[+]` spinners.
   - **⭐ Class Recommended (1-Click)**: Instantly assign optimal 27-point stats tailored to your class.
   - **Standard Array** (15, 14, 13, 12, 10, 8) and **Roll 4d6 Drop Lowest** with interactive dice rolls.
-  - Clear **+2 / +1 racial bonus tags** and live modifier calculations.
-- **Background & Skill Selection**: The SRD Acolyte background or a custom/homebrew background. Rogues choose their two Expertise skills. Auto-pruning prevents locked states when switching classes; locks granted background proficiencies with a shield badge and allows dynamic skill swapping.
+  - Clear **ability bonus tags** and live modifier calculations. Bonuses come from race/subrace in SRD 5.1, and from the background (+2/+1 or +1/+1/+1, chosen on the Background step) in SRD 5.2.1.
+- **Background & Skill Selection**: SRD 5.1 has Acolyte; SRD 5.2.1 has Acolyte, Criminal, Sage and Soldier, each with ability increases and an Origin feat. Both versions also offer a custom/homebrew background. Rogues choose their two Expertise skills. Auto-pruning prevents locked states when switching classes; locks granted background proficiencies with a shield badge and allows dynamic skill swapping.
 - **Spells & Magic**: Starting Cantrips and 1st-level spells filtered by class with spell slot indicators.
 - **Appearance & Identity**: Curated fantasy character avatar gallery, custom image URL input, alignment matrix, and a **Random Fantasy Name Generator (🎲)** tailored to your race.
 
@@ -51,7 +61,7 @@ Featuring a **guided character creation & level-up interface**, an **illustrated
   - **Hit Points Increase**: Choose "Take Average" or "Roll 1dHitDie live" with animated dice rolling.
   - **Class Features Unlocked**: Automatic breakdown of all features granted at the new level.
   - **Subclass Selection**: Prompts when reaching your class's archetype level (e.g. Level 3 for Fighter/Rogue, Level 2 for Wizard).
-  - **ASI & Feats**: Choose between +2 to one ability, +1 to two abilities, or a Feat (SRD 5.1 includes Grappler).
+  - **ASI & Feats**: Choose between +2 to one ability, +1 to two abilities, or a Feat (SRD 5.1: Grappler; SRD 5.2.1: General feats, plus Epic Boons at level 19).
   - **Live Before ➔ After Diff**: Right-hand inspector displays real-time before/after stat increases.
 
 ---
@@ -118,19 +128,22 @@ dnd-char-sheet-creator/
 │   │   │   └── DiceRollToast.jsx          # Roll result toast (live region)
 │   │   ├── Modals/
 │   │   │   ├── DiceRollerModal.jsx        # 3D interactive dice tray
-│   │   │   ├── SrdLegalModal.jsx          # SRD 5.1 CC-BY-4.0 attribution
+│   │   │   ├── SrdLegalModal.jsx          # SRD 5.1 & 5.2.1 CC-BY-4.0 attribution
 │   │   │   └── Custom*Modal.jsx           # Custom attack, spell, feature & item builders
 │   │   ├── CharacterRosterModal.jsx       # Roster vault, JSON export & import
 │   │   ├── Header.jsx                     # Top bar: Tabletop vs Adventurer View, Level Up, + New Hero
 │   │   └── ...
 │   ├── data/
-│   │   ├── srdRaces.js                    # 9 SRD races, SRD subraces, traits & stat bonuses
-│   │   ├── srdClasses.js                  # 12 SRD classes, archetypes & level 1-20 features
-│   │   ├── srdBackgrounds.js              # SRD backgrounds, skill proficiencies & features
-│   │   ├── srdFeats.js                    # SRD feats (Grappler)
-│   │   ├── srdSpells.js                   # SRD spell library (Cantrips through 5th level)
-│   │   ├── srdEquipment.js                # Weapons, armor, packs & gear
-│   │   └── sampleCharacters.js            # Starter heroes (Torvin, Altea, Corin)
+│   │   ├── rulesets.js                    # Version registry: '5.1' / '5.2' → data, PHB mapping, attribution
+│   │   ├── srd51/                         # SRD 5.1 data (2014 PHB)
+│   │   ├── srd52/                         # SRD 5.2.1 data (2024 PHB)
+│   │   │   ├── srdRaces.js                #   races / species & subraces
+│   │   │   ├── srdClasses.js              #   12 classes, subclasses & level 1-20 features
+│   │   │   ├── srdBackgrounds.js          #   backgrounds
+│   │   │   ├── srdFeats.js                #   feats
+│   │   │   ├── srdSpells.js               #   cantrips & 1st-level spells, plus a selection of higher levels
+│   │   │   └── srdEquipment.js            #   armor, weapons (and 5.2 masteries) & packs
+│   │   └── sampleCharacters.js            # Starter heroes (Torvin, Altea, Corin; SRD 5.1)
 │   ├── utils/
 │   │   ├── dndRules.js                    # Modifiers, AC, skills, slots, carrying capacity, point buy
 │   │   ├── a11y.js                        # Keyboard activation helper for role="button" elements
@@ -142,10 +155,12 @@ dnd-char-sheet-creator/
 
 ---
 
-## ⚖️ Legal & SRD 5.1 Attribution
+## ⚖️ Legal & SRD Attribution
 
-This work includes material taken from the **System Reference Document 5.1 (“SRD 5.1”)** by Wizards of the Coast LLC, available at [https://dnd.wizards.com/resources/systems-reference-document](https://dnd.wizards.com/resources/systems-reference-document). 
+This work includes material taken from the **System Reference Document 5.1 (“SRD 5.1”)** by Wizards of the Coast LLC, available at [https://dnd.wizards.com/resources/systems-reference-document](https://dnd.wizards.com/resources/systems-reference-document). The SRD 5.1 is licensed under the **Creative Commons Attribution 4.0 International License (CC-BY-4.0)**, available at [https://creativecommons.org/licenses/by/4.0/legalcode](https://creativecommons.org/licenses/by/4.0/legalcode).
 
-The SRD 5.1 is licensed under the **Creative Commons Attribution 4.0 International License (CC-BY-4.0)**, available at [https://creativecommons.org/licenses/by/4.0/legalcode](https://creativecommons.org/licenses/by/4.0/legalcode).
+This work includes material from the **System Reference Document 5.2.1 (“SRD 5.2.1”)** by Wizards of the Coast LLC, available at [https://www.dndbeyond.com/srd](https://www.dndbeyond.com/srd). The SRD 5.2.1 is licensed under the **Creative Commons Attribution 4.0 International License**, available at [https://creativecommons.org/licenses/by/4.0/legalcode](https://creativecommons.org/licenses/by/4.0/legalcode).
+
+This project is compatible with fifth edition.
 
 *Dungeons & Dragons* and *D&D* are registered trademarks of Wizards of the Coast LLC. This project is an independent community tool and is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC or Larian Studios.

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import Modal from '../Common/Modal';
 import { X, Sword } from 'lucide-react';
-import { SRD_WEAPONS } from '../../data/srdEquipment';
+import { getRuleset } from '../../data/rulesets';
 
-export default function CustomAttackModal({ isOpen, onClose, onSaveAttack }) {
+export default function CustomAttackModal({ isOpen, onClose, onSaveAttack, srdVersion }) {
+  const { weapons: SRD_WEAPONS } = getRuleset(srdVersion);
   const [selectedPreset, setSelectedPreset] = useState('');
   const [name, setName] = useState('');
   const [ability, setAbility] = useState('str');

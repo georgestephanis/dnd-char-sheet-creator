@@ -4,6 +4,7 @@ export const SAMPLE_CHARACTERS = [
   {
     id: 'sample-fighter-1',
     name: 'Torvin Stonehelm',
+    srdVersion: '5.1',
     raceId: 'dwarf',
     subraceId: 'hill-dwarf',
     raceName: 'Hill Dwarf',
@@ -68,6 +69,7 @@ export const SAMPLE_CHARACTERS = [
   {
     id: 'sample-wizard-3',
     name: 'Altea Stardancer',
+    srdVersion: '5.1',
     raceId: 'elf',
     subraceId: 'high-elf',
     raceName: 'High Elf',
@@ -142,6 +144,7 @@ export const SAMPLE_CHARACTERS = [
   {
     id: 'sample-rogue-2',
     name: 'Corin Underbough',
+    srdVersion: '5.1',
     raceId: 'halfling',
     subraceId: 'lightfoot-halfling',
     raceName: 'Lightfoot Halfling',

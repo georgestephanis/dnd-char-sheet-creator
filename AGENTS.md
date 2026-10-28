@@ -15,8 +15,11 @@ This document defines the architectural principles, invariants, coding standards
    - **Baldur’s Gate 3 Aesthetic (`src/components/BG3/`)**: A rich, gothic obsidian/gold 3-pillar interface for character creation, in-game party member inspection, and level-up advancement.
    - **Tabletop 5e Printable Sheet (`src/components/Sheet/`)**: A high-density, classic 3-column D&D 5e character sheet designed for pen-and-paper tabletop gaming with dedicated `@media print` styling.
 
-3. **SRD 5.1 & CC-BY-4.0 Compliance**:
-   - Content included in static datasets (`src/data/`) must originate from the official **System Reference Document 5.1 (SRD 5.1)** released under **Creative Commons Attribution 4.0 International (CC-BY-4.0)**.
+3. **SRD 5.1 / 5.2.1 & CC-BY-4.0 Compliance**:
+   - Two rulesets ship side by side: SRD 5.1 (`src/data/srd51/`, matches the 2014 PHB) and SRD 5.2.1 (`src/data/srd52/`, matches the 2024 PHB), registered in `src/data/rulesets.js`. Every character stores `srdVersion`, a `RULESETS` key: `'5.1'` (label “SRD 5.1”) or `'5.2'` (label “SRD 5.2.1”, the current 5.2 release). It's set at creation and never changed by a respec. Characters without one are treated as 5.1.
+   - Components must read SRD data through `getRuleset(version)` / `getCharacterRuleset(character)`, never by importing a version's files directly. Rule differences go behind ruleset fields (e.g. `abilityBonusSource`, `halfCasterType`) or a version check in `dndRules.js`.
+   - Each version's data must come only from that SRD document (5.2.1: https://www.dndbeyond.com/srd); never fill gaps with Player's Handbook text.
+   - Content included in static datasets (`src/data/`) must originate from the official **System Reference Document** released under **Creative Commons Attribution 4.0 International (CC-BY-4.0)**.
    - Do **NOT** hardcode non-SRD copyrighted intellectual property (e.g. non-SRD subclasses, proprietary monsters, or campaign-specific lore).
    - The UI is visually *inspired by* Baldur's Gate 3, but must not use its names, terms or assets in user-facing text: no "Tav", "Origin" heroes, "Venture Forth", BG3 weapon actions, companion names, or "BG3"/"Baldur's Gate" labels. `BG3*` component names and `bg3-` CSS classes are internal and fine.
    - Support homebrew and personal customization through the provided custom attack, spell, feature, and item creation modals.
@@ -63,8 +66,9 @@ export PATH="/Users/georgestephanis/.nvm/versions/node/v22.22.2/bin:/opt/homebre
 A character is stored as a flat, portable JSON-serializable object:
 ```json
 {
-  "id": "char-1730000000000",
+  "id": "char-3f2c9a1e-7b4d-4e8a-9c21-5d6f0a8b7e14",
   "name": "Torvin Stonehelm",
+  "srdVersion": "5.1",
   "raceId": "dwarf",
   "subraceId": "hill-dwarf",
   "raceName": "Hill Dwarf",
@@ -79,6 +83,7 @@ A character is stored as a flat, portable JSON-serializable object:
   "player": "Adventurer",
   "abilityScores": { "str": 15, "dex": 12, "con": 14, "int": 8, "wis": 13, "cha": 10 },
   "racialBonuses": { "con": 2, "wis": 1 },
+  "backgroundBonus": null,
   "customAbilityBonuses": { "str": 0, "dex": 0, "con": 0, "int": 0, "wis": 0, "cha": 0 },
   "savingThrowsProficient": ["str", "con"],
   "skillProficiencies": ["Athletics", "Intimidation", "Perception", "Survival"],
@@ -107,6 +112,9 @@ A character is stored as a flat, portable JSON-serializable object:
   "avatarUrl": ""
 }
 ```
+
+- `id` comes from `generateCharacterId()` (`char-` + `crypto.randomUUID()`, with a timestamp fallback where that's unavailable).
+- `racialBonuses` holds the ability increases applied on top of the base scores. In 5.1 they come from the race and subrace. In 5.2 they come from the background, and `backgroundBonus` records the choice (`{ "mode": "two-one" | "one-one-one", "two": "str", "one": "con" }`).
 
 ### Rules Engine (`src/utils/dndRules.js`)
 All mathematical formulas and 5e mechanics must be kept in pure utility functions in `dndRules.js`:
@@ -140,9 +148,10 @@ All mathematical formulas and 5e mechanics must be kept in pure utility function
 
 ## 📦 6. Extending Content & Adding Features
 
-- **Adding a New SRD Subclass or Feature**: Update `src/data/srdClasses.js` with the archetype name, description, and `featuresByLevel` map.
-- **Adding a New Spell**: Add the spell record to `src/data/srdSpells.js` with `level`, `school`, `castingTime`, `range`, `classes`, and `description`.
-- **Adding New Feats**: Add the entry to `src/data/srdFeats.js` (SRD 5.1 contains only Grappler; non-SRD feats belong in homebrew, not the dataset).
+- **Adding a New SRD Subclass or Feature**: Update `src/data/<srd51|srd52>/srdClasses.js` with the archetype name, description, and `featuresByLevel` map.
+- **Adding a New Spell**: Add the spell record to that version's `srdSpells.js` with `level`, `school`, `castingTime`, `range`, `classes`, and `description`.
+- **Adding New Feats**: Add the entry to that version's `srdFeats.js`. SRD 5.1 contains only Grappler; SRD 5.2.1 feats carry a `category` (`origin`, `general`, `fighting-style`, `epic-boon`). Non-SRD feats belong in homebrew, not the dataset.
+- **Adding another SRD version**: add a `src/data/srdXX/` folder with the same file and export names, then register it in `RULESETS` with `label`, `playersHandbook`, `summary`, `attribution`, `abilityBonusSource` and `halfCasterType`.
 - **Detecting a feat in rules code**: use `hasFeat(character, 'Name')` from `dndRules.js`, not substring matches on feature names.
 
 ## 🧱 7. Component Conventions

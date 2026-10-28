@@ -3,8 +3,7 @@ import Modal from '../Common/Modal';
 import {
   Shield, Heart, Award, Dices, ChevronRight
 } from 'lucide-react';
-import { SRD_CLASSES } from '../../data/srdClasses';
-import { SRD_FEATS } from '../../data/srdFeats';
+import { getCharacterRuleset } from '../../data/rulesets';
 import { getAbilityModifier, getProficiencyBonus, hasFeat, getCalculatedAbilityScores } from '../../utils/dndRules';
 import { activateOnKey } from '../../utils/a11y';
 
@@ -26,13 +25,22 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
   const currentLevel = character.level || 1;
   const targetLevel = Math.min(20, currentLevel + 1);
 
-  const classData = SRD_CLASSES.find(c => c.id === character.classId) || SRD_CLASSES[0];
+  const ruleset = getCharacterRuleset(character);
+  // Origin and Epic Boon feats aren't taken at ordinary ASI levels; the ASI itself is its own option
+  const SRD_FEATS = ruleset.feats.filter(f =>
+    f.id !== 'ability-score-improvement' &&
+    (!f.category || f.category === 'general' || (f.category === 'epic-boon' && targetLevel >= 19))
+  );
+  const classData = ruleset.classes.find(c => c.id === character.classId) || ruleset.classes[0];
   const hitDie = classData.hitDie || 8;
   const conMod = getAbilityModifier(getCalculatedAbilityScores(character).con);
 
-  const isHillDwarf = character.subraceId === 'hill-dwarf';
+  // Dwarven Toughness: on the subrace in 5.1 (Hill Dwarf), on the species in 5.2
+  const race = ruleset.races.find(r => r.id === character.raceId);
+  const subrace = race?.subraces?.find(sr => sr.id === character.subraceId);
+  const speciesHpPerLevel = subrace?.extraHpPerLevel || race?.extraHpPerLevel || 0;
   const hasToughFeat = hasFeat(character, 'Tough');
-  const extraHpPerLevel = (isHillDwarf ? 1 : 0) + (hasToughFeat ? 2 : 0);
+  const extraHpPerLevel = speciesHpPerLevel + (hasToughFeat ? 2 : 0);
 
   const standardAvgGain = Math.max(1, Math.floor(hitDie / 2) + 1 + conMod + extraHpPerLevel);
   const [hpMethod, setHpMethod] = useState('average');
@@ -339,7 +347,7 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
                   <label htmlFor="bg3levelupmodal-feat-selection" className="form-label">Feat Selection</label>
                   <select id="bg3levelupmodal-feat-selection" className="form-select" value={selectedFeatId} onChange={(e) => setSelectedFeatId(e.target.value)}>
                     {SRD_FEATS.map(feat => (
-                      <option key={feat.id} value={feat.id}>{feat.name} ({feat.prerequisite})</option>
+                      <option key={feat.id} value={feat.id}>{feat.name}{feat.prerequisite ? ` (${feat.prerequisite})` : ''}</option>
                     ))}
                   </select>
                 </div>

@@ -5,7 +5,7 @@ import {
 import {
   getAbilityModifier, formatModifier, calculateArmorClass,
   getProficiencyBonus, getCarryingCapacity, getSpellSlotsForCharacter,
-  getSkillBonus, getHitDiceLabel, getCalculatedAbilityScores, hasFeat,
+  getSkillBonus, getHitDiceLabel, getCalculatedAbilityScores, getInitiativeModifier,
   SKILLS
 } from '../../utils/dndRules';
 import { activateOnKey } from '../../utils/a11y';
@@ -30,7 +30,6 @@ export default function BG3CharacterInspector({
   const profBonus = getProficiencyBonus(level);
   const finalScores = getCalculatedAbilityScores(character);
 
-  const dexMod = getAbilityModifier(finalScores.dex);
   const calculatedAc = calculateArmorClass(character, finalScores);
   const speed = character.speed || 30;
 
@@ -192,7 +191,7 @@ export default function BG3CharacterInspector({
               <div className="bg3-vital-lbl">Armour Class</div>
             </div>
             <div className="bg3-vital-cell">
-              <div className="bg3-vital-val">{formatModifier(dexMod + (hasFeat(character, 'Alert') ? 5 : 0))}</div>
+              <div className="bg3-vital-val">{formatModifier(getInitiativeModifier(character, finalScores))}</div>
               <div className="bg3-vital-lbl">Initiative</div>
             </div>
             <div className="bg3-vital-cell">

@@ -1,6 +1,6 @@
-// D&D 5e Rules Engine & Calculation Utilities (SRD 5.1 compliant)
+// D&D 5e Rules Engine & Calculation Utilities (ruleset-aware: SRD data is looked up per character version)
 
-import { SRD_CLASSES } from '../data/srdClasses';
+import { getRuleset } from '../data/rulesets';
 
 export const ABILITIES = [
   { id: 'str', name: 'Strength', short: 'STR' },
@@ -138,6 +138,10 @@ export function getSpellSlotsForClass(casterType, level) {
   if (casterType === 'full') {
     return FULL_CASTER_SLOTS[lvl] || [0, 0, 0, 0, 0, 0, 0, 0, 0];
   }
+  // SRD 5.2 half casters (Paladin, Ranger) have two 1st-level slots at level 1
+  if (casterType === 'half-5.2') {
+    return lvl === 1 ? [2, 0, 0, 0, 0, 0, 0, 0, 0] : getSpellSlotsForClass('half', lvl);
+  }
   if (casterType === 'half') {
     const halfSlots = HALF_CASTER_SLOTS[lvl] || [0, 0, 0, 0, 0];
     return [...halfSlots, 0, 0, 0, 0];
@@ -151,15 +155,18 @@ export function getSpellSlotsForClass(casterType, level) {
   return [0, 0, 0, 0, 0, 0, 0, 0, 0];
 }
 
-// Resolve a class id to its caster type ('full' | 'half' | 'pact' | 'none')
-export function getCasterType(classId) {
-  const classData = SRD_CLASSES.find(c => c.id === classId);
+// Resolve a class id to its caster type: 'full' | 'pact' | 'none', or the ruleset's
+// half-caster type ('half' in 5.1, 'half-5.2' in 5.2, whose casters get slots at level 1)
+export function getCasterType(classId, srdVersion) {
+  const ruleset = getRuleset(srdVersion);
+  const classData = ruleset.classes.find(c => c.id === classId);
   if (!classData) return 'none';
-  return classData.spellcasterType || (classData.spellcaster ? 'full' : 'none');
+  const type = classData.spellcasterType || (classData.spellcaster ? 'full' : 'none');
+  return type === 'half' ? ruleset.halfCasterType : type;
 }
 
 export function getSpellSlotsForCharacter(character) {
-  return getSpellSlotsForClass(getCasterType(character.classId), character.level || 1);
+  return getSpellSlotsForClass(getCasterType(character.classId, character.srdVersion), character.level || 1);
 }
 
 // Lowest slot level (0-based index) at or above the spell's level with a slot remaining, or -1
@@ -170,12 +177,12 @@ export function findAvailableSlotIndex(maxSlots, slotsUsed, spellLevel) {
   return -1;
 }
 
-export function getHitDieSize(classId) {
-  return SRD_CLASSES.find(c => c.id === classId)?.hitDie || 8;
+export function getHitDieSize(classId, srdVersion) {
+  return getRuleset(srdVersion).classes.find(c => c.id === classId)?.hitDie || 8;
 }
 
 export function getHitDiceLabel(character) {
-  return character.hitDiceMax || `${character.level || 1}d${getHitDieSize(character.classId)}`;
+  return character.hitDiceMax || `${character.level || 1}d${getHitDieSize(character.classId, character.srdVersion)}`;
 }
 
 // True when the character has a feature granting the named feat (e.g. "Feat: Alert")
@@ -195,6 +202,13 @@ export function getSkillBonus(character, skillName, abilityScore) {
   if (character.skillProficiencies?.includes(skillName)) return abMod + profBonus;
   if (character.classId === 'bard' && (character.level || 1) >= 2) return abMod + Math.floor(profBonus / 2);
   return abMod;
+}
+
+// Initiative modifier: DEX plus Alert (5.1: +5; 5.2: + proficiency bonus)
+export function getInitiativeModifier(character, scores) {
+  const dexMod = getAbilityModifier(scores.dex);
+  if (!hasFeat(character, 'Alert')) return dexMod;
+  return dexMod + (character.srdVersion === '5.2' ? getProficiencyBonus(character.level || 1) : 5);
 }
 
 // Parse damage like "1d8", "2d6+1" or a flat "1" into { count, sides, flat }, or null
@@ -255,7 +269,9 @@ export function calculateArmorClass(character, scores) {
     } else if (character.classId === 'monk' && !hasShield) {
       baseAc = 10 + dexMod + wisMod;
     } else if (character.subclassId === 'draconic-bloodline') {
-      baseAc = 13 + dexMod;
+      baseAc = 13 + dexMod; // SRD 5.1 Draconic Resilience
+    } else if (character.subclassId === 'draconic-sorcery') {
+      baseAc = 10 + dexMod + getAbilityModifier(scores.cha); // SRD 5.2.1 Draconic Resilience
     } else {
       baseAc = 10 + dexMod;
     }

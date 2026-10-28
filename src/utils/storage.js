@@ -1,6 +1,7 @@
 // LocalStorage & JSON Export/Import Management for D&D Characters
 
 import { SAMPLE_CHARACTERS } from '../data/sampleCharacters';
+import { DEFAULT_SRD_VERSION } from '../data/rulesets';
 
 const STORAGE_KEY = 'dnd_characters_v1';
 const ACTIVE_CHAR_KEY = 'dnd_active_character_id_v1';
@@ -26,6 +27,8 @@ export function normalizeCharacter(raw) {
     if (!Array.isArray(character[field])) character[field] = [];
   }
   character.features = character.features.filter(f => f && typeof f === 'object' && typeof f.name === 'string');
+  // Characters saved before rulesets were versioned use the default (SRD 5.1)
+  if (typeof character.srdVersion !== 'string') character.srdVersion = DEFAULT_SRD_VERSION;
   if (!Array.isArray(character.spellSlotsUsed)) character.spellSlotsUsed = [0, 0, 0, 0, 0, 0, 0, 0, 0];
   if (!character.abilityScores || typeof character.abilityScores !== 'object') {
     character.abilityScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 };

@@ -1,17 +1,15 @@
 import React, { useState } from 'react';
 import { Shield, Zap, Wind, Heart, RotateCcw, BedDouble } from 'lucide-react';
-import { calculateArmorClass, getAbilityModifier, formatModifier, hasFeat, getHitDiceLabel } from '../../utils/dndRules';
+import { calculateArmorClass, formatModifier, getInitiativeModifier, getHitDiceLabel } from '../../utils/dndRules';
 
 export default function CombatVitals({ character, scores, onUpdateCharacter, onLongRest }) {
   const [damageInput, setDamageInput] = useState('');
   const [showAcOverride, setShowAcOverride] = useState(false);
 
-  const dexMod = getAbilityModifier(scores.dex);
   const calculatedAc = calculateArmorClass(character, scores);
 
-  // Initiative: DEX mod + feat bonus (e.g. Alert +5)
-  const hasAlertFeat = hasFeat(character, 'Alert');
-  const initiativeMod = dexMod + (hasAlertFeat ? 5 : 0);
+  // Initiative: DEX mod + Alert (SRD 5.1: +5; SRD 5.2.1: + proficiency bonus)
+  const initiativeMod = getInitiativeModifier(character, scores);
 
   const speed = character.speed || 30;
   const currentHp = character.currentHp ?? character.maxHp ?? 10;

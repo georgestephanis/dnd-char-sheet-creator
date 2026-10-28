@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import Modal from './Common/Modal';
+import { getRuleset } from '../data/rulesets';
 import { X, UserPlus, Download, Upload, Copy, Trash2, Play, Users } from 'lucide-react';
 import { exportCharacterToJson, exportAllCharactersToJson, importCharactersFromJson } from '../utils/storage';
 
@@ -169,7 +170,7 @@ export default function CharacterRosterModal({
                       )}
                     </div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-                      Level {char.level || 1} &bull; {char.raceName || char.raceId} &bull; {char.className || char.classId} {char.subclassName ? `(${char.subclassName})` : ''} &bull; HP: {char.currentHp ?? char.maxHp}/{char.maxHp}
+                      Level {char.level || 1} &bull; {char.raceName || char.raceId} &bull; {char.className || char.classId} {char.subclassName ? `(${char.subclassName})` : ''} &bull; HP: {char.currentHp ?? char.maxHp}/{char.maxHp} &bull; {getRuleset(char.srdVersion).label}
                     </div>
                   </div>
                 </div>
