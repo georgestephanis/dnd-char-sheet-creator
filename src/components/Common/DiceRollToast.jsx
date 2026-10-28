@@ -10,6 +10,8 @@ export default function DiceRollToast({ rollToast, onDismiss }) {
   return (
     <div
       className="no-print"
+      role="status"
+      aria-live="polite"
       style={{
         position: 'fixed',
         bottom: '24px',
@@ -39,7 +41,7 @@ export default function DiceRollToast({ rollToast, onDismiss }) {
           flexShrink: 0
         }}
       >
-        <Dices size={24} style={{ color: isNat20 ? '#10b981' : isNat1 ? '#ef4444' : 'var(--text-gold)' }} />
+        <Dices size={24} aria-hidden="true" style={{ color: isNat20 ? '#10b981' : isNat1 ? '#ef4444' : 'var(--text-gold)' }} />
       </div>
 
       <div>
@@ -50,9 +52,11 @@ export default function DiceRollToast({ rollToast, onDismiss }) {
           <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.75rem', fontWeight: 800, color: isNat20 ? '#10b981' : isNat1 ? '#ef4444' : '#fff', lineHeight: 1 }}>
             {rollToast.total}
           </span>
-          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            ({rollToast.breakdown})
-          </span>
+          {rollToast.breakdown && (
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              ({rollToast.breakdown})
+            </span>
+          )}
           {isNat20 && <span style={{ color: '#10b981', fontWeight: 800, fontSize: '0.75rem' }}>NATURAL 20!</span>}
           {isNat1 && <span style={{ color: '#ef4444', fontWeight: 800, fontSize: '0.75rem' }}>CRITICAL FAIL!</span>}
         </div>
@@ -62,8 +66,9 @@ export default function DiceRollToast({ rollToast, onDismiss }) {
         type="button"
         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', marginLeft: '0.5rem' }}
         onClick={onDismiss}
+        aria-label="Dismiss roll result"
       >
-        <X size={16} />
+        <X size={16} aria-hidden="true" />
       </button>
     </div>
   );

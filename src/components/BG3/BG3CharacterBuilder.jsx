@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import Modal from '../Common/Modal';
 import {
-  Shield, Sword, Wand2, Sparkles, User, BookOpen, Check,
-  Dices, Star, Heart, Zap, Wind, ChevronRight, ChevronLeft, Award, Plus, Trash2, ArrowLeft, RefreshCw, Flame
+  Shield, Sword, Wand2, Sparkles, User, BookOpen, Check, Dices, Star, ChevronRight,
+  ChevronLeft, Award, ArrowLeft, RefreshCw
 } from 'lucide-react';
 import { SRD_RACES } from '../../data/srdRaces';
 import { SRD_CLASSES } from '../../data/srdClasses';
 import { SRD_BACKGROUNDS } from '../../data/srdBackgrounds';
-import { SRD_FEATS } from '../../data/srdFeats';
 import { SRD_SPELLS } from '../../data/srdSpells';
 import { SAMPLE_CHARACTERS } from '../../data/sampleCharacters';
+import { generateCharacterId } from '../../utils/storage';
 import {
-  POINT_BUY_COSTS, POINT_BUY_TOTAL, STANDARD_ARRAY,
-  roll4d6DropLowest, getAbilityModifier, formatModifier,
-  calculateArmorClass, getProficiencyBonus
+  POINT_BUY_COSTS, POINT_BUY_TOTAL, roll4d6DropLowest, getAbilityModifier,
+  formatModifier, calculateArmorClass
 } from '../../utils/dndRules';
+import { activateOnKey } from '../../utils/a11y';
 
-// Recommended 27-point buy scores per class (BG3 & 5e optimal arrays)
+// Recommended 27-point buy scores per class (5e optimal arrays)
 const CLASS_RECOMMENDED_SCORES = {
   barbarian: { str: 15, con: 14, dex: 13, wis: 12, cha: 10, int: 8 },
   bard: { cha: 15, dex: 14, con: 13, wis: 12, int: 10, str: 8 },
@@ -31,16 +32,17 @@ const CLASS_RECOMMENDED_SCORES = {
   wizard: { int: 15, dex: 14, con: 13, wis: 12, cha: 10, str: 8 },
 };
 
+// Original names for the random name generator (no names from published settings or games)
 const FANTASY_NAMES = {
-  dwarf: ['Bruenor', 'Thorin', 'Morgran', 'Balin', 'Brakka', 'Helga', 'Vondal', 'Duerg', 'Thorgar', 'Orsik'],
-  elf: ['Altea', 'Astarion', 'Aelar', 'Caelynn', 'Feyre', 'Legolas', 'Elysia', 'Valerius', 'Theadrin', 'Xiloscient'],
-  human: ['Tav', 'Gale', 'Wyll', 'Valen', 'Seraphina', 'Rowan', 'Kaelen', 'Aric', 'Gareth', 'Lyra'],
-  tiefling: ['Karlach', 'Akmenos', 'Barakas', 'Damakos', 'Kallista', 'Lilith', 'Malakor', 'Vesper', 'Zephyr', 'Mephist'],
-  halfling: ['Corin', 'Alton', 'Cade', 'Eldon', 'Lyle', 'Bree', 'Callie', 'Kithri', 'Verna', 'Finnick'],
-  dragonborn: ['Arjhan', 'Balasar', 'Donaar', 'Ghesh', 'Heskan', 'Kriv', 'Medrash', 'Patrin', 'Rhogar', 'Torinn'],
-  gnome: ['Boddynock', 'Dimble', 'Fonkin', 'Gimble', 'Gnim', 'Namfoodle', 'Seebo', 'Wrenn', 'Zook', 'Ellywick'],
-  'half-elf': ['Shadowheart', 'Tanis', 'Rhiannon', 'Faerand', 'Silas', 'Corvin', 'Vaelin', 'Aria', 'Dorian', 'Kyra'],
-  'half-orc': ['Krag', 'Gore', 'Dench', 'Feng', 'Gell', 'Henk', 'Holg', 'Imsh', 'Mhurren', 'Ront', 'Thokk']
+  dwarf: ['Torvin', 'Helgrid', 'Bramdur', 'Kethra', 'Orvald', 'Dagny', 'Rurik', 'Sigra', 'Thrandal', 'Moira'],
+  elf: ['Altea', 'Ilvaris', 'Saelith', 'Thenwyn', 'Faelor', 'Yselle', 'Caerith', 'Lithriel', 'Arvanis', 'Nymara'],
+  human: ['Maren', 'Rowan', 'Mira', 'Aldric', 'Seraphina', 'Joren', 'Talia', 'Corwin', 'Elena', 'Bastian'],
+  tiefling: ['Ashka', 'Ruin', 'Vexis', 'Morrow', 'Nyxara', 'Cinder', 'Sarrowyn', 'Hollow', 'Vesper', 'Solace'],
+  halfling: ['Corin', 'Pip', 'Tamsin', 'Wendel', 'Marigold', 'Odo', 'Fennick', 'Rosie', 'Barley', 'Clover'],
+  dragonborn: ['Kaurax', 'Vyrsha', 'Thoravek', 'Sarnith', 'Draxis', 'Ylsira', 'Gorvath', 'Rhessa', 'Torrak', 'Ixalia'],
+  gnome: ['Fizzwick', 'Nim', 'Tibble', 'Quillon', 'Dabber', 'Lissel', 'Wobblenock', 'Pellin', 'Zinnia', 'Glim'],
+  'half-elf': ['Sorrel', 'Kaelen', 'Avelyn', 'Doran', 'Liora', 'Merrick', 'Isra', 'Tobin', 'Calla', 'Riven'],
+  'half-orc': ['Grask', 'Murga', 'Thokra', 'Brul', 'Vashka', 'Korrin', 'Ugra', 'Drak', 'Hesk', 'Orla']
 };
 
 const FANTASY_AVATARS = [
@@ -72,7 +74,7 @@ export default function BG3CharacterBuilder({
   const [originType, setOriginType] = useState('custom'); // 'custom' or preset character id
 
   // Identity
-  const [charName, setCharName] = useState('Tav');
+  const [charName, setCharName] = useState('Adventurer');
   const [playerName, setPlayerName] = useState('Player');
   const [alignment, setAlignment] = useState('Neutral Good');
   const [avatarIcon, setAvatarIcon] = useState('⚔️');
@@ -80,10 +82,8 @@ export default function BG3CharacterBuilder({
 
   // Race
   const [selectedRaceId, setSelectedRaceId] = useState('human');
-  const [selectedSubraceId, setSelectedSubraceId] = useState('human-standard');
+  const [selectedSubraceId, setSelectedSubraceId] = useState('');
   const [dragonbornAncestry, setDragonbornAncestry] = useState('Red');
-  const [variantHumanStats, setVariantHumanStats] = useState(['str', 'dex']);
-  const [variantHumanFeatId, setVariantHumanFeatId] = useState('alert');
 
   // Class & Level
   const [selectedClassId, setSelectedClassId] = useState('fighter');
@@ -97,10 +97,11 @@ export default function BG3CharacterBuilder({
   const [baseScores, setBaseScores] = useState({ str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 });
 
   // Background
-  const [selectedBackgroundId, setSelectedBackgroundId] = useState('soldier');
+  const [selectedBackgroundId, setSelectedBackgroundId] = useState('acolyte');
 
   // Skills
   const [selectedClassSkills, setSelectedClassSkills] = useState(['Athletics', 'Perception']);
+  const [selectedExpertise, setSelectedExpertise] = useState([]);
 
   // Spells
   const [selectedCantrips, setSelectedCantrips] = useState([]);
@@ -109,27 +110,65 @@ export default function BG3CharacterBuilder({
   // Equipment package
   const [selectedEquipIndex, setSelectedEquipIndex] = useState(0);
 
-  // If initialCharacter is provided, populate state once
+  // If initialCharacter is provided, populate state once (the builder is remounted per opening)
   useEffect(() => {
     if (initialCharacter) {
-      setCharName(initialCharacter.name || 'Tav');
+      setCharName(initialCharacter.name || 'Adventurer');
       setPlayerName(initialCharacter.player || 'Player');
       setAlignment(initialCharacter.alignment || 'Neutral Good');
       setAvatarIcon(initialCharacter.avatarIcon || '⚔️');
       setCustomAvatarUrl(initialCharacter.avatarUrl || '');
-      setSelectedRaceId(initialCharacter.raceId || 'human');
-      setSelectedSubraceId(initialCharacter.subraceId || 'human-standard');
+      // Saved ids may refer to content removed from the SRD dataset; resolve them so the
+      // selected cards match what will actually be saved
+      const race = SRD_RACES.find(r => r.id === initialCharacter.raceId) || SRD_RACES.find(r => r.id === 'human');
+      const subrace = race.subraces?.find(sr => sr.id === initialCharacter.subraceId) || race.subraces?.[0];
+      setSelectedRaceId(race.id);
+      setSelectedSubraceId(subrace?.id || '');
       setSelectedClassId(initialCharacter.classId || 'fighter');
       setSelectedSubclassId(initialCharacter.subclassId || '');
       setStartingLevel(initialCharacter.level || 1);
-      setSelectedBackgroundId(initialCharacter.backgroundId || 'soldier');
+      // Removed backgrounds become Custom so the character keeps a homebrew background
+      setSelectedBackgroundId(
+        SRD_BACKGROUNDS.some(bg => bg.id === initialCharacter.backgroundId)
+          ? initialCharacter.backgroundId
+          : (initialCharacter.backgroundId ? 'custom' : 'acolyte')
+      );
       if (initialCharacter.abilityScores) {
-        setPointBuyScores({ ...initialCharacter.abilityScores });
-        setBaseScores({ ...initialCharacter.abilityScores });
+        const stored = { ...initialCharacter.abilityScores };
+        const values = Object.values(stored);
+        const isPointBuy = values.every(v => POINT_BUY_COSTS[v] !== undefined) &&
+          values.reduce((acc, v) => acc + POINT_BUY_COSTS[v], 0) === POINT_BUY_TOTAL;
+        // Only seed point buy with scores it can represent; otherwise keep its valid default
+        if (isPointBuy) setPointBuyScores(stored);
+        setBaseScores(stored);
+        // Rolled or hand-entered scores can't be represented as a 27-point buy
+        setScoreMethod(isPointBuy ? 'pointbuy' : 'roll');
       }
       if (initialCharacter.skillProficiencies) {
-        setSelectedClassSkills([...initialCharacter.skillProficiencies]);
+        // Background skills are re-added on save; only class picks belong in this list
+        const bg = SRD_BACKGROUNDS.find(b => b.id === initialCharacter.backgroundId);
+        const bgSkills = bg?.skillProficiencies || [];
+        // Keep only skills this class can pick, up to its quota, so the step starts out valid
+        const loadedClass = SRD_CLASSES.find(c => c.id === initialCharacter.classId);
+        const classOptions = loadedClass?.skillChoices?.options || [];
+        const quota = loadedClass?.skillChoices?.count || 2;
+        setSelectedClassSkills(
+          initialCharacter.skillProficiencies
+            .filter(sk => !bgSkills.includes(sk) && classOptions.includes(sk))
+            .slice(0, quota)
+        );
       }
+      if (initialCharacter.expertiseSkills) {
+        setSelectedExpertise([...initialCharacter.expertiseSkills]);
+      }
+      if (initialCharacter.fightingStyle) {
+        setFightingStyle(initialCharacter.fightingStyle);
+      }
+      // Only preselect SRD spells on this class's list; others stay on the sheet untouched
+      const knownSpells = initialCharacter.spells || [];
+      const isClassSpell = (sp) => SRD_SPELLS.some(s => s.id === sp.id && s.classes.includes(initialCharacter.classId));
+      setSelectedCantrips(knownSpells.filter(sp => sp.level === 0 && isClassSpell(sp)).map(sp => sp.id));
+      setSelectedFirstLevelSpells(knownSpells.filter(sp => sp.level === 1 && isClassSpell(sp)).map(sp => sp.id));
       setOriginType('custom');
     }
   }, [initialCharacter]);
@@ -151,11 +190,6 @@ export default function BG3CharacterBuilder({
   if (currentSubrace?.abilityScoreBonuses) {
     Object.entries(currentSubrace.abilityScoreBonuses).forEach(([k, v]) => {
       racialBonuses[k] = (racialBonuses[k] || 0) + v;
-    });
-  }
-  if (selectedRaceId === 'human' && selectedSubraceId === 'human-variant') {
-    variantHumanStats.forEach(stat => {
-      racialBonuses[stat] = 1;
     });
   }
 
@@ -261,7 +295,6 @@ export default function BG3CharacterBuilder({
     const isBgSkill = currentBackground.skillProficiencies?.includes(sk);
     if (isBgSkill) return;
 
-    const availableClassOptions = currentClass.skillChoices?.options || [];
     const isSelected = selectedClassSkills.includes(sk);
     const maxCount = currentClass.skillChoices?.count || 2;
 
@@ -277,7 +310,7 @@ export default function BG3CharacterBuilder({
     }
   };
 
-  // Load an Origin Preset Hero (Bruenor, Altea, Corin)
+  // Load a sample starter hero
   const handleSelectOrigin = (originId) => {
     if (originId === 'custom') {
       setOriginType('custom');
@@ -309,15 +342,22 @@ export default function BG3CharacterBuilder({
   // Vitals calculation for right inspector
   const conMod = getAbilityModifier(finalScores.con);
   const dexMod = getAbilityModifier(finalScores.dex);
-  const isHillDwarf = selectedSubraceId === 'hill-dwarf';
+  const isHillDwarf = currentSubrace?.id === 'hill-dwarf';
   const bonusHpPerLevel = isHillDwarf ? 1 : 0;
   const startingHp = (currentClass.hitDie || 8) + conMod + bonusHpPerLevel;
   const speed = currentSubrace?.speed || currentRace.speed || 30;
 
+  // A subclass is only chosen once the character reaches the class's subclass level
+  const subclassLevel = currentClass.subclassLevel || 3;
+  const isSubclassAvailable = startingLevel >= subclassLevel;
+  const effectiveSubclass = isSubclassAvailable
+    ? (currentClass.subclasses?.find(s => s.id === selectedSubclassId) || currentClass.subclasses?.[0] || null)
+    : null;
+
   // Mock character for AC calculation
   const mockChar = {
     classId: currentClass.id,
-    subclassId: selectedSubclassId,
+    subclassId: effectiveSubclass?.id || '',
     equippedArmor: currentClass.id === 'fighter' || currentClass.id === 'paladin'
       ? { ac: 16, category: 'Heavy' }
       : currentClass.id === 'rogue' || currentClass.id === 'ranger'
@@ -329,7 +369,22 @@ export default function BG3CharacterBuilder({
   const calculatedAc = calculateArmorClass(mockChar, finalScores);
 
   // Validation checks for pillar badges
-  const isSkillsComplete = selectedClassSkills.length === (currentClass.skillChoices?.count || 2);
+  // Rogues choose two proficient skills for Expertise at 1st level
+  const expertiseCount = currentClass.id === 'rogue' ? 2 : 0;
+  const allProficientSkills = Array.from(new Set([...(currentBackground.skillProficiencies || []), ...selectedClassSkills]));
+  const validExpertise = selectedExpertise.filter(sk => allProficientSkills.includes(sk)).slice(0, expertiseCount);
+  const handleToggleExpertise = (sk) => {
+    if (validExpertise.includes(sk)) {
+      setSelectedExpertise(validExpertise.filter(s => s !== sk));
+    } else if (validExpertise.length < expertiseCount) {
+      setSelectedExpertise([...validExpertise, sk]);
+    } else {
+      setSelectedExpertise([...validExpertise.slice(1), sk]);
+    }
+  };
+
+  const isSkillsComplete = selectedClassSkills.length === (currentClass.skillChoices?.count || 2) &&
+    validExpertise.length === expertiseCount;
   const isAbilitiesComplete = scoreMethod === 'pointbuy' ? pointBuyRemaining === 0 : true;
 
   // Handle finalize character
@@ -346,19 +401,20 @@ export default function BG3CharacterBuilder({
         features.push({ id: `cf-1-${i}`, name: cf.name, source: `${currentClass.name} (Lvl 1)`, description: cf.description });
       });
     }
-    if (currentBackground.feature) {
+    // Cleric, Sorcerer and Warlock pick their subclass at 1st level and gain its features then
+    if (effectiveSubclass && subclassLevel === 1) {
+      (effectiveSubclass.featuresByLevel?.[1] || []).forEach((sf, i) => {
+        features.push({ id: `scf-1-${i}`, name: sf.name, source: `${effectiveSubclass.name} (Lvl 1)`, description: sf.description });
+      });
+    }
+    // Custom backgrounds only carry a placeholder feature; don't add it to the sheet
+    if (currentBackground.feature && !currentBackground.isCustom) {
       features.push({
         id: `bg-feat`,
         name: currentBackground.feature.name,
         source: `Background (${currentBackground.name})`,
         description: currentBackground.feature.description
       });
-    }
-    if (selectedRaceId === 'human' && selectedSubraceId === 'human-variant') {
-      const feat = SRD_FEATS.find(f => f.id === variantHumanFeatId);
-      if (feat) {
-        features.push({ id: `vf-1`, name: `Feat: ${feat.name}`, source: 'Variant Human Feat', description: feat.description });
-      }
     }
 
     const attacks = [];
@@ -411,15 +467,15 @@ export default function BG3CharacterBuilder({
     });
 
     const newCharacter = {
-      id: initialCharacter?.id || `char-${Date.now()}`,
-      name: charName.trim() || 'Tav',
+      id: initialCharacter?.id || generateCharacterId(),
+      name: charName.trim() || 'Adventurer',
       raceId: currentRace.id,
       subraceId: currentSubrace?.id || '',
       raceName: currentSubrace?.name || currentRace.name,
       classId: currentClass.id,
       className: currentClass.name,
-      subclassId: selectedSubclassId || currentClass.subclasses?.[0]?.id || '',
-      subclassName: currentClass.subclasses?.find(s => s.id === selectedSubclassId)?.name || '',
+      subclassId: effectiveSubclass?.id || '',
+      subclassName: effectiveSubclass?.name || '',
       level: startingLevel,
       backgroundId: currentBackground.id,
       backgroundName: currentBackground.name,
@@ -431,8 +487,8 @@ export default function BG3CharacterBuilder({
       racialBonuses,
       customAbilityBonuses: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
       savingThrowsProficient: currentClass.savingThrows || ['str', 'con'],
-      skillProficiencies: Array.from(new Set([...(currentBackground.skillProficiencies || []), ...selectedClassSkills])),
-      expertiseSkills: currentClass.id === 'rogue' ? selectedClassSkills.slice(0, 2) : [],
+      skillProficiencies: allProficientSkills,
+      expertiseSkills: validExpertise,
       equippedArmor: mockChar.equippedArmor,
       equippedShield: mockChar.equippedShield,
       fightingStyle: fightingStyle,
@@ -460,12 +516,81 @@ export default function BG3CharacterBuilder({
       avatarUrl: customAvatarUrl
     };
 
-    onCharacterCreated(newCharacter);
+    onCharacterCreated(initialCharacter ? mergeRespec(initialCharacter, newCharacter) : newCharacter);
     onClose();
   };
 
+  // A respec re-derives what the builder controls and keeps everything else the character earned
+  const mergeRespec = (existing, rebuilt) => {
+    const classChanged = existing.classId !== rebuilt.classId;
+    const builderSpellIds = new Set(rebuilt.spells.map(sp => sp.id));
+    const isBuilderFeature = (f) => /^(rf-|srf-|cf-1-|scf-1-|bg-feat|vf-1)/.test(f.id || ''); // vf-1: legacy Variant Human feat
+    const subclassChanged = (existing.subclassId || '') !== (rebuilt.subclassId || '');
+    // Level-up subclass features use sf- ids; older/sample data marks them by source instead
+    const oldSubclassName = (existing.subclassName || '').toLowerCase();
+    const isSubclassLevelFeature = (f) =>
+      /^sf-/.test(f.id || '') ||
+      /^subclass\b/i.test(f.source || '') ||
+      (oldSubclassName && (f.source || '').toLowerCase().startsWith(oldSubclassName));
+    const isClassLevelFeature = (f) => /^(f-|sf-)/.test(f.id || '');
+
+    // Also drop older copies of features the builder just regenerated (e.g. sample characters' own ids)
+    const rebuiltNames = new Set(rebuilt.features.map(f => (f.name || '').toLowerCase()));
+    const keptFeatures = (existing.features || []).filter(f =>
+      !isBuilderFeature(f) &&
+      !(classChanged && isClassLevelFeature(f)) &&
+      !(subclassChanged && isSubclassLevelFeature(f)) &&
+      !rebuiltNames.has((f.name || '').toLowerCase())
+    );
+    const keptSpells = (existing.spells || []).filter(sp =>
+      // Drop only spells the builder offered (this class's SRD cantrips/1st-level) and that were deselected
+      !builderSpellIds.has(sp.id) &&
+      !((sp.level === 0 || sp.level === 1) && SRD_SPELLS.some(s => s.id === sp.id && s.classes.includes(existing.classId)))
+    );
+
+    // Max HP: level-1 value plus the fixed average for each further level
+    const hitDie = currentClass.hitDie || 8;
+    // Tough grants +2 HP per level including 1st, so it's added for every level separately
+    const hasTough = keptFeatures.some(f => /^feat:\s*tough$/i.test(f.name || ''));
+    const level = rebuilt.level || 1;
+    // Same rules as level-up: each level grants at least 1 HP
+    const toughPerLevel = hasTough ? 2 : 0;
+    // CON for HP includes the ASI/feat bonuses this respec preserves
+    const hpConMod = getAbilityModifier(finalScores.con + (existing.customAbilityBonuses?.con || 0));
+    const firstLevelHp = Math.max(1, (currentClass.hitDie || 8) + hpConMod + bonusHpPerLevel + toughPerLevel);
+    const perLevelHp = Math.max(1, Math.floor(hitDie / 2) + 1 + hpConMod + bonusHpPerLevel + toughPerLevel);
+    const maxHp = firstLevelHp + (level - 1) * perLevelHp;
+    const damageTaken = Math.max(0, (existing.maxHp || 0) - (existing.currentHp ?? existing.maxHp ?? 0));
+
+    return {
+      ...existing,
+      ...rebuilt,
+      // Earned and hand-entered state the builder doesn't model
+      xp: existing.xp ?? rebuilt.xp,
+      inspiration: existing.inspiration ?? false,
+      customAbilityBonuses: existing.customAbilityBonuses || rebuilt.customAbilityBonuses,
+      features: [...rebuilt.features, ...keptFeatures],
+      spells: [...rebuilt.spells, ...keptSpells],
+      spellSlotsUsed: existing.spellSlotsUsed || rebuilt.spellSlotsUsed,
+      attacks: existing.attacks?.length ? existing.attacks : rebuilt.attacks,
+      equipment: existing.equipment?.length ? existing.equipment : rebuilt.equipment,
+      currency: existing.currency || rebuilt.currency,
+      personality: existing.personality ?? rebuilt.personality,
+      ideals: existing.ideals ?? rebuilt.ideals,
+      bonds: existing.bonds ?? rebuilt.bonds,
+      flaws: existing.flaws ?? rebuilt.flaws,
+      backstory: existing.backstory ?? rebuilt.backstory,
+      deathSaves: existing.deathSaves || rebuilt.deathSaves,
+      tempHp: existing.tempHp ?? 0,
+      exhaustion: existing.exhaustion ?? rebuilt.exhaustion,
+      hitDiceUsed: Math.min(existing.hitDiceUsed || 0, level),
+      maxHp,
+      currentHp: Math.max(0, maxHp - damageTaken)
+    };
+  };
+
   const stepsList = [
-    { id: 'origin', label: 'Origin', badge: originType === 'custom' ? 'Custom Hero' : 'Origin Hero', status: 'complete', icon: User },
+    { id: 'origin', label: 'Start', badge: originType === 'custom' ? 'Custom Hero' : 'Sample Hero', status: 'complete', icon: User },
     { id: 'race', label: 'Race', badge: currentSubrace?.name || currentRace.name, status: 'complete', icon: Sparkles },
     { id: 'class', label: 'Class', badge: currentClass.name, status: 'complete', icon: Sword },
     { id: 'abilities', label: 'Abilities', badge: scoreMethod === 'pointbuy' && pointBuyRemaining !== 0 ? `${pointBuyRemaining} pts` : 'Ready', status: isAbilitiesComplete ? 'complete' : 'pending', icon: Award },
@@ -473,7 +598,7 @@ export default function BG3CharacterBuilder({
     { id: 'skills', label: 'Skills', badge: `${selectedClassSkills.length}/${currentClass.skillChoices?.count || 2}`, status: isSkillsComplete ? 'complete' : 'pending', icon: Check },
     ...(currentClass.spellcaster ? [{ id: 'spells', label: 'Spells', badge: `${selectedCantrips.length} Cantrips`, status: 'complete', icon: Wand2 }] : []),
     { id: 'equipment', label: 'Equipment', badge: 'Selected', status: 'complete', icon: Shield },
-    { id: 'identity', label: 'Identity', badge: charName || 'Tav', status: 'complete', icon: User }
+    { id: 'identity', label: 'Identity', badge: charName || 'Adventurer', status: 'complete', icon: User }
   ];
 
   const currentStepIndex = stepsList.findIndex(s => s.id === activeTab);
@@ -485,16 +610,16 @@ export default function BG3CharacterBuilder({
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(5, 7, 10, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(8px)', overscrollBehavior: 'contain' }}>
+    <Modal onClose={onClose} className="bg3-overlay-dialog" labelledBy="bg3-forge-title" closeOnBackdrop={false}>
       <div className="bg3-creator-container" style={{ width: '96vw', maxWidth: '1440px', height: '94vh' }}>
 
         {/* PILLAR 1: STEP CATEGORIES */}
         <div className="bg3-steps-pillar">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.6rem', borderBottom: '1px solid rgba(223, 184, 90, 0.25)', marginBottom: '0.5rem' }}>
-            <span style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 800, fontSize: '0.95rem' }}>
+            <span id="bg3-forge-title" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 800, fontSize: '0.95rem' }}>
               CHARACTER FORGE
             </span>
-            <button
+            <button aria-label="Close Builder"
               type="button"
               className="btn btn-secondary btn-icon btn-sm"
               onClick={onClose}
@@ -547,7 +672,7 @@ export default function BG3CharacterBuilder({
               <div>
                 <div className="bg3-section-title">
                   <User size={24} />
-                  <span>CHOOSE ORIGIN ARCHETYPE</span>
+                  <span>CHOOSE YOUR STARTING POINT</span>
                 </div>
                 <div className="bg3-section-subtitle">
                   Forge your own legend from scratch as a Custom Adventurer, or embark on your journey as an iconic pre-made hero.
@@ -555,14 +680,14 @@ export default function BG3CharacterBuilder({
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                   {/* Custom Hero Card */}
-                  <div
+                  <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={originType === 'custom'}
                     className={`bg3-card ${originType === 'custom' ? 'selected' : ''}`}
                     onClick={() => handleSelectOrigin('custom')}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
                       <div style={{ fontSize: '1.6rem' }}>⚔️</div>
                       <div>
-                        <div className="bg3-card-header">Custom Adventurer (Tav)</div>
+                        <div className="bg3-card-header">Custom Adventurer</div>
                         <div className="bg3-badge-pill">Free Choice</div>
                       </div>
                     </div>
@@ -571,9 +696,9 @@ export default function BG3CharacterBuilder({
                     </div>
                   </div>
 
-                  {/* Origin Starter Heroes */}
+                  {/* Sample Starter Heroes */}
                   {SAMPLE_CHARACTERS.map(orig => (
-                    <div
+                    <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={originType === orig.id}
                       key={orig.id}
                       className={`bg3-card ${originType === orig.id ? 'selected' : ''}`}
                       onClick={() => handleSelectOrigin(orig.id)}
@@ -607,7 +732,7 @@ export default function BG3CharacterBuilder({
 
                 <div className="bg3-cards-grid">
                   {SRD_RACES.map(r => (
-                    <div
+                    <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={selectedRaceId === r.id}
                       key={r.id}
                       className={`bg3-card ${selectedRaceId === r.id ? 'selected' : ''}`}
                       onClick={() => {
@@ -622,7 +747,7 @@ export default function BG3CharacterBuilder({
                       <div className="bg3-card-header">{r.name}</div>
                       <div className="bg3-card-desc">{r.description}</div>
                       <div className="bg3-badge-pill">
-                        Speed: {r.speed}ft &bull; {r.subraces ? `${r.subraces.length} Subraces` : 'Standard'}
+                        Speed: {r.speed}ft &bull; {r.subraces?.length > 1 ? `${r.subraces.length} Subraces` : r.subraces?.length === 1 ? r.subraces[0].name : 'Standard'}
                       </div>
                     </div>
                   ))}
@@ -636,7 +761,7 @@ export default function BG3CharacterBuilder({
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
                       {currentRace.subraces.map(sub => (
-                        <div
+                        <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={selectedSubraceId === sub.id}
                           key={sub.id}
                           className={`bg3-card ${selectedSubraceId === sub.id ? 'selected' : ''}`}
                           onClick={() => setSelectedSubraceId(sub.id)}
@@ -659,7 +784,7 @@ export default function BG3CharacterBuilder({
                       {['Black (Acid)', 'Blue (Lightning)', 'Brass (Fire)', 'Bronze (Lightning)', 'Copper (Acid)', 'Gold (Fire)', 'Green (Poison)', 'Red (Fire)', 'Silver (Cold)', 'White (Cold)'].map(anc => {
                         const color = anc.split(' ')[0];
                         return (
-                          <div
+                          <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={dragonbornAncestry === color}
                             key={color}
                             className={`bg3-card ${dragonbornAncestry === color ? 'selected' : ''}`}
                             onClick={() => setDragonbornAncestry(color)}
@@ -672,37 +797,6 @@ export default function BG3CharacterBuilder({
                   </div>
                 )}
 
-                {/* Variant Human Options */}
-                {selectedRaceId === 'human' && selectedSubraceId === 'human-variant' && (
-                  <div style={{ background: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(223, 184, 90, 0.3)', borderRadius: '8px', padding: '1.25rem', marginBottom: '1.25rem' }}>
-                    <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-                      VARIANT HUMAN TALENTS
-                    </div>
-                    <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.75rem' }}>
-                      Choose 2 different ability scores to increase by +1, and select 1 bonus Feat.
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                      <div>
-                        <label className="form-label">Ability Bonus #1</label>
-                        <select className="form-select" value={variantHumanStats[0]} onChange={(e) => setVariantHumanStats([e.target.value, variantHumanStats[1]])}>
-                          {['str', 'dex', 'con', 'int', 'wis', 'cha'].map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="form-label">Ability Bonus #2</label>
-                        <select className="form-select" value={variantHumanStats[1]} onChange={(e) => setVariantHumanStats([variantHumanStats[0], e.target.value])}>
-                          {['str', 'dex', 'con', 'int', 'wis', 'cha'].map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
-                        </select>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="form-label">Bonus Feat</label>
-                      <select className="form-select" value={variantHumanFeatId} onChange={(e) => setVariantHumanFeatId(e.target.value)}>
-                        {SRD_FEATS.map(f => <option key={f.id} value={f.id}>{f.name} &bull; {f.description.substring(0, 60)}...</option>)}
-                      </select>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
@@ -721,7 +815,7 @@ export default function BG3CharacterBuilder({
                   {SRD_CLASSES.map(c => {
                     const isSelected = selectedClassId === c.id;
                     return (
-                      <div
+                      <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={isSelected}
                         key={c.id}
                         className={`bg3-card ${isSelected ? 'selected' : ''}`}
                         onClick={() => handleSelectClass(c.id)}
@@ -736,17 +830,22 @@ export default function BG3CharacterBuilder({
                   })}
                 </div>
 
-                {/* Subclass Selection if available at Level 1 */}
-                {currentClass.subclasses && currentClass.subclasses.length > 0 && (
+                {/* Subclass selection once the class's subclass level is reached */}
+                {!isSubclassAvailable && currentClass.subclasses?.length > 0 && (
+                  <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1.25rem' }}>
+                    {currentClass.name}s choose their subclass at level {subclassLevel}. You'll pick it when you level up.
+                  </div>
+                )}
+                {isSubclassAvailable && currentClass.subclasses && currentClass.subclasses.length > 0 && (
                   <div style={{ background: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(223, 184, 90, 0.3)', borderRadius: '8px', padding: '1.25rem', marginBottom: '1.25rem' }}>
                     <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.75rem' }}>
                       SUBCLASS / ARCHETYPE ({currentClass.name})
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
                       {currentClass.subclasses.map(sub => (
-                        <div
+                        <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={effectiveSubclass?.id === sub.id}
                           key={sub.id}
-                          className={`bg3-card ${selectedSubclassId === sub.id ? 'selected' : ''}`}
+                          className={`bg3-card ${effectiveSubclass?.id === sub.id ? 'selected' : ''}`}
                           onClick={() => setSelectedSubclassId(sub.id)}
                         >
                           <div className="bg3-card-header">{sub.name}</div>
@@ -770,7 +869,7 @@ export default function BG3CharacterBuilder({
                         { id: 'greatweapon', name: 'Great Weapon Fighting', desc: 'Reroll 1s and 2s on two-handed damage dice.' },
                         { id: 'archery', name: 'Archery', desc: '+2 bonus to attack rolls with ranged weapons.' }
                       ].map(fs => (
-                        <div
+                        <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={fightingStyle === fs.id}
                           key={fs.id}
                           className={`bg3-card ${fightingStyle === fs.id ? 'selected' : ''}`}
                           onClick={() => setFightingStyle(fs.id)}
@@ -911,7 +1010,7 @@ export default function BG3CharacterBuilder({
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
                           {scoreMethod === 'pointbuy' ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                              <button
+                              <button aria-label={`Decrease ${stat.id.toUpperCase()}`}
                                 type="button"
                                 className="btn btn-secondary btn-icon btn-sm"
                                 style={{ width: '28px', height: '28px' }}
@@ -923,7 +1022,7 @@ export default function BG3CharacterBuilder({
                               <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 800, width: '26px', textAlign: 'center' }}>
                                 {base}
                               </span>
-                              <button
+                              <button aria-label={`Increase ${stat.id.toUpperCase()}`}
                                 type="button"
                                 className="btn btn-secondary btn-icon btn-sm"
                                 style={{ width: '28px', height: '28px' }}
@@ -966,7 +1065,7 @@ export default function BG3CharacterBuilder({
               <div>
                 <div className="bg3-section-title">
                   <BookOpen size={24} />
-                  <span>CHOOSE BACKGROUND &amp; ORIGIN LORE</span>
+                  <span>CHOOSE BACKGROUND &amp; HISTORY</span>
                 </div>
                 <div className="bg3-section-subtitle">
                   Your background reveals where you came from, your place in the world, and your core proficiencies.
@@ -974,7 +1073,7 @@ export default function BG3CharacterBuilder({
 
                 <div className="bg3-cards-grid">
                   {SRD_BACKGROUNDS.map(b => (
-                    <div
+                    <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={selectedBackgroundId === b.id}
                       key={b.id}
                       className={`bg3-card ${selectedBackgroundId === b.id ? 'selected' : ''}`}
                       onClick={() => handleSelectBackground(b.id)}
@@ -1043,7 +1142,7 @@ export default function BG3CharacterBuilder({
                     const isSelected = selectedClassSkills.includes(sk);
 
                     return (
-                      <div
+                      <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={isSelected || isBgSkill} aria-disabled={isBgSkill || undefined}
                         key={sk}
                         onClick={() => handleToggleSkill(sk)}
                         className={`bg3-card ${isSelected || isBgSkill ? 'selected' : ''}`}
@@ -1060,6 +1159,35 @@ export default function BG3CharacterBuilder({
                     );
                   })}
                 </div>
+
+                {expertiseCount > 0 && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 700, marginBottom: '0.75rem' }}>
+                      Expertise: {validExpertise.length} of {expertiseCount} Selected
+                      <span style={{ fontWeight: 400, color: '#94a3b8' }}> — double your proficiency bonus for two proficient skills</span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.75rem' }}>
+                      {allProficientSkills.map(sk => {
+                        const isExpert = validExpertise.includes(sk);
+                        return (
+                          <button
+                            type="button"
+                            key={sk}
+                            onClick={() => handleToggleExpertise(sk)}
+                            className={`bg3-card ${isExpert ? 'selected' : ''}`}
+                            aria-pressed={isExpert}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <span className="bg3-card-header" style={{ margin: 0 }}>{sk}</span>
+                              {isExpert && <Star size={16} style={{ color: 'var(--text-gold)' }} />}
+                            </div>
+                            <div className="bg3-card-desc">{isExpert ? 'Expertise' : 'Click to choose'}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1079,7 +1207,7 @@ export default function BG3CharacterBuilder({
                   {SRD_SPELLS.filter(s => s.level === 0 && s.classes.includes(currentClass.id)).map(sp => {
                     const isSelected = selectedCantrips.includes(sp.id);
                     return (
-                      <div
+                      <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={isSelected}
                         key={sp.id}
                         className={`bg3-card ${isSelected ? 'selected' : ''}`}
                         onClick={() => {
@@ -1103,7 +1231,7 @@ export default function BG3CharacterBuilder({
                   {SRD_SPELLS.filter(s => s.level === 1 && s.classes.includes(currentClass.id)).map(sp => {
                     const isSelected = selectedFirstLevelSpells.includes(sp.id);
                     return (
-                      <div
+                      <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={isSelected}
                         key={sp.id}
                         className={`bg3-card ${isSelected ? 'selected' : ''}`}
                         onClick={() => {
@@ -1137,7 +1265,7 @@ export default function BG3CharacterBuilder({
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                   {currentClass.startingEquipmentPackages?.map((pkg, idx) => (
-                    <div
+                    <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={selectedEquipIndex === idx}
                       key={pkg.id || idx}
                       className={`bg3-card ${selectedEquipIndex === idx ? 'selected' : ''}`}
                       onClick={() => setSelectedEquipIndex(idx)}
@@ -1166,7 +1294,7 @@ export default function BG3CharacterBuilder({
                 {/* Hero Name & Random Generator */}
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem', marginBottom: '1.25rem' }}>
                   <div className="form-group">
-                    <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <label htmlFor="bg3characterbuilder-heros-name-random-name" className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <span>Hero&rsquo;s Name *</span>
                       <button
                         type="button"
@@ -1176,18 +1304,18 @@ export default function BG3CharacterBuilder({
                         <Dices size={14} /> Random Name
                       </button>
                     </label>
-                    <input
+                    <input id="bg3characterbuilder-heros-name-random-name"
                       type="text"
                       className="form-input"
                       value={charName}
-                      placeholder="e.g. Tav, Gale, Shadowheart"
+                      placeholder="e.g. Maren Ashford"
                       onChange={(e) => setCharName(e.target.value)}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Alignment</label>
-                    <select
+                    <label htmlFor="bg3characterbuilder-alignment" className="form-label">Alignment</label>
+                    <select id="bg3characterbuilder-alignment"
                       className="form-select"
                       value={alignment}
                       onChange={(e) => setAlignment(e.target.value)}
@@ -1208,7 +1336,7 @@ export default function BG3CharacterBuilder({
                     {FANTASY_AVATARS.map(av => {
                       const isSel = avatarIcon === av.icon;
                       return (
-                        <div
+                        <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={isSel}
                           key={av.id}
                           className={`bg3-card ${isSel ? 'selected' : ''}`}
                           style={{ textAlign: 'center', padding: '0.65rem 0.4rem', cursor: 'pointer' }}
@@ -1226,8 +1354,8 @@ export default function BG3CharacterBuilder({
                   </div>
 
                   <div className="form-group" style={{ maxWidth: '480px' }}>
-                    <label className="form-label">Or Custom Image URL</label>
-                    <input
+                    <label htmlFor="bg3characterbuilder-or-custom-image-url" className="form-label">Or Custom Image URL</label>
+                    <input id="bg3characterbuilder-or-custom-image-url"
                       type="url"
                       className="form-input"
                       placeholder="https://example.com/portrait.jpg"
@@ -1266,7 +1394,7 @@ export default function BG3CharacterBuilder({
           </div>
         </div>
 
-        {/* PILLAR 3: RIGHT CHARACTER SUMMARY (BG3 LIVE INSPECTOR) */}
+        {/* PILLAR 3: RIGHT CHARACTER SUMMARY (LIVE INSPECTOR) */}
         <div className="bg3-summary-pillar">
           <div className="bg3-portrait-frame">
             {customAvatarUrl ? (
@@ -1276,7 +1404,7 @@ export default function BG3CharacterBuilder({
             )}
           </div>
           <div className="bg3-summary-name">
-            {charName || 'Tav'}
+            {charName || 'Adventurer'}
           </div>
           <div className="bg3-summary-subtitle">
             Level {startingLevel} &bull; {currentSubrace?.name || currentRace.name} &bull; {currentClass.name}
@@ -1336,18 +1464,25 @@ export default function BG3CharacterBuilder({
             })}
           </div>
 
-          {/* Grand Venture Forth Golden Button */}
+          {initialCharacter && (
+            <div style={{ fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.4, marginBottom: '0.5rem' }}>
+              Respec keeps inventory, attacks, currency, backstory, homebrew, ASIs and level-up features.
+              {initialCharacter.classId !== selectedClassId && ' Changing class removes features gained from the old class.'}
+            </div>
+          )}
+
+          {/* Grand Create Hero Golden Button */}
           <button
             type="button"
             className="bg3-btn-venture"
             onClick={handleVentureForth}
           >
-            <span>{initialCharacter ? 'Save Changes' : 'Venture Forth'}</span>
+            <span>{initialCharacter ? 'Save Changes' : 'Create Hero'}</span>
             <ChevronRight size={18} />
           </button>
         </div>
 
       </div>
-    </div>
+    </Modal>
   );
 }

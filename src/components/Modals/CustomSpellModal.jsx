@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Modal from '../Common/Modal';
 import { X, Sparkles } from 'lucide-react';
 import { SRD_SPELLS } from '../../data/srdSpells';
 
@@ -63,11 +64,11 @@ export default function CustomSpellModal({ isOpen, onClose, onSaveSpell }) {
   };
 
   return (
-    <dialog open className="modal-dialog" style={{ maxWidth: '750px' }} onClick={(e) => { if (e.target.tagName === 'DIALOG') onClose(); }}>
+    <Modal onClose={onClose} style={{ maxWidth: '750px' }} labelledBy="customspell-modal-title">
       <div className="modal-header">
         <div className="modal-title">
           <Sparkles size={20} className="text-gold" />
-          <span>Add Spell to Spellbook</span>
+          <span id="customspell-modal-title">Add Spell to Spellbook</span>
         </div>
         <button type="button" className="btn btn-secondary btn-icon" onClick={onClose} aria-label="Close">
           <X size={18} />
@@ -190,8 +191,8 @@ export default function CustomSpellModal({ isOpen, onClose, onSaveSpell }) {
           <form onSubmit={handleSaveCustomSpell}>
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.75rem' }}>
               <div className="form-group">
-                <label className="form-label">Spell Name *</label>
-                <input
+                <label htmlFor="customspellmodal-spell-name" className="form-label">Spell Name *</label>
+                <input id="customspellmodal-spell-name"
                   type="text"
                   className="form-input"
                   required
@@ -202,8 +203,8 @@ export default function CustomSpellModal({ isOpen, onClose, onSaveSpell }) {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Spell Level</label>
-                <select
+                <label htmlFor="customspellmodal-spell-level" className="form-label">Spell Level</label>
+                <select id="customspellmodal-spell-level"
                   className="form-select"
                   value={customLevel}
                   onChange={(e) => setCustomLevel(parseInt(e.target.value, 10))}
@@ -224,8 +225,8 @@ export default function CustomSpellModal({ isOpen, onClose, onSaveSpell }) {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
               <div className="form-group">
-                <label className="form-label">School</label>
-                <select
+                <label htmlFor="customspellmodal-school" className="form-label">School</label>
+                <select id="customspellmodal-school"
                   className="form-select"
                   value={customSchool}
                   onChange={(e) => setCustomSchool(e.target.value)}
@@ -237,8 +238,8 @@ export default function CustomSpellModal({ isOpen, onClose, onSaveSpell }) {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Casting Time</label>
-                <input
+                <label htmlFor="customspellmodal-casting-time" className="form-label">Casting Time</label>
+                <input id="customspellmodal-casting-time"
                   type="text"
                   className="form-input"
                   value={customCastingTime}
@@ -247,8 +248,8 @@ export default function CustomSpellModal({ isOpen, onClose, onSaveSpell }) {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Range</label>
-                <input
+                <label htmlFor="customspellmodal-range" className="form-label">Range</label>
+                <input id="customspellmodal-range"
                   type="text"
                   className="form-input"
                   value={customRange}
@@ -258,8 +259,8 @@ export default function CustomSpellModal({ isOpen, onClose, onSaveSpell }) {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Duration</label>
-              <input
+              <label htmlFor="customspellmodal-duration" className="form-label">Duration</label>
+              <input id="customspellmodal-duration"
                 type="text"
                 className="form-input"
                 value={customDuration}
@@ -268,8 +269,8 @@ export default function CustomSpellModal({ isOpen, onClose, onSaveSpell }) {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Description & Rules</label>
-              <textarea
+              <label htmlFor="customspellmodal-description-rules" className="form-label">Description & Rules</label>
+              <textarea id="customspellmodal-description-rules"
                 className="form-textarea"
                 rows="3"
                 placeholder="Spell effects, damage, saving throw required..."
@@ -308,6 +309,6 @@ export default function CustomSpellModal({ isOpen, onClose, onSaveSpell }) {
           Close
         </button>
       </div>
-    </dialog>
+    </Modal>
   );
 }

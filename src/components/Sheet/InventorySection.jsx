@@ -65,7 +65,7 @@ export default function InventorySection({ character, scores, onUpdateCharacter,
             { id: 'pp', label: 'PP' }
           ].map(coin => (
             <div key={coin.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <input
+              <input aria-label={`${coin.label || coin.id.toUpperCase()} amount`}
                 type="number"
                 min="0"
                 style={{ width: '100%', maxWidth: '50px', padding: '0.2rem', textAlign: 'center', fontWeight: 700, border: '1px solid var(--parchment-border)', borderRadius: '4px', background: '#fff' }}
@@ -85,7 +85,7 @@ export default function InventorySection({ character, scores, onUpdateCharacter,
       </div>
 
       {/* Inventory Items List */}
-      <div style={{ maxHeight: '280px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.3rem', marginBottom: '0.75rem' }}>
+      <div className="scroll-list" style={{ maxHeight: '280px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.3rem', marginBottom: '0.75rem' }}>
         {equipment.map(item => (
           <div
             key={item.id}
@@ -100,7 +100,7 @@ export default function InventorySection({ character, scores, onUpdateCharacter,
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flex: 1 }}>
-              <input
+              <input aria-label={`${item.name} equipped`}
                 type="checkbox"
                 checked={item.equipped ?? false}
                 title="Equipped"
@@ -117,7 +117,7 @@ export default function InventorySection({ character, scores, onUpdateCharacter,
               )}
             </div>
 
-            <button
+            <button aria-label={`Remove ${item.name}`}
               type="button"
               className="no-print"
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)', padding: '0.1rem' }}
@@ -139,7 +139,7 @@ export default function InventorySection({ character, scores, onUpdateCharacter,
       {/* Other Proficiencies & Languages */}
       <div style={{ borderTop: '1px solid var(--parchment-border-light)', paddingTop: '0.5rem' }}>
         <div className="sheet-label" style={{ marginBottom: '0.25rem' }}>Other Proficiencies &amp; Languages</div>
-        <textarea
+        <textarea aria-label="Other proficiencies and languages"
           className="form-textarea"
           style={{ background: 'rgba(255, 255, 255, 0.7)', border: '1px solid var(--parchment-border)', color: 'var(--parchment-text)', fontSize: '0.8rem' }}
           rows="3"

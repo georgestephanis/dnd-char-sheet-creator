@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import Modal from '../Common/Modal';
 import { X, Dices, RotateCcw } from 'lucide-react';
 import { rollDice } from '../../utils/dndRules';
 
-export default function DiceRollerModal({ isOpen, onClose, initialRollData, onRollComplete }) {
+export default function DiceRollerModal({ isOpen, onClose, onRollComplete }) {
   const [selectedDie, setSelectedDie] = useState(20);
   const [dieCount, setDieCount] = useState(1);
   const [modifier, setModifier] = useState(0);
@@ -17,7 +18,10 @@ export default function DiceRollerModal({ isOpen, onClose, initialRollData, onRo
       const res = rollDice(count, sides, mod);
       const entry = {
         title: `${count}d${sides}${mod ? (mod > 0 ? `+${mod}` : `${mod}`) : ''}`,
+        sides,
+        modifier: mod,
         rolls: res.rolls,
+        natural: count === 1 ? res.rolls[0] : null,
         total: res.total,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
       };
@@ -32,7 +36,10 @@ export default function DiceRollerModal({ isOpen, onClose, initialRollData, onRo
       const dropped = rollMode === 'advantage' ? Math.min(r1, r2) : Math.max(r1, r2);
       const entry = {
         title: `1d20 ${rollMode.toUpperCase()} (${mod >= 0 ? `+${mod}` : mod})`,
+        sides: 20,
+        modifier: mod,
         rolls: [r1, r2],
+        natural: picked,
         picked,
         dropped,
         total: picked + mod,
@@ -49,11 +56,11 @@ export default function DiceRollerModal({ isOpen, onClose, initialRollData, onRo
   const diceOptions = [4, 6, 8, 10, 12, 20, 100];
 
   return (
-    <dialog open className="modal-dialog" onClick={(e) => { if (e.target.tagName === 'DIALOG') onClose(); }}>
+    <Modal onClose={onClose} labelledBy="diceroller-modal-title">
       <div className="modal-header">
         <div className="modal-title">
           <Dices size={20} className="text-gold" />
-          <span>Interactive Dice Roller</span>
+          <span id="diceroller-modal-title">Interactive Dice Roller</span>
         </div>
         <button type="button" className="btn btn-secondary btn-icon" onClick={onClose} aria-label="Close">
           <X size={18} />
@@ -82,8 +89,8 @@ export default function DiceRollerModal({ isOpen, onClose, initialRollData, onRo
         {/* Dice Controls */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
           <div>
-            <label className="form-label">Count</label>
-            <input
+            <label htmlFor="dicerollermodal-count" className="form-label">Count</label>
+            <input id="dicerollermodal-count"
               type="number"
               className="form-input"
               min="1"
@@ -94,8 +101,8 @@ export default function DiceRollerModal({ isOpen, onClose, initialRollData, onRo
           </div>
 
           <div>
-            <label className="form-label">Modifier</label>
-            <input
+            <label htmlFor="dicerollermodal-modifier" className="form-label">Modifier</label>
+            <input id="dicerollermodal-modifier"
               type="number"
               className="form-input"
               value={modifier}
@@ -104,11 +111,13 @@ export default function DiceRollerModal({ isOpen, onClose, initialRollData, onRo
           </div>
 
           <div>
-            <label className="form-label">Mode (d20)</label>
-            <select
+            <label htmlFor="dicerollermodal-mode-d20" className="form-label">Mode (d20)</label>
+            <select id="dicerollermodal-mode-d20"
               className="form-select"
-              value={rollMode}
+              value={selectedDie !== 20 || dieCount > 1 ? 'normal' : rollMode}
               onChange={(e) => setRollMode(e.target.value)}
+              disabled={selectedDie !== 20 || dieCount > 1}
+              title={selectedDie !== 20 || dieCount > 1 ? 'Advantage and disadvantage apply to a single d20' : undefined}
             >
               <option value="normal">Normal</option>
               <option value="advantage">Advantage</option>
@@ -147,7 +156,7 @@ export default function DiceRollerModal({ isOpen, onClose, initialRollData, onRo
               fontFamily: 'var(--font-heading)',
               fontSize: '3.2rem',
               fontWeight: 800,
-              color: currentResult.total === 20 && selectedDie === 20 ? '#10b981' : currentResult.total === 1 && selectedDie === 20 ? '#ef4444' : 'var(--text-main)',
+              color: currentResult.sides === 20 && currentResult.natural === 20 ? '#10b981' : currentResult.sides === 20 && currentResult.natural === 1 ? '#ef4444' : 'var(--text-main)',
               lineHeight: 1.1,
               margin: '0.2rem 0'
             }}>
@@ -161,7 +170,7 @@ export default function DiceRollerModal({ isOpen, onClose, initialRollData, onRo
                 </span>
               ) : (
                 <span>
-                  Dice: [{currentResult.rolls.join(', ')}] {modifier !== 0 && `(Mod: ${modifier >= 0 ? `+${modifier}` : modifier})`}
+                  Dice: [{currentResult.rolls.join(', ')}] {currentResult.modifier !== 0 && `(Mod: ${currentResult.modifier >= 0 ? `+${currentResult.modifier}` : currentResult.modifier})`}
                 </span>
               )}
             </div>
@@ -216,6 +225,6 @@ export default function DiceRollerModal({ isOpen, onClose, initialRollData, onRo
           Close
         </button>
       </div>
-    </dialog>
+    </Modal>
   );
 }

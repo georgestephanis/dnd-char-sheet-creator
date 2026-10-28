@@ -1,5 +1,4 @@
 import React from 'react';
-import { User, Scroll, Shield } from 'lucide-react';
 
 export default function RoleplaySection({ character, onUpdateCharacter }) {
   if (!character) return null;
@@ -12,7 +11,7 @@ export default function RoleplaySection({ character, onUpdateCharacter }) {
           <div className="section-box-title">
             <span>Personality Traits</span>
           </div>
-          <textarea
+          <textarea aria-label="Personality traits"
             className="form-textarea"
             style={{ background: 'rgba(255, 255, 255, 0.7)', border: '1px solid var(--parchment-border)', color: 'var(--parchment-text)', fontSize: '0.85rem' }}
             rows="3"
@@ -26,7 +25,7 @@ export default function RoleplaySection({ character, onUpdateCharacter }) {
           <div className="section-box-title">
             <span>Ideals</span>
           </div>
-          <textarea
+          <textarea aria-label="Ideals"
             className="form-textarea"
             style={{ background: 'rgba(255, 255, 255, 0.7)', border: '1px solid var(--parchment-border)', color: 'var(--parchment-text)', fontSize: '0.85rem' }}
             rows="3"
@@ -40,7 +39,7 @@ export default function RoleplaySection({ character, onUpdateCharacter }) {
           <div className="section-box-title">
             <span>Bonds</span>
           </div>
-          <textarea
+          <textarea aria-label="Bonds"
             className="form-textarea"
             style={{ background: 'rgba(255, 255, 255, 0.7)', border: '1px solid var(--parchment-border)', color: 'var(--parchment-text)', fontSize: '0.85rem' }}
             rows="3"
@@ -54,7 +53,7 @@ export default function RoleplaySection({ character, onUpdateCharacter }) {
           <div className="section-box-title">
             <span>Flaws</span>
           </div>
-          <textarea
+          <textarea aria-label="Flaws"
             className="form-textarea"
             style={{ background: 'rgba(255, 255, 255, 0.7)', border: '1px solid var(--parchment-border)', color: 'var(--parchment-text)', fontSize: '0.85rem' }}
             rows="3"
@@ -70,7 +69,7 @@ export default function RoleplaySection({ character, onUpdateCharacter }) {
         <div className="section-box-title">
           <span>Character Backstory &amp; History</span>
         </div>
-        <textarea
+        <textarea aria-label="Backstory"
           className="form-textarea"
           style={{ background: 'rgba(255, 255, 255, 0.7)', border: '1px solid var(--parchment-border)', color: 'var(--parchment-text)', fontSize: '0.85rem' }}
           rows="5"

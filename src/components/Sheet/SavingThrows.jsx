@@ -19,23 +19,23 @@ export default function SavingThrows({ character, scores, onRollSave, onToggleSa
 
           return (
             <div key={ab.id} className="stat-list-item">
-              <span
-                className={`proficiency-indicator ${isProf ? 'proficient' : ''}`}
+              <button
+                type="button"
+                className={`proficiency-indicator btn-reset ${isProf ? 'proficient' : ''}`}
                 title={`Toggle ${ab.name} save proficiency`}
+                aria-label={`${ab.name} save proficiency`}
+                aria-pressed={isProf}
                 onClick={() => onToggleSaveProficiency && onToggleSaveProficiency(ab.id)}
               />
-              <span
-                className="stat-mod-value"
+              <button
+                type="button"
+                className="stat-roll-btn btn-reset"
+                aria-label={`Roll ${ab.name} save, ${formatModifier(totalMod)}`}
                 onClick={() => onRollSave && onRollSave(`${ab.name} Save`, totalMod)}
               >
-                {formatModifier(totalMod)}
-              </span>
-              <span
-                className="stat-name-label"
-                onClick={() => onRollSave && onRollSave(`${ab.name} Save`, totalMod)}
-              >
-                {ab.name}
-              </span>
+                <span className="stat-mod-value">{formatModifier(totalMod)}</span>
+                <span className="stat-name-label">{ab.name}</span>
+              </button>
             </div>
           );
         })}

@@ -5,6 +5,36 @@ import { SAMPLE_CHARACTERS } from '../data/sampleCharacters';
 const STORAGE_KEY = 'dnd_characters_v1';
 const ACTIVE_CHAR_KEY = 'dnd_active_character_id_v1';
 
+export function generateCharacterId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return `char-${crypto.randomUUID()}`;
+  }
+  return `char-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
+}
+
+const ARRAY_FIELDS = ['attacks', 'features', 'spells', 'equipment', 'skillProficiencies', 'expertiseSkills', 'savingThrowsProficient'];
+
+// Fill in fields older or hand-edited files may lack, so components can rely on their shape
+export function normalizeCharacter(raw) {
+  const character = { ...raw };
+  // Downstream code compares ids and calls string methods on names
+  character.id = (typeof character.id === 'string' || typeof character.id === 'number') && String(character.id)
+    ? String(character.id)
+    : generateCharacterId();
+  character.name = typeof character.name === 'string' ? character.name : String(character.name ?? '');
+  for (const field of ARRAY_FIELDS) {
+    if (!Array.isArray(character[field])) character[field] = [];
+  }
+  character.features = character.features.filter(f => f && typeof f === 'object' && typeof f.name === 'string');
+  if (!Array.isArray(character.spellSlotsUsed)) character.spellSlotsUsed = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+  if (!character.abilityScores || typeof character.abilityScores !== 'object') {
+    character.abilityScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 };
+  }
+  const level = parseInt(character.level, 10);
+  character.level = Number.isFinite(level) ? Math.min(20, Math.max(1, level)) : 1;
+  return character;
+}
+
 export function loadCharacters() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -14,8 +44,13 @@ export function loadCharacters() {
       return SAMPLE_CHARACTERS;
     }
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
+    // An empty array is a deliberate empty roster; only seed samples when the key is absent
+    if (Array.isArray(parsed)) {
+      const entries = parsed.filter(c => c && typeof c === 'object' && !Array.isArray(c));
+      const characters = entries.map(normalizeCharacter);
+      // Persist ids generated for legacy entries so they stay stable across reloads
+      if (entries.some((c, i) => c.id !== characters[i].id || c.name !== characters[i].name)) saveCharacters(characters);
+      return characters;
     }
     return SAMPLE_CHARACTERS;
   } catch (err) {
@@ -74,10 +109,10 @@ export function deleteCharacterById(id) {
 export function duplicateCharacterById(id) {
   const characters = loadCharacters();
   const target = characters.find(c => c.id === id);
-  if (!target) return characters;
+  if (!target) return { updatedList: characters, newCharacterId: null };
 
   const clone = JSON.parse(JSON.stringify(target));
-  clone.id = `char-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+  clone.id = generateCharacterId();
   clone.name = `${target.name} (Copy)`;
   characters.unshift(clone);
   saveCharacters(characters);
@@ -113,18 +148,20 @@ export function importCharactersFromJson(jsonString) {
 
     if (Array.isArray(data)) {
       data.forEach(item => {
-        if (item && item.name) {
-          item.id = `char-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-          existing.unshift(item);
+        if (item && typeof item === 'object' && !Array.isArray(item) && item.name) {
+          existing.unshift(normalizeCharacter({ ...item, id: generateCharacterId() }));
           importedCount++;
         }
       });
-    } else if (data && data.name) {
-      data.id = `char-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-      existing.unshift(data);
+    } else if (data && typeof data === 'object' && data.name) {
+      existing.unshift(normalizeCharacter({ ...data, id: generateCharacterId() }));
       importedCount = 1;
     } else {
       throw new Error('Invalid character file format.');
+    }
+
+    if (importedCount === 0) {
+      throw new Error('No characters found in file.');
     }
 
     saveCharacters(existing);

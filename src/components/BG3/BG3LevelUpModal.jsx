@@ -1,23 +1,37 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import Modal from '../Common/Modal';
 import {
-  X, TrendingUp, Sparkles, Shield, Heart, Award, Dices, ChevronRight, Check
+  Shield, Heart, Award, Dices, ChevronRight
 } from 'lucide-react';
 import { SRD_CLASSES } from '../../data/srdClasses';
 import { SRD_FEATS } from '../../data/srdFeats';
-import { getAbilityModifier, getProficiencyBonus, getSpellSlotsForClass } from '../../utils/dndRules';
+import { getAbilityModifier, getProficiencyBonus, hasFeat, getCalculatedAbilityScores } from '../../utils/dndRules';
+import { activateOnKey } from '../../utils/a11y';
 
+// Mount the dialog only while open, keyed to the character's current level, so every
+// opening starts from fresh state instead of the previous session's choices.
 export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeveledCharacter }) {
   if (!isOpen || !character) return null;
+  return (
+    <LevelUpDialog
+      key={`${character.id}-${character.level || 1}`}
+      onClose={onClose}
+      character={character}
+      onSaveLeveledCharacter={onSaveLeveledCharacter}
+    />
+  );
+}
 
+function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
   const currentLevel = character.level || 1;
-  const [targetLevel, setTargetLevel] = useState(Math.min(20, currentLevel + 1));
+  const targetLevel = Math.min(20, currentLevel + 1);
 
   const classData = SRD_CLASSES.find(c => c.id === character.classId) || SRD_CLASSES[0];
   const hitDie = classData.hitDie || 8;
-  const conMod = getAbilityModifier((character.abilityScores?.con || 10) + (character.racialBonuses?.con || 0) + (character.customAbilityBonuses?.con || 0));
+  const conMod = getAbilityModifier(getCalculatedAbilityScores(character).con);
 
   const isHillDwarf = character.subraceId === 'hill-dwarf';
-  const hasToughFeat = character.features?.some(f => f.name.toLowerCase().includes('tough'));
+  const hasToughFeat = hasFeat(character, 'Tough');
   const extraHpPerLevel = (isHillDwarf ? 1 : 0) + (hasToughFeat ? 2 : 0);
 
   const standardAvgGain = Math.max(1, Math.floor(hitDie / 2) + 1 + conMod + extraHpPerLevel);
@@ -53,7 +67,14 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
   const chosenSubclass = classData.subclasses.find(s => s.id === selectedSubclassId);
   const subclassFeaturesAtTarget = chosenSubclass?.featuresByLevel?.[targetLevel] || [];
 
-  const handleApplyLevelUp = () => {
+  const isMaxLevel = currentLevel >= 20;
+
+  // continueAfter keeps the dialog open; it remounts for the next level (keyed on level)
+  // Single-shot per level: a double-click must not apply the same level twice
+  const hasAppliedRef = useRef(false);
+  const handleApplyLevelUp = (continueAfter = false) => {
+    if (isMaxLevel || hasAppliedRef.current) return;
+    hasAppliedRef.current = true;
     const hpToAdd = hpMethod === 'average' ? standardAvgGain : manualHpGain;
     const newMaxHp = (character.maxHp || 10) + hpToAdd;
     const newCurrentHp = (character.currentHp || 10) + hpToAdd;
@@ -71,7 +92,7 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
       }
     });
 
-    if (chosenSubclass) {
+    if (chosenSubclass && targetLevel >= classData.subclassLevel) {
       subclassFeaturesAtTarget.forEach(sf => {
         if (!newFeatures.some(ex => ex.name === sf.name)) {
           newFeatures.push({
@@ -117,11 +138,15 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
       }
     }
 
+    // Only assign a subclass once the class's subclass level is reached
+    const finalSubclassId = character.subclassId || (targetLevel >= classData.subclassLevel ? selectedSubclassId : '');
+
     const updated = {
       ...character,
       level: targetLevel,
-      subclassId: selectedSubclassId || character.subclassId,
-      subclassName: chosenSubclass?.name || character.subclassName,
+      subclassId: finalSubclassId,
+      // Derived from the saved id so the two fields can't disagree
+      subclassName: classData.subclasses.find(sc => sc.id === finalSubclassId)?.name || '',
       maxHp: newMaxHp,
       currentHp: newCurrentHp,
       hitDiceMax: `${targetLevel}d${hitDie}`,
@@ -130,11 +155,11 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
     };
 
     onSaveLeveledCharacter(updated);
-    onClose();
+    if (!continueAfter) onClose();
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(5, 7, 10, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(8px)' }}>
+    <Modal onClose={onClose} className="bg3-overlay-dialog" labelledBy="bg3-levelup-title" closeOnBackdrop={false}>
       <div className="bg3-creator-container" style={{ width: '92vw', maxWidth: '1100px', gridTemplateColumns: '1fr 340px', height: '88vh' }}>
 
         {/* LEFT / CENTER STAGE: LEVEL-UP PERKS & CHOICES */}
@@ -142,7 +167,7 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
           {/* Header Banner */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(223, 184, 90, 0.3)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
             <div>
-              <div style={{ fontSize: '0.75rem', fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <div id="bg3-levelup-title" style={{ fontSize: '0.75rem', fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                 LEVEL UP ADVANCEMENT
               </div>
               <div className="bg3-section-title" style={{ margin: 0 }}>
@@ -151,17 +176,13 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Target Level:</span>
-              <select
-                className="form-select"
-                style={{ width: '90px', fontWeight: 'bold', background: '#11151e', borderColor: 'var(--border-gold)', color: 'var(--text-gold)' }}
-                value={targetLevel}
-                onChange={(e) => setTargetLevel(parseInt(e.target.value, 10))}
-              >
-                {Array.from({ length: 20 - currentLevel }, (_, i) => currentLevel + 1 + i).map(lvl => (
-                  <option key={lvl} value={lvl}>Lvl {lvl}</option>
-                ))}
-              </select>
+              {/* One level per step, so every level's HP, ASI and subclass choice is made */}
+              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                {isMaxLevel ? 'Maximum level' : `Lvl ${currentLevel} → `}
+              </span>
+              <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--text-gold)' }}>
+                Lvl {isMaxLevel ? currentLevel : targetLevel}
+              </span>
             </div>
           </div>
 
@@ -173,7 +194,7 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
-              <div
+              <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={hpMethod === 'average'}
                 onClick={() => setHpMethod('average')}
                 className={`bg3-card ${hpMethod === 'average' ? 'selected' : ''}`}
                 style={{ cursor: 'pointer' }}
@@ -186,7 +207,7 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
                 </div>
               </div>
 
-              <div
+              <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={hpMethod === 'rolled'}
                 onClick={() => { if (rolledDieValue === null) handleRollHitDie(); else setHpMethod('rolled'); }}
                 className={`bg3-card ${hpMethod === 'rolled' ? 'selected' : ''}`}
                 style={{ cursor: 'pointer' }}
@@ -212,7 +233,7 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
           </div>
 
           {/* Subclass Selection */}
-          {targetLevel >= classData.subclassLevel && (!character.subclassId || character.subclassId === '') && (
+          {needsSubclass && (
             <div style={{ background: 'linear-gradient(145deg, #18202d 0%, #11151e 100%)', border: '1.5px solid var(--border-gold)', borderRadius: '8px', padding: '1rem', marginBottom: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 800 }}>
                 <Shield size={18} />
@@ -220,7 +241,7 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
                 {classData.subclasses.map(sub => (
-                  <div
+                  <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={selectedSubclassId === sub.id}
                     key={sub.id}
                     className={`bg3-card ${selectedSubclassId === sub.id ? 'selected' : ''}`}
                     onClick={() => setSelectedSubclassId(sub.id)}
@@ -270,8 +291,8 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
 
               {asiType === 'plusTwo' && (
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Ability to increase by +2</label>
-                  <select
+                  <label htmlFor="bg3levelupmodal-ability-to-increase-by-2" className="form-label">Ability to increase by +2</label>
+                  <select id="bg3levelupmodal-ability-to-increase-by-2"
                     className="form-select"
                     value={plusTwoAbility}
                     onChange={(e) => setPlusTwoAbility(e.target.value)}
@@ -289,8 +310,8 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
               {asiType === 'plusOnePlusOne' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                   <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label">First Ability (+1)</label>
-                    <select className="form-select" value={plusOneFirst} onChange={(e) => setPlusOneFirst(e.target.value)}>
+                    <label htmlFor="bg3levelupmodal-first-ability-1" className="form-label">First Ability (+1)</label>
+                    <select id="bg3levelupmodal-first-ability-1" className="form-select" value={plusOneFirst} onChange={(e) => setPlusOneFirst(e.target.value)}>
                       <option value="str">Strength</option>
                       <option value="dex">Dexterity</option>
                       <option value="con">Constitution</option>
@@ -300,8 +321,8 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
                     </select>
                   </div>
                   <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label">Second Ability (+1)</label>
-                    <select className="form-select" value={plusOneSecond} onChange={(e) => setPlusOneSecond(e.target.value)}>
+                    <label htmlFor="bg3levelupmodal-second-ability-1" className="form-label">Second Ability (+1)</label>
+                    <select id="bg3levelupmodal-second-ability-1" className="form-select" value={plusOneSecond} onChange={(e) => setPlusOneSecond(e.target.value)}>
                       <option value="str">Strength</option>
                       <option value="dex">Dexterity</option>
                       <option value="con">Constitution</option>
@@ -315,8 +336,8 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
 
               {asiType === 'feat' && (
                 <div className="form-group" style={{ margin: 0 }}>
-                  <label className="form-label">Feat Selection</label>
-                  <select className="form-select" value={selectedFeatId} onChange={(e) => setSelectedFeatId(e.target.value)}>
+                  <label htmlFor="bg3levelupmodal-feat-selection" className="form-label">Feat Selection</label>
+                  <select id="bg3levelupmodal-feat-selection" className="form-select" value={selectedFeatId} onChange={(e) => setSelectedFeatId(e.target.value)}>
                     {SRD_FEATS.map(feat => (
                       <option key={feat.id} value={feat.id}>{feat.name} ({feat.prerequisite})</option>
                     ))}
@@ -410,11 +431,23 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
             <button
               type="button"
               className="bg3-btn-venture"
-              onClick={handleApplyLevelUp}
+              onClick={() => handleApplyLevelUp(false)}
+              disabled={isMaxLevel}
+              title={isMaxLevel ? 'Already at maximum level (20)' : undefined}
             >
-              <span>Complete Level Up</span>
+              <span>{isMaxLevel ? 'Maximum Level Reached' : 'Complete Level Up'}</span>
               <ChevronRight size={18} />
             </button>
+            {targetLevel < 20 && !isMaxLevel && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ width: '100%', justifyContent: 'center', color: 'var(--text-gold)', borderColor: 'var(--border-gold)' }}
+                onClick={() => handleApplyLevelUp(true)}
+              >
+                Level Up &amp; Continue to Lvl {targetLevel + 1}
+              </button>
+            )}
             <button
               type="button"
               className="btn btn-secondary"
@@ -427,6 +460,6 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
         </div>
 
       </div>
-    </div>
+    </Modal>
   );
 }

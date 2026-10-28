@@ -1,15 +1,16 @@
 import React from 'react';
+import Modal from '../Common/Modal';
 import { X, ShieldCheck } from 'lucide-react';
 
 export default function SrdLegalModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <dialog open className="modal-dialog" onClick={(e) => { if (e.target.tagName === 'DIALOG') onClose(); }}>
+    <Modal onClose={onClose} labelledBy="srdlegal-modal-title">
       <div className="modal-header">
         <div className="modal-title">
           <ShieldCheck size={20} className="text-gold" />
-          <span>SRD 5.1 Legal & Open Gaming Attribution</span>
+          <span id="srdlegal-modal-title">SRD 5.1 Legal & Open Gaming Attribution</span>
         </div>
         <button type="button" className="btn btn-secondary btn-icon" onClick={onClose} aria-label="Close">
           <X size={18} />
@@ -44,6 +45,6 @@ export default function SrdLegalModal({ isOpen, onClose }) {
           Close Notice
         </button>
       </div>
-    </dialog>
+    </Modal>
   );
 }

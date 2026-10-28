@@ -9,14 +9,15 @@ export default function FeaturesSection({ character, onOpenAddFeature, onRemoveF
   const features = character.features || [];
 
   const toggleExpand = (id) => {
-    setExpandedIds(prev => ({ ...prev, [id]: !prev[id] }));
+    setExpandedIds(prev => ({ ...prev, [id]: !(prev[id] ?? true) }));
   };
 
-  const filteredFeatures = features.filter(f => {
-    if (sourceFilter !== 'all' && !f.source?.toLowerCase().includes(sourceFilter.toLowerCase())) return false;
-    if (search.trim() && !f.name.toLowerCase().includes(search.toLowerCase()) && !f.description?.toLowerCase().includes(search.toLowerCase())) return false;
+  const matchesFilter = (f) => {
+    if (sourceFilter !== 'all' && !(f.source || '').toLowerCase().includes(sourceFilter.toLowerCase())) return false;
+    if (search.trim() && !(f.name || '').toLowerCase().includes(search.toLowerCase()) && !f.description?.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
-  });
+  };
+  const visibleCount = features.filter(matchesFilter).length;
 
   return (
     <div className="section-box" style={{ marginBottom: '0.75rem' }}>
@@ -38,7 +39,7 @@ export default function FeaturesSection({ character, onOpenAddFeature, onRemoveF
 
       {/* Filter and Search Bar (no-print) */}
       <div className="no-print" style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.65rem' }}>
-        <input
+        <input aria-label="Search features"
           type="text"
           className="form-input"
           style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', background: '#fff', color: '#111' }}
@@ -46,7 +47,7 @@ export default function FeaturesSection({ character, onOpenAddFeature, onRemoveF
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <select
+        <select aria-label="Filter features by source"
           className="form-select"
           style={{ width: '110px', padding: '0.25rem', fontSize: '0.75rem', background: '#fff', color: '#111' }}
           value={sourceFilter}
@@ -61,13 +62,15 @@ export default function FeaturesSection({ character, onOpenAddFeature, onRemoveF
       </div>
 
       {/* Features List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '450px', overflowY: 'auto' }}>
-        {filteredFeatures.map(feat => {
+      <div className="scroll-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: '450px', overflowY: 'auto' }}>
+        {/* Filtered-out features are hidden on screen but still printed */}
+        {features.map(feat => {
           const isExpanded = expandedIds[feat.id] ?? true;
 
           return (
             <div
               key={feat.id}
+              className={matchesFilter(feat) ? '' : 'filtered-out'}
               style={{
                 border: '1px solid var(--parchment-border-light)',
                 borderRadius: '5px',
@@ -76,8 +79,11 @@ export default function FeaturesSection({ character, onOpenAddFeature, onRemoveF
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', flex: 1 }}
+                <button
+                  type="button"
+                  className="btn-reset"
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', flex: 1, textAlign: 'left' }}
+                  aria-expanded={isExpanded}
                   onClick={() => toggleExpand(feat.id)}
                 >
                   <span className="no-print" style={{ color: 'var(--parchment-text-muted)' }}>
@@ -91,9 +97,9 @@ export default function FeaturesSection({ character, onOpenAddFeature, onRemoveF
                       [{feat.source}]
                     </span>
                   )}
-                </div>
+                </button>
 
-                <button
+                <button aria-label={`Remove ${feat.name}`}
                   type="button"
                   className="no-print"
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)', padding: '0.1rem' }}
@@ -104,8 +110,9 @@ export default function FeaturesSection({ character, onOpenAddFeature, onRemoveF
                 </button>
               </div>
 
-              {isExpanded && feat.description && (
-                <div style={{ fontSize: '0.8rem', color: 'var(--parchment-text)', marginTop: '0.3rem', lineHeight: '1.4' }}>
+              {/* Collapsed descriptions stay in the DOM so the printed sheet is complete */}
+              {feat.description && (
+                <div className={`feature-desc ${isExpanded ? '' : 'is-collapsed'}`} style={{ fontSize: '0.8rem', color: 'var(--parchment-text)', marginTop: '0.3rem', lineHeight: '1.4' }}>
                   {feat.description}
                 </div>
               )}
@@ -113,8 +120,8 @@ export default function FeaturesSection({ character, onOpenAddFeature, onRemoveF
           );
         })}
 
-        {filteredFeatures.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--parchment-text-muted)', fontSize: '0.8rem' }}>
+        {visibleCount === 0 && (
+          <div className="no-print" style={{ textAlign: 'center', padding: '1rem', color: 'var(--parchment-text-muted)', fontSize: '0.8rem' }}>
             No features found.
           </div>
         )}

@@ -133,6 +133,13 @@
   margin-bottom: 1.5rem;
 }
 
+button.bg3-card {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  width: 100%;
+}
+
 .bg3-card {
   background: linear-gradient(145deg, #18202d 0%, #11151e 100%);
   border: 1.5px solid rgba(223, 184, 90, 0.25);
@@ -401,3 +408,34 @@ dialog::backdrop {
   overscroll-behavior: contain;
 }
 
+
+.bg3-btn-venture:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+}
+
+/* Full-screen BG3 overlays rendered as native modal dialogs */
+dialog.bg3-overlay-dialog {
+  border: 0;
+  margin: 0;
+  padding: 1rem;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  background: rgba(5, 7, 10, 0.95);
+  color: var(--text-main);
+  overscroll-behavior: contain;
+}
+
+dialog.bg3-overlay-dialog[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+dialog.bg3-overlay-dialog::backdrop {
+  background: rgba(5, 7, 10, 0.6);
+  backdrop-filter: blur(8px);
+}

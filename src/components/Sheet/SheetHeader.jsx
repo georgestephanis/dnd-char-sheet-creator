@@ -1,17 +1,13 @@
 import React from 'react';
-import { Sparkles, Star } from 'lucide-react';
-import { getProficiencyBonus } from '../../utils/dndRules';
 
 export default function SheetHeader({ character, onUpdateCharacter }) {
   if (!character) return null;
-
-  const profBonus = getProficiencyBonus(character.level || 1);
 
   return (
     <div className="sheet-header-box">
       {/* Left: Character Name */}
       <div className="char-name-block">
-        <input
+        <input aria-label="Character name"
           type="text"
           className="char-name-input"
           value={character.name || ''}
@@ -38,7 +34,7 @@ export default function SheetHeader({ character, onUpdateCharacter }) {
         </div>
 
         <div className="meta-field">
-          <input
+          <input aria-label="Player name"
             type="text"
             className="meta-value"
             value={character.player || ''}
@@ -56,7 +52,7 @@ export default function SheetHeader({ character, onUpdateCharacter }) {
         </div>
 
         <div className="meta-field">
-          <input
+          <input aria-label="Alignment"
             type="text"
             className="meta-value"
             value={character.alignment || ''}
@@ -67,7 +63,7 @@ export default function SheetHeader({ character, onUpdateCharacter }) {
         </div>
 
         <div className="meta-field">
-          <input
+          <input aria-label="Experience points"
             type="text"
             className="meta-value"
             value={character.xp || '0'}

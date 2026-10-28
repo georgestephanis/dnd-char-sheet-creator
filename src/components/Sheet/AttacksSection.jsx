@@ -60,17 +60,22 @@ export default function AttacksSection({ character, scores, onRollAttack, onOpen
                       </div>
                     )}
                   </td>
-                  <td
-                    style={{ fontWeight: 800, textAlign: 'center', cursor: 'pointer', fontFamily: 'var(--font-heading)' }}
-                    onClick={() => onRollAttack && onRollAttack(atk, bonus, abMod)}
-                  >
-                    {formatModifier(bonus)}
+                  <td style={{ fontWeight: 800, textAlign: 'center', fontFamily: 'var(--font-heading)' }}>
+                    <button
+                      type="button"
+                      className="btn-reset"
+                      style={{ fontWeight: 800, fontFamily: 'var(--font-heading)', cursor: 'pointer', width: '100%', padding: '0.25rem 0' }}
+                      aria-label={`Roll ${atk.name} attack, ${formatModifier(bonus)} to hit`}
+                      onClick={() => onRollAttack && onRollAttack(atk, bonus, abMod)}
+                    >
+                      {formatModifier(bonus)}
+                    </button>
                   </td>
                   <td style={{ fontSize: '0.8rem', fontWeight: 600 }}>
                     {damageWithMod}
                   </td>
                   <td className="no-print" style={{ textAlign: 'center' }}>
-                    <button
+                    <button aria-label={`Remove ${atk.name}`}
                       type="button"
                       style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)' }}
                       title="Remove attack"

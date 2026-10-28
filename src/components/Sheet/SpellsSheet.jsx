@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Trash2, Wand2, Sparkles, BookOpen, Check } from 'lucide-react';
+import React from 'react';
+import { Plus, Trash2, Wand2 } from 'lucide-react';
 import { SRD_CLASSES } from '../../data/srdClasses';
 import { getAbilityModifier, getProficiencyBonus, getSpellSlotsForClass, formatModifier } from '../../utils/dndRules';
 
@@ -112,9 +112,13 @@ export default function SpellsSheet({ character, scores, onUpdateCharacter, onOp
                   {Array.from({ length: total }).map((__, sIdx) => {
                     const isExpended = sIdx < used;
                     return (
-                      <span
+                      <button
+                        type="button"
                         key={sIdx}
+                        className="btn-reset pip-btn"
                         title={`Slot ${sIdx + 1} (${isExpended ? 'Expended' : 'Available'})`}
+                        aria-label={`Level ${slotLvl} slot ${sIdx + 1}`}
+                        aria-pressed={isExpended}
                         onClick={() => handleToggleSlot(idx, sIdx + 1)}
                         style={{
                           width: '11px',
@@ -179,7 +183,7 @@ export default function SpellsSheet({ character, scores, onUpdateCharacter, onOp
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                         {lvl > 0 && (
-                          <input
+                          <input aria-label={`${sp.name} prepared`}
                             type="checkbox"
                             checked={sp.prepared ?? false}
                             title="Prepared"
@@ -210,7 +214,7 @@ export default function SpellsSheet({ character, scores, onUpdateCharacter, onOp
                             <span>Cast</span>
                           </button>
                         )}
-                        <button
+                        <button aria-label={`Remove ${sp.name}`}
                           type="button"
                           className="no-print"
                           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)', padding: '0.1rem' }}

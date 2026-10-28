@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import Header from './components/Header';
 import CharacterSheet from './components/Sheet/CharacterSheet';
 import BG3CharacterBuilder from './components/BG3/BG3CharacterBuilder';
@@ -14,21 +15,22 @@ import CustomItemModal from './components/Modals/CustomItemModal';
 import DiceRollToast from './components/Common/DiceRollToast';
 
 import {
-  loadCharacters,
-  saveCharacters,
-  saveSingleCharacter,
-  deleteCharacterById,
-  duplicateCharacterById,
-  getActiveCharacterId,
-  setActiveCharacterId
+  loadCharacters, saveSingleCharacter, deleteCharacterById, duplicateCharacterById,
+  getActiveCharacterId, setActiveCharacterId
 } from './utils/storage';
 
-import { rollDice } from './utils/dndRules';
+import {
+  rollDice,
+  formatModifier,
+  parseDamageExpression,
+  getSpellSlotsForCharacter,
+  findAvailableSlotIndex
+} from './utils/dndRules';
 
 export default function App() {
   const [characters, setCharacters] = useState(() => loadCharacters());
   const [activeCharacterId, setActiveCharId] = useState(() => getActiveCharacterId(characters));
-  const [viewMode, setViewMode] = useState('sheet'); // 'sheet' (Tabletop) or 'bg3_view' (BG3 Inspector)
+  const [viewMode, setViewMode] = useState('sheet'); // 'sheet' (Tabletop) or 'bg3_view' (Adventurer View)
 
   // Creation & Respec Forge
   const [isCreationWizardOpen, setIsCreationWizardOpen] = useState(false);
@@ -91,7 +93,7 @@ export default function App() {
   const handleDuplicateCharacter = (id) => {
     const res = duplicateCharacterById(id);
     setCharacters(res.updatedList);
-    setActiveCharId(res.newCharacterId);
+    if (res.newCharacterId) setActiveCharId(res.newCharacterId);
   };
 
   const handleCharacterSaved = (savedChar) => {
@@ -100,7 +102,7 @@ export default function App() {
       setEditingCharacter(null);
       showToast({
         title: `${savedChar.name} Respec Saved!`,
-        dieRoll: 20,
+        dieRoll: null,
         total: `Level ${savedChar.level} ${savedChar.className}`,
         breakdown: 'Updated character in local vault'
       });
@@ -111,7 +113,7 @@ export default function App() {
       saveSingleCharacter(savedChar);
       showToast({
         title: `${savedChar.name} Created!`,
-        dieRoll: 20,
+        dieRoll: null,
         total: `Level ${savedChar.level} ${savedChar.className}`,
         breakdown: 'Character saved to local vault'
       });
@@ -125,12 +127,24 @@ export default function App() {
       title: `Advanced to Level ${leveledChar.level}!`,
       total: `${leveledChar.className} Lvl ${leveledChar.level}`,
       breakdown: `Max HP increased to ${leveledChar.maxHp}`,
-      dieRoll: 20
+      dieRoll: null
     });
   };
 
   const showToast = (toastData) => {
     setRollToast(toastData);
+  };
+
+  // Mirror dice tray results into the roll toast
+  const handleDiceTrayRoll = (entry) => {
+    showToast({
+      title: entry.title,
+      dieRoll: entry.sides === 20 ? entry.natural : null,
+      total: entry.total,
+      breakdown: entry.isAdvDis
+        ? `kept ${entry.picked}, dropped ${entry.dropped}`
+        : `rolls: ${entry.rolls.join(', ')}`
+    });
   };
 
   // Roll standard ability check (1d20 + mod)
@@ -174,41 +188,51 @@ export default function App() {
     const d20 = Math.floor(Math.random() * 20) + 1;
     const toHitTotal = d20 + toHitBonus;
 
-    let damageTotal = 0;
-    let damageRolls = [];
-    if (atk.damageDice) {
-      const match = atk.damageDice.match(/(\d+)d(\d+)/);
-      if (match) {
-        const count = parseInt(match[1], 10);
-        const sides = parseInt(match[2], 10);
-        const res = rollDice(count, sides, abilityMod);
-        damageTotal = res.total;
-        damageRolls = res.rolls;
-      }
-    }
+    const damage = parseDamageExpression(atk.damageDice);
+    const damageRes = damage ? rollDice(damage.count, damage.sides, damage.flat + abilityMod) : null;
+    const damageTotal = damageRes ? Math.max(0, damageRes.total) : null;
+    const damageBreakdown = damageRes
+      ? ` • Dmg: [${damageRes.rolls.length > 0 ? damageRes.rolls.join(', ') : '—'}] ${formatModifier(damageRes.modifier)} (${atk.damageType || ''})`
+      : '';
 
     showToast({
       title: `${atk.name} Attack`,
       dieRoll: d20,
-      total: `Atk: ${toHitTotal} | Dmg: ${damageTotal > 0 ? damageTotal : '—'}`,
-      breakdown: `To Hit: [d20 (${d20}) ${toHitBonus >= 0 ? `+ ${toHitBonus}` : `- ${Math.abs(toHitBonus)}`}] ${damageRolls.length > 0 ? `• Dmg dice: [${damageRolls.join(', ')}] ${abilityMod >= 0 ? `+${abilityMod}` : abilityMod} (${atk.damageType || ''})` : ''}`
+      total: `Atk: ${toHitTotal} | Dmg: ${damageTotal ?? '—'}`,
+      breakdown: `To Hit: [d20 (${d20}) ${toHitBonus >= 0 ? `+ ${toHitBonus}` : `- ${Math.abs(toHitBonus)}`}]${damageBreakdown}`
     });
   };
 
   // Cast spell (expends spell slot)
   const handleCastSpell = (spell) => {
-    if (spell.level > 0) {
-      const slotIndex = spell.level - 1;
-      const currentUsed = activeCharacter.spellSlotsUsed?.[slotIndex] || 0;
-      const nextArr = [...(activeCharacter.spellSlotsUsed || [0, 0, 0, 0, 0, 0, 0, 0, 0])];
-      nextArr[slotIndex] = currentUsed + 1;
-      handleUpdateCharacter({ spellSlotsUsed: nextArr });
+    if (!activeCharacter) return;
+    if (spell.level === 0) {
+      showToast({ title: `Cast: ${spell.name}`, dieRoll: null, total: 'Cantrip', breakdown: `${spell.castingTime} • ${spell.range}` });
+      return;
     }
 
+    const maxSlots = getSpellSlotsForCharacter(activeCharacter);
+    const used = activeCharacter.spellSlotsUsed || [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const slotIndex = findAvailableSlotIndex(maxSlots, used, spell.level);
+    if (slotIndex < 0) {
+      showToast({
+        title: `Cannot Cast: ${spell.name}`,
+        dieRoll: null,
+        total: 'No Slots',
+        breakdown: `No spell slots of level ${spell.level} or higher remain. Take a rest to recover.`
+      });
+      return;
+    }
+
+    const nextArr = [...used];
+    nextArr[slotIndex] = (nextArr[slotIndex] || 0) + 1;
+    handleUpdateCharacter({ spellSlotsUsed: nextArr });
+
+    const upcast = slotIndex + 1 > spell.level ? ` (upcast from ${spell.level})` : '';
     showToast({
       title: `Cast: ${spell.name}`,
-      dieRoll: 10,
-      total: spell.level === 0 ? 'Cantrip' : `Slot Lvl ${spell.level} Expended`,
+      dieRoll: null,
+      total: `Lvl ${slotIndex + 1} Slot Expended${upcast}`,
       breakdown: `${spell.castingTime} • ${spell.range}`
     });
   };
@@ -232,13 +256,43 @@ export default function App() {
 
     showToast({
       title: 'Long Rest Finished',
-      dieRoll: 20,
+      dieRoll: null,
       total: `HP Restored to ${maxHp}`,
       breakdown: `All spell slots restored & ${restoredDice} Hit Dice recovered`
     });
   };
 
   // Print Character Sheet
+  // Printing always uses the tabletop sheet; the Adventurer View is restored afterwards.
+  // Handles both the Print button and the browser's own Ctrl/Cmd+P.
+  const viewBeforePrintRef = useRef(null);
+  const viewModeRef = useRef(viewMode);
+  useEffect(() => {
+    viewModeRef.current = viewMode;
+  }, [viewMode]);
+
+  // Registered once so the listeners can't be swapped out mid-print
+  useEffect(() => {
+    const handleBeforePrint = () => {
+      if (viewModeRef.current !== 'sheet') {
+        viewBeforePrintRef.current = viewModeRef.current;
+        flushSync(() => setViewMode('sheet'));
+      }
+    };
+    const handleAfterPrint = () => {
+      if (viewBeforePrintRef.current) {
+        setViewMode(viewBeforePrintRef.current);
+        viewBeforePrintRef.current = null;
+      }
+    };
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+  }, []);
+
   const handlePrint = () => {
     window.print();
   };
@@ -298,7 +352,6 @@ export default function App() {
               }}
               onSwitchToTabletopSheet={() => setViewMode('sheet')}
               onRollCheck={handleRollCheck}
-              onRollSave={handleRollSave}
               onRollSkill={handleRollSkill}
               onRollAttack={handleRollAttack}
               onCastSpell={handleCastSpell}
@@ -326,7 +379,7 @@ export default function App() {
               Welcome to D&amp;D 5e Character Forge
             </h2>
             <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', maxWidth: '500px', margin: '0 auto 1.5rem auto' }}>
-              Create a new character using the Baldur&rsquo;s Gate 3 inspired character creator or choose a sample hero.
+              Create a new character in the guided Character Forge, or start from a sample hero.
             </p>
             <button
               type="button"
@@ -337,24 +390,39 @@ export default function App() {
                 setIsCreationWizardOpen(true);
               }}
             >
-              Venture Forth &amp; Create Hero
+              Forge a New Hero
             </button>
           </div>
         )}
       </main>
 
-      {/* Baldur's Gate 3 Character Creation / Respec Forge Modal */}
-      <BG3CharacterBuilder
-        isOpen={isCreationWizardOpen}
-        initialCharacter={editingCharacter}
-        onClose={() => {
-          setIsCreationWizardOpen(false);
-          setEditingCharacter(null);
-        }}
-        onCharacterCreated={handleCharacterSaved}
-      />
+      <footer className="app-footer no-print">
+        <span>Spotted a mimic lurking in the code?</span>
+        <a
+          href="https://github.com/georgestephanis/dnd-char-sheet-creator/issues/new"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span aria-hidden="true">🐛 </span>Report it to the Guild of Bug Hunters
+          <span className="visually-hidden"> (opens GitHub in a new tab)</span>
+        </a>
+      </footer>
 
-      {/* Baldur's Gate 3 Level Up Modal */}
+      {/* Character Forge: creation and respec */}
+      {isCreationWizardOpen && (
+        <BG3CharacterBuilder
+          key={editingCharacter?.id || 'new-character'}
+          isOpen={isCreationWizardOpen}
+          initialCharacter={editingCharacter}
+          onClose={() => {
+            setIsCreationWizardOpen(false);
+            setEditingCharacter(null);
+          }}
+          onCharacterCreated={handleCharacterSaved}
+        />
+      )}
+
+      {/* Level Up Modal */}
       <BG3LevelUpModal
         isOpen={isLevelUpOpen}
         onClose={() => setIsLevelUpOpen(false)}
@@ -363,30 +431,32 @@ export default function App() {
       />
 
       {/* Character Roster / Vault Modal */}
-      <CharacterRosterModal
-        isOpen={isRosterOpen}
-        onClose={() => setIsRosterOpen(false)}
-        characters={characters}
-        activeCharacterId={activeCharacterId}
-        onSelectCharacter={handleSelectCharacter}
-        onDeleteCharacter={handleDeleteCharacter}
-        onDuplicateCharacter={handleDuplicateCharacter}
-        onNewCharacter={() => {
-          setIsRosterOpen(false);
-          setEditingCharacter(null);
-          setIsCreationWizardOpen(true);
-        }}
-        onImportCharacters={(imported) => {
-          setCharacters(imported);
-          if (imported.length > 0) setActiveCharId(imported[0].id);
-        }}
-      />
+      {isRosterOpen && (
+        <CharacterRosterModal
+          isOpen={isRosterOpen}
+          onClose={() => setIsRosterOpen(false)}
+          characters={characters}
+          activeCharacterId={activeCharacterId}
+          onSelectCharacter={handleSelectCharacter}
+          onDeleteCharacter={handleDeleteCharacter}
+          onDuplicateCharacter={handleDuplicateCharacter}
+          onOpenCreationWizard={() => {
+            setIsRosterOpen(false);
+            setEditingCharacter(null);
+            setIsCreationWizardOpen(true);
+          }}
+          onImportCharacters={(imported) => {
+            setCharacters(imported);
+            if (imported.length > 0) setActiveCharId(imported[0].id);
+          }}
+        />
+      )}
 
       {/* Dice Roller Tray Modal */}
       <DiceRollerModal
         isOpen={isDiceRollerOpen}
         onClose={() => setIsDiceRollerOpen(false)}
-        onDiceRolled={showToast}
+        onRollComplete={handleDiceTrayRoll}
       />
 
       {/* SRD Legal Modal */}
@@ -396,33 +466,41 @@ export default function App() {
       />
 
       {/* Custom Sub-entity Modals */}
-      <CustomAttackModal
-        isOpen={isAddAttackOpen}
-        onClose={() => setIsAddAttackOpen(false)}
-        onSaveAttack={handleSaveAttack}
-      />
+      {isAddAttackOpen && (
+        <CustomAttackModal
+          isOpen={isAddAttackOpen}
+          onClose={() => setIsAddAttackOpen(false)}
+          onSaveAttack={handleSaveAttack}
+        />
+      )}
 
-      <CustomSpellModal
-        isOpen={isAddSpellOpen}
-        onClose={() => setIsAddSpellOpen(false)}
-        onSaveSpell={handleSaveSpell}
-      />
+      {isAddSpellOpen && (
+        <CustomSpellModal
+          isOpen={isAddSpellOpen}
+          onClose={() => setIsAddSpellOpen(false)}
+          onSaveSpell={handleSaveSpell}
+        />
+      )}
 
-      <CustomFeatureModal
-        isOpen={isAddFeatureOpen}
-        onClose={() => setIsAddFeatureOpen(false)}
-        onSaveFeature={handleSaveFeature}
-      />
+      {isAddFeatureOpen && (
+        <CustomFeatureModal
+          isOpen={isAddFeatureOpen}
+          onClose={() => setIsAddFeatureOpen(false)}
+          onSaveFeature={handleSaveFeature}
+        />
+      )}
 
-      <CustomItemModal
-        isOpen={isAddItemOpen}
-        onClose={() => setIsAddItemOpen(false)}
-        onSaveItem={handleSaveItem}
-      />
+      {isAddItemOpen && (
+        <CustomItemModal
+          isOpen={isAddItemOpen}
+          onClose={() => setIsAddItemOpen(false)}
+          onSaveItem={handleSaveItem}
+        />
+      )}
 
       {/* Live Dice Roll Toast Feedback */}
       <DiceRollToast
-        rollData={rollToast}
+        rollToast={rollToast}
         onDismiss={() => setRollToast(null)}
       />
     </div>

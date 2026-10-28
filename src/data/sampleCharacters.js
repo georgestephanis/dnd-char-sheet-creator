@@ -3,7 +3,7 @@
 export const SAMPLE_CHARACTERS = [
   {
     id: 'sample-fighter-1',
-    name: 'Bruenor Ironfist',
+    name: 'Torvin Stonehelm',
     raceId: 'dwarf',
     subraceId: 'hill-dwarf',
     raceName: 'Hill Dwarf',
@@ -12,8 +12,8 @@ export const SAMPLE_CHARACTERS = [
     subclassId: '',
     subclassName: '',
     level: 1,
-    backgroundId: 'soldier',
-    backgroundName: 'Soldier',
+    backgroundId: 'custom',
+    backgroundName: 'Veteran (Homebrew)',
     alignment: 'Lawful Good',
     player: 'Adventurer',
     xp: '0',
@@ -62,7 +62,7 @@ export const SAMPLE_CHARACTERS = [
     ideals: 'Greater Good: Our lot is to lay down our lives in defense of the realm and clan.',
     bonds: 'I would still lay down my life for the shield-brothers I served with on the frontier.',
     flaws: 'My stubbornness often blinds me to other ways of solving problems.',
-    backstory: 'Hailing from the granite halls beneath the mountains, Bruenor served with distinction in the city guard before setting forth to reclaim ancestral honor.',
+    backstory: 'Hailing from the granite halls beneath the mountains, Torvin served with distinction in the city guard before setting forth to reclaim ancestral honor.',
     avatarUrl: ''
   },
   {
@@ -76,8 +76,8 @@ export const SAMPLE_CHARACTERS = [
     subclassId: 'school-of-evocation',
     subclassName: 'School of Evocation',
     level: 3,
-    backgroundId: 'sage',
-    backgroundName: 'Sage',
+    backgroundId: 'custom',
+    backgroundName: 'Scholar (Homebrew)',
     alignment: 'Neutral Good',
     player: 'Adventurer',
     xp: '900',
@@ -109,8 +109,7 @@ export const SAMPLE_CHARACTERS = [
       { id: 'fw-3', name: 'Trance', source: 'Racial', description: 'Meditate deeply for 4 hours instead of 8 hours of sleep.' },
       { id: 'fw-4', name: 'Arcane Recovery', source: 'Class', description: 'Recover up to 2 levels of spell slots on short rest once per day.' },
       { id: 'fw-5', name: 'Evocation Savant', source: 'Subclass', description: 'Halve gold and time needed to copy evocation spells into your spellbook.' },
-      { id: 'fw-6', name: 'Sculpt Spells', source: 'Subclass', description: 'Protect 1 + spell level allies from taking damage from your evocation spells.' },
-      { id: 'fw-7', name: 'Researcher', source: 'Background', description: 'You know where and from whom to obtain elusive arcane knowledge.' }
+      { id: 'fw-6', name: 'Sculpt Spells', source: 'Subclass', description: 'Protect 1 + spell level allies from taking damage from your evocation spells.' }
     ],
     spells: [
       { id: 'fire-bolt', name: 'Fire Bolt', level: 0, prepared: true, school: 'Evocation' },
@@ -151,8 +150,8 @@ export const SAMPLE_CHARACTERS = [
     subclassId: '',
     subclassName: '',
     level: 2,
-    backgroundId: 'criminal',
-    backgroundName: 'Criminal / Spy',
+    backgroundId: 'custom',
+    backgroundName: 'Rooftop Runner (Homebrew)',
     alignment: 'Chaotic Good',
     player: 'Adventurer',
     xp: '300',

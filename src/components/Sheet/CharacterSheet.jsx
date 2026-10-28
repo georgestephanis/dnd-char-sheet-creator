@@ -9,8 +9,8 @@ import FeaturesSection from './FeaturesSection';
 import InventorySection from './InventorySection';
 import SpellsSheet from './SpellsSheet';
 import RoleplaySection from './RoleplaySection';
-import { getCalculatedAbilityScores, getAbilityModifier, getProficiencyBonus } from '../../utils/dndRules';
-import { Shield, Sparkles, BookOpen, User, Star } from 'lucide-react';
+import { getCalculatedAbilityScores, getProficiencyBonus, getSkillBonus } from '../../utils/dndRules';
+import { Shield, Sparkles, BookOpen, Star } from 'lucide-react';
 
 export default function CharacterSheet({
   character,
@@ -40,19 +40,9 @@ export default function CharacterSheet({
   const profBonus = getProficiencyBonus(character.level || 1);
 
   // Passive Senses calculations
-  const wisMod = getAbilityModifier(scores.wis);
-  const intMod = getAbilityModifier(scores.int);
-  const isPerceptionProf = character.skillProficiencies?.includes('Perception');
-  const isPerceptionExp = character.expertiseSkills?.includes('Perception');
-  const passivePerception = 10 + wisMod + (isPerceptionExp ? profBonus * 2 : isPerceptionProf ? profBonus : 0);
-
-  const isInsightProf = character.skillProficiencies?.includes('Insight');
-  const isInsightExp = character.expertiseSkills?.includes('Insight');
-  const passiveInsight = 10 + wisMod + (isInsightExp ? profBonus * 2 : isInsightProf ? profBonus : 0);
-
-  const isInvestigationProf = character.skillProficiencies?.includes('Investigation');
-  const isInvestigationExp = character.expertiseSkills?.includes('Investigation');
-  const passiveInvestigation = 10 + intMod + (isInvestigationExp ? profBonus * 2 : isInvestigationProf ? profBonus : 0);
+  const passivePerception = 10 + getSkillBonus(character, 'Perception', scores.wis);
+  const passiveInsight = 10 + getSkillBonus(character, 'Insight', scores.wis);
+  const passiveInvestigation = 10 + getSkillBonus(character, 'Investigation', scores.int);
 
   const handleToggleSaveProficiency = (abId) => {
     const list = character.savingThrowsProficient || [];
@@ -154,7 +144,8 @@ export default function CharacterSheet({
       </div>
 
       {/* PAGE 1: Core Character Sheet (Visible on screen if tab is 'core', or in print) */}
-      <div className={`sheet-page ${activeTab !== 'core' ? 'no-print-hide' : ''}`} style={activeTab !== 'core' ? { display: 'none' } : {}}>
+      {/* Inactive tabs are hidden on screen only; print renders all three pages */}
+      <div className={`sheet-page sheet-tab-panel ${activeTab !== 'core' ? 'is-inactive' : ''}`}>
         <SheetHeader character={character} onUpdateCharacter={onUpdateCharacter} />
 
         {/* Main 3-Column Sheet Body */}
@@ -261,7 +252,7 @@ export default function CharacterSheet({
       </div>
 
       {/* PAGE 2 / TAB: Spellbook & Magic */}
-      <div style={activeTab !== 'spells' ? { display: 'none' } : {}}>
+      <div className={`sheet-tab-panel ${activeTab !== 'spells' ? 'is-inactive' : ''}`}>
         <SpellsSheet
           character={character}
           scores={scores}
@@ -273,7 +264,7 @@ export default function CharacterSheet({
       </div>
 
       {/* PAGE 3 / TAB: Roleplay & Bio */}
-      <div className="sheet-page" style={activeTab !== 'roleplay' ? { display: 'none', marginTop: '1rem' } : { marginTop: '1rem' }}>
+      <div className={`sheet-page sheet-tab-panel ${activeTab !== 'roleplay' ? 'is-inactive' : ''}`} style={{ marginTop: '1rem' }}>
         <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--parchment-text)', marginBottom: '1rem', borderBottom: '2px solid var(--parchment-border-light)', paddingBottom: '0.5rem' }}>
           Roleplay, Traits &amp; Backstory
         </h3>

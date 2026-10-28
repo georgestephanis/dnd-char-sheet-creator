@@ -1,7 +1,7 @@
 import React from 'react';
 import { ABILITIES, getAbilityModifier, formatModifier } from '../../utils/dndRules';
 
-export default function AbilityScores({ scores, onRollCheck, onUpdateScore }) {
+export default function AbilityScores({ scores, onRollCheck }) {
   return (
     <div className="abilities-sidebar">
       {ABILITIES.map(ab => {
@@ -11,13 +11,15 @@ export default function AbilityScores({ scores, onRollCheck, onUpdateScore }) {
         return (
           <div key={ab.id} className="ability-score-card">
             <span className="ability-name">{ab.short}</span>
-            <div
-              className="ability-modifier"
+            <button
+              type="button"
+              className="ability-modifier btn-reset"
               title={`Click to roll ${ab.name} check (${formatModifier(mod)})`}
+              aria-label={`Roll ${ab.name} check, ${formatModifier(mod)}`}
               onClick={() => onRollCheck && onRollCheck(ab.name, mod)}
             >
               {formatModifier(mod)}
-            </div>
+            </button>
             <div className="ability-score-bubble">
               {score}
             </div>
