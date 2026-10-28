@@ -17,10 +17,11 @@ const ARRAY_FIELDS = ['attacks', 'features', 'spells', 'equipment', 'skillProfic
 // Fill in fields older or hand-edited files may lack, so components can rely on their shape
 export function normalizeCharacter(raw) {
   const character = { ...raw };
+  if (!character.id) character.id = generateCharacterId();
   for (const field of ARRAY_FIELDS) {
     if (!Array.isArray(character[field])) character[field] = [];
   }
-  character.features = character.features.filter(f => f && typeof f === 'object');
+  character.features = character.features.filter(f => f && typeof f === 'object' && typeof f.name === 'string');
   if (!Array.isArray(character.spellSlotsUsed)) character.spellSlotsUsed = [0, 0, 0, 0, 0, 0, 0, 0, 0];
   if (!character.abilityScores || typeof character.abilityScores !== 'object') {
     character.abilityScores = { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 };
@@ -41,7 +42,11 @@ export function loadCharacters() {
     const parsed = JSON.parse(raw);
     // An empty array is a deliberate empty roster; only seed samples when the key is absent
     if (Array.isArray(parsed)) {
-      return parsed.filter(c => c && typeof c === 'object' && c.id).map(normalizeCharacter);
+      const entries = parsed.filter(c => c && typeof c === 'object');
+      const characters = entries.map(normalizeCharacter);
+      // Persist ids generated for legacy entries so they stay stable across reloads
+      if (entries.some(c => !c.id)) saveCharacters(characters);
+      return characters;
     }
     return SAMPLE_CHARACTERS;
   } catch (err) {
