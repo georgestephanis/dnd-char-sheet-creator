@@ -130,7 +130,8 @@ export default function BG3CharacterBuilder({
         const values = Object.values(stored);
         const isPointBuy = values.every(v => POINT_BUY_COSTS[v] !== undefined) &&
           values.reduce((acc, v) => acc + POINT_BUY_COSTS[v], 0) === POINT_BUY_TOTAL;
-        setPointBuyScores(stored);
+        // Only seed point buy with scores it can represent; otherwise keep its valid default
+        if (isPointBuy) setPointBuyScores(stored);
         setBaseScores(stored);
         // Rolled or hand-entered scores can't be represented as a 27-point buy
         setScoreMethod(isPointBuy ? 'pointbuy' : 'roll');
@@ -520,9 +521,10 @@ export default function BG3CharacterBuilder({
 
     // Max HP: level-1 value plus the fixed average for each further level
     const hitDie = currentClass.hitDie || 8;
-    const extraPerLevel = bonusHpPerLevel + (keptFeatures.some(f => /^feat:\s*tough$/i.test(f.name || '')) ? 2 : 0);
+    // Tough grants +2 HP per level including 1st, so it's added for every level separately
+    const hasTough = keptFeatures.some(f => /^feat:\s*tough$/i.test(f.name || ''));
     const level = rebuilt.level || 1;
-    const maxHp = Math.max(level, startingHp + (level - 1) * (Math.floor(hitDie / 2) + 1 + conMod + extraPerLevel));
+    const maxHp = Math.max(level, startingHp + (level - 1) * (Math.floor(hitDie / 2) + 1 + conMod + bonusHpPerLevel) + (hasTough ? 2 * level : 0));
     const damageTaken = Math.max(0, (existing.maxHp || 0) - (existing.currentHp ?? existing.maxHp ?? 0));
 
     return {
