@@ -526,7 +526,12 @@ export default function BG3CharacterBuilder({
     const builderSpellIds = new Set(rebuilt.spells.map(sp => sp.id));
     const isBuilderFeature = (f) => /^(rf-|srf-|cf-1-|scf-1-|bg-feat|vf-1)/.test(f.id || ''); // vf-1: legacy Variant Human feat
     const subclassChanged = (existing.subclassId || '') !== (rebuilt.subclassId || '');
-    const isSubclassLevelFeature = (f) => /^sf-/.test(f.id || '');
+    // Level-up subclass features use sf- ids; older/sample data marks them by source instead
+    const oldSubclassName = (existing.subclassName || '').toLowerCase();
+    const isSubclassLevelFeature = (f) =>
+      /^sf-/.test(f.id || '') ||
+      /^subclass\b/i.test(f.source || '') ||
+      (oldSubclassName && (f.source || '').toLowerCase().startsWith(oldSubclassName));
     const isClassLevelFeature = (f) => /^(f-|sf-)/.test(f.id || '');
 
     // Also drop older copies of features the builder just regenerated (e.g. sample characters' own ids)
