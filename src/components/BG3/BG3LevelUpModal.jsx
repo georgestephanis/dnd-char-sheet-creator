@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Modal from '../Common/Modal';
 import {
   X, TrendingUp, Sparkles, Shield, Heart, Award, Dices, ChevronRight, Check
 } from 'lucide-react';
@@ -149,7 +150,7 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(5, 7, 10, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(8px)' }}>
+    <Modal onClose={onClose} className="bg3-overlay-dialog" labelledBy="bg3-levelup-title" closeOnBackdrop={false}>
       <div className="bg3-creator-container" style={{ width: '92vw', maxWidth: '1100px', gridTemplateColumns: '1fr 340px', height: '88vh' }}>
 
         {/* LEFT / CENTER STAGE: LEVEL-UP PERKS & CHOICES */}
@@ -157,7 +158,7 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
           {/* Header Banner */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(223, 184, 90, 0.3)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
             <div>
-              <div style={{ fontSize: '0.75rem', fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              <div id="bg3-levelup-title" style={{ fontSize: '0.75rem', fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                 LEVEL UP ADVANCEMENT
               </div>
               <div className="bg3-section-title" style={{ margin: 0 }}>
@@ -449,6 +450,6 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
         </div>
 
       </div>
-    </div>
+    </Modal>
   );
 }

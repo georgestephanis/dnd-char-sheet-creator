@@ -427,29 +427,37 @@ export default function App() {
       />
 
       {/* Custom Sub-entity Modals */}
-      <CustomAttackModal
-        isOpen={isAddAttackOpen}
-        onClose={() => setIsAddAttackOpen(false)}
-        onSaveAttack={handleSaveAttack}
-      />
+      {isAddAttackOpen && (
+        <CustomAttackModal
+          isOpen={isAddAttackOpen}
+          onClose={() => setIsAddAttackOpen(false)}
+          onSaveAttack={handleSaveAttack}
+        />
+      )}
 
-      <CustomSpellModal
-        isOpen={isAddSpellOpen}
-        onClose={() => setIsAddSpellOpen(false)}
-        onSaveSpell={handleSaveSpell}
-      />
+      {isAddSpellOpen && (
+        <CustomSpellModal
+          isOpen={isAddSpellOpen}
+          onClose={() => setIsAddSpellOpen(false)}
+          onSaveSpell={handleSaveSpell}
+        />
+      )}
 
-      <CustomFeatureModal
-        isOpen={isAddFeatureOpen}
-        onClose={() => setIsAddFeatureOpen(false)}
-        onSaveFeature={handleSaveFeature}
-      />
+      {isAddFeatureOpen && (
+        <CustomFeatureModal
+          isOpen={isAddFeatureOpen}
+          onClose={() => setIsAddFeatureOpen(false)}
+          onSaveFeature={handleSaveFeature}
+        />
+      )}
 
-      <CustomItemModal
-        isOpen={isAddItemOpen}
-        onClose={() => setIsAddItemOpen(false)}
-        onSaveItem={handleSaveItem}
-      />
+      {isAddItemOpen && (
+        <CustomItemModal
+          isOpen={isAddItemOpen}
+          onClose={() => setIsAddItemOpen(false)}
+          onSaveItem={handleSaveItem}
+        />
+      )}
 
       {/* Live Dice Roll Toast Feedback */}
       <DiceRollToast

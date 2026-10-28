@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Modal from '../Common/Modal';
 import { X, Dices, RotateCcw } from 'lucide-react';
 import { rollDice } from '../../utils/dndRules';
 
@@ -55,11 +56,11 @@ export default function DiceRollerModal({ isOpen, onClose, onRollComplete }) {
   const diceOptions = [4, 6, 8, 10, 12, 20, 100];
 
   return (
-    <dialog open className="modal-dialog" onClick={(e) => { if (e.target.tagName === 'DIALOG') onClose(); }}>
+    <Modal onClose={onClose} labelledBy="diceroller-modal-title">
       <div className="modal-header">
         <div className="modal-title">
           <Dices size={20} className="text-gold" />
-          <span>Interactive Dice Roller</span>
+          <span id="diceroller-modal-title">Interactive Dice Roller</span>
         </div>
         <button type="button" className="btn btn-secondary btn-icon" onClick={onClose} aria-label="Close">
           <X size={18} />
@@ -224,6 +225,6 @@ export default function DiceRollerModal({ isOpen, onClose, onRollComplete }) {
           Close
         </button>
       </div>
-    </dialog>
+    </Modal>
   );
 }

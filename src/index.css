@@ -693,6 +693,7 @@ dialog.modal-dialog {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
   margin: auto;
   overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 dialog.modal-dialog::backdrop {

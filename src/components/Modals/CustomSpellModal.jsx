@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Modal from '../Common/Modal';
 import { X, Sparkles } from 'lucide-react';
 import { SRD_SPELLS } from '../../data/srdSpells';
 
@@ -63,11 +64,11 @@ export default function CustomSpellModal({ isOpen, onClose, onSaveSpell }) {
   };
 
   return (
-    <dialog open className="modal-dialog" style={{ maxWidth: '750px' }} onClick={(e) => { if (e.target.tagName === 'DIALOG') onClose(); }}>
+    <Modal onClose={onClose} style={{ maxWidth: '750px' }} labelledBy="customspell-modal-title">
       <div className="modal-header">
         <div className="modal-title">
           <Sparkles size={20} className="text-gold" />
-          <span>Add Spell to Spellbook</span>
+          <span id="customspell-modal-title">Add Spell to Spellbook</span>
         </div>
         <button type="button" className="btn btn-secondary btn-icon" onClick={onClose} aria-label="Close">
           <X size={18} />
@@ -308,6 +309,6 @@ export default function CustomSpellModal({ isOpen, onClose, onSaveSpell }) {
           Close
         </button>
       </div>
-    </dialog>
+    </Modal>
   );
 }

@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import Modal from './Common/Modal';
 import { X, UserPlus, Download, Upload, Copy, Trash2, Play, Users } from 'lucide-react';
 import { exportCharacterToJson, exportAllCharactersToJson, importCharactersFromJson } from '../utils/storage';
 
@@ -14,6 +15,8 @@ export default function CharacterRosterModal({
   onImportCharacters
 }) {
   const fileInputRef = useRef(null);
+  const [importStatus, setImportStatus] = useState(null); // { type: 'success' | 'error', message }
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
   if (!isOpen) return null;
 
@@ -27,10 +30,10 @@ export default function CharacterRosterModal({
       if (typeof text === 'string') {
         const res = importCharactersFromJson(text);
         if (res.success) {
-          alert(`Successfully imported ${res.count} character(s)!`);
+          setImportStatus({ type: 'success', message: `Imported ${res.count} character${res.count === 1 ? '' : 's'}.` });
           onImportCharacters(res.list);
         } else {
-          alert(`Error importing characters: ${res.error}`);
+          setImportStatus({ type: 'error', message: `Import failed: ${res.error}` });
         }
       }
     };
@@ -40,11 +43,11 @@ export default function CharacterRosterModal({
   };
 
   return (
-    <dialog open className="modal-dialog" style={{ maxWidth: '800px' }} onClick={(e) => { if (e.target.tagName === 'DIALOG') onClose(); }}>
+    <Modal onClose={onClose} style={{ maxWidth: '800px' }} labelledBy="characterroster-modal-title">
       <div className="modal-header">
         <div className="modal-title">
           <Users size={20} className="text-gold" />
-          <span>Character Roster & Vault</span>
+          <span id="characterroster-modal-title">Character Roster & Vault</span>
         </div>
         <button type="button" className="btn btn-secondary btn-icon" onClick={onClose} aria-label="Close">
           <X size={18} />
@@ -93,6 +96,28 @@ export default function CharacterRosterModal({
             </button>
           </div>
         </div>
+
+        {importStatus && (
+          <div
+            role="status"
+            style={{
+              marginBottom: '1rem',
+              padding: '0.6rem 0.85rem',
+              borderRadius: '6px',
+              fontSize: '0.85rem',
+              border: `1px solid ${importStatus.type === 'error' ? 'var(--accent-red)' : 'var(--border-gold)'}`,
+              color: importStatus.type === 'error' ? 'var(--accent-red)' : 'var(--text-gold)'
+            }}
+          >
+            {importStatus.message}
+          </div>
+        )}
+
+        {characters.length === 0 && (
+          <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem 0' }}>
+            Your vault is empty. Create a character or import a JSON backup.
+          </div>
+        )}
 
         {/* Characters Grid / List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '420px', overflowY: 'auto' }}>
@@ -167,6 +192,7 @@ export default function CharacterRosterModal({
                     type="button"
                     className="btn btn-secondary btn-icon btn-sm"
                     title="Duplicate character"
+                    aria-label={`Duplicate ${char.name || 'character'}`}
                     onClick={() => onDuplicateCharacter(char.id)}
                   >
                     <Copy size={15} />
@@ -176,24 +202,40 @@ export default function CharacterRosterModal({
                     type="button"
                     className="btn btn-secondary btn-icon btn-sm"
                     title="Export JSON"
+                    aria-label={`Export ${char.name || 'character'} as JSON`}
                     onClick={() => exportCharacterToJson(char)}
                   >
                     <Download size={15} />
                   </button>
 
-                  <button
-                    type="button"
-                    className="btn btn-secondary btn-icon btn-sm"
-                    title="Delete character"
-                    style={{ color: 'var(--accent-red)' }}
-                    onClick={() => {
-                      if (window.confirm(`Are you sure you want to delete ${char.name}? This cannot be undone.`)) {
-                        onDeleteCharacter(char.id);
-                      }
-                    }}
-                  >
-                    <Trash2 size={15} />
-                  </button>
+                  {pendingDeleteId === char.id ? (
+                    <>
+                      <button
+                        type="button"
+                        className="btn btn-accent btn-sm"
+                        onClick={() => {
+                          setPendingDeleteId(null);
+                          onDeleteCharacter(char.id);
+                        }}
+                      >
+                        Delete {char.name || 'character'}?
+                      </button>
+                      <button type="button" className="btn btn-secondary btn-sm" onClick={() => setPendingDeleteId(null)}>
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-icon btn-sm"
+                      title="Delete character"
+                      aria-label={`Delete ${char.name || 'character'}`}
+                      style={{ color: 'var(--accent-red)' }}
+                      onClick={() => setPendingDeleteId(char.id)}
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -206,6 +248,6 @@ export default function CharacterRosterModal({
           Close Roster
         </button>
       </div>
-    </dialog>
+    </Modal>
   );
 }

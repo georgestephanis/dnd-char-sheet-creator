@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Modal from '../Common/Modal';
 import { X, Award } from 'lucide-react';
 
 export default function CustomFeatureModal({ isOpen, onClose, onSaveFeature }) {
@@ -24,12 +25,12 @@ export default function CustomFeatureModal({ isOpen, onClose, onSaveFeature }) {
   };
 
   return (
-    <dialog open className="modal-dialog" onClick={(e) => { if (e.target.tagName === 'DIALOG') onClose(); }}>
+    <Modal onClose={onClose} labelledBy="customfeature-modal-title">
       <form onSubmit={handleSubmit}>
         <div className="modal-header">
           <div className="modal-title">
             <Award size={20} className="text-gold" />
-            <span>Add Custom Feature / Trait / Feat</span>
+            <span id="customfeature-modal-title">Add Custom Feature / Trait / Feat</span>
           </div>
           <button type="button" className="btn btn-secondary btn-icon" onClick={onClose} aria-label="Close">
             <X size={18} />
@@ -88,6 +89,6 @@ export default function CustomFeatureModal({ isOpen, onClose, onSaveFeature }) {
           </button>
         </div>
       </form>
-    </dialog>
+    </Modal>
   );
 }

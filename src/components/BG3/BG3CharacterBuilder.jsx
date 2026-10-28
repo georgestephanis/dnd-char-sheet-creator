@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Modal from '../Common/Modal';
 import {
   Shield, Sword, Wand2, Sparkles, User, BookOpen, Check,
   Dices, Star, Heart, Zap, Wind, ChevronRight, ChevronLeft, Award, Plus, Trash2, ArrowLeft, RefreshCw, Flame
@@ -593,13 +594,13 @@ export default function BG3CharacterBuilder({
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(5, 7, 10, 0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', backdropFilter: 'blur(8px)', overscrollBehavior: 'contain' }}>
+    <Modal onClose={onClose} className="bg3-overlay-dialog" labelledBy="bg3-forge-title" closeOnBackdrop={false}>
       <div className="bg3-creator-container" style={{ width: '96vw', maxWidth: '1440px', height: '94vh' }}>
 
         {/* PILLAR 1: STEP CATEGORIES */}
         <div className="bg3-steps-pillar">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.6rem', borderBottom: '1px solid rgba(223, 184, 90, 0.25)', marginBottom: '0.5rem' }}>
-            <span style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 800, fontSize: '0.95rem' }}>
+            <span id="bg3-forge-title" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 800, fontSize: '0.95rem' }}>
               CHARACTER FORGE
             </span>
             <button
@@ -1492,6 +1493,6 @@ export default function BG3CharacterBuilder({
         </div>
 
       </div>
-    </div>
+    </Modal>
   );
 }

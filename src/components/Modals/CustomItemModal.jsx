@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Modal from '../Common/Modal';
 import { X, Backpack } from 'lucide-react';
 import { SRD_ARMOR, SRD_WEAPONS, SRD_ADVENTURING_PACKS } from '../../data/srdEquipment';
 
@@ -64,12 +65,12 @@ export default function CustomItemModal({ isOpen, onClose, onSaveItem }) {
   };
 
   return (
-    <dialog open className="modal-dialog" onClick={(e) => { if (e.target.tagName === 'DIALOG') onClose(); }}>
+    <Modal onClose={onClose} labelledBy="customitem-modal-title">
       <form onSubmit={handleSubmit}>
         <div className="modal-header">
           <div className="modal-title">
             <Backpack size={20} className="text-gold" />
-            <span>Add Inventory Item</span>
+            <span id="customitem-modal-title">Add Inventory Item</span>
           </div>
           <button type="button" className="btn btn-secondary btn-icon" onClick={onClose} aria-label="Close">
             <X size={18} />
@@ -170,6 +171,6 @@ export default function CustomItemModal({ isOpen, onClose, onSaveItem }) {
           </button>
         </div>
       </form>
-    </dialog>
+    </Modal>
   );
 }

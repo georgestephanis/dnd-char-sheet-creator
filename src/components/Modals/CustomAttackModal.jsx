@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Modal from '../Common/Modal';
 import { X, Sword } from 'lucide-react';
 import { SRD_WEAPONS } from '../../data/srdEquipment';
 
@@ -49,12 +50,12 @@ export default function CustomAttackModal({ isOpen, onClose, onSaveAttack }) {
   };
 
   return (
-    <dialog open className="modal-dialog" onClick={(e) => { if (e.target.tagName === 'DIALOG') onClose(); }}>
+    <Modal onClose={onClose} labelledBy="customattack-modal-title">
       <form onSubmit={handleSubmit}>
         <div className="modal-header">
           <div className="modal-title">
             <Sword size={20} className="text-gold" />
-            <span>Add Attack / Weapon</span>
+            <span id="customattack-modal-title">Add Attack / Weapon</span>
           </div>
           <button type="button" className="btn btn-secondary btn-icon" onClick={onClose} aria-label="Close">
             <X size={18} />
@@ -178,6 +179,6 @@ export default function CustomAttackModal({ isOpen, onClose, onSaveAttack }) {
           </button>
         </div>
       </form>
-    </dialog>
+    </Modal>
   );
 }
