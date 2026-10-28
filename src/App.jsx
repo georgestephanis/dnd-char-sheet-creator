@@ -396,6 +396,18 @@ export default function App() {
         )}
       </main>
 
+      <footer className="app-footer no-print">
+        <span>Spotted a mimic lurking in the code?</span>
+        <a
+          href="https://github.com/georgestephanis/dnd-char-sheet-creator/issues/new"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          🐛 Report it to the Guild of Bug Hunters
+          <span className="visually-hidden"> (opens GitHub in a new tab)</span>
+        </a>
+      </footer>
+
       {/* Baldur's Gate 3 Character Creation / Respec Forge Modal */}
       {isCreationWizardOpen && (
         <BG3CharacterBuilder
