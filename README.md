@@ -27,7 +27,7 @@ Featuring a **guided character creation & level-up interface**, an **illustrated
 - **Lineage & Subraces**:
   - *SRD 5.1:* 9 races (Dwarf, Elf, Halfling, Human, Dragonborn, Gnome, Half-Elf, Half-Orc, Tiefling) with their SRD subraces (Hill Dwarf, High Elf, Lightfoot Halfling, Rock Gnome).
   - *SRD 5.2.1:* 9 species (Dragonborn, Dwarf, Elf, Gnome, Goliath, Halfling, Human, Orc, Tiefling) with their lineages and ancestries.
-- **12 Classes & Level 1 Disciplines**: Barbarian, Bard, Cleric, Druid, Fighter, Monk, Paladin, Ranger, Rogue, Sorcerer, Warlock, Wizard with fighting styles, divine domains, and patrons.
+- **12 Classes**: Barbarian, Bard, Cleric, Druid, Fighter, Monk, Paladin, Ranger, Rogue, Sorcerer, Warlock, Wizard, each with its SRD subclass, offered once the character reaches the subclass level (see Level-Up below).
 - **Ability Score Allocation**:
   - **Point Buy (27 Points)** with standard costs (8 to 15), live budget progress meter, and `[-]`/`[+]` spinners.
   - **⭐ Class Recommended (1-Click)**: Instantly assign optimal 27-point stats tailored to your class.
@@ -35,7 +35,7 @@ Featuring a **guided character creation & level-up interface**, an **illustrated
   - Clear **ability bonus tags** and live modifier calculations. Bonuses come from race/subrace in SRD 5.1, and from the background (+2/+1 or +1/+1/+1, chosen on the Background step) in SRD 5.2.1.
 - **Background & Skill Selection**: SRD 5.1 has Acolyte; SRD 5.2.1 has Acolyte, Criminal, Sage and Soldier, each with ability increases and an Origin feat. Both versions also offer a custom/homebrew background. Rogues choose their two Expertise skills. Auto-pruning prevents locked states when switching classes; locks granted background proficiencies with a shield badge and allows dynamic skill swapping.
 - **Spells & Magic**: Starting Cantrips and 1st-level spells filtered by class with spell slot indicators.
-- **Appearance & Identity**: Curated fantasy character avatar gallery, custom image URL input, alignment matrix, and a **Random Fantasy Name Generator (🎲)** tailored to your race.
+- **Appearance & Identity**: Curated fantasy character avatar gallery, custom image URL input, an alignment dropdown, and a **Random Fantasy Name Generator (🎲)** tailored to your race.
 
 ---
 
@@ -51,7 +51,8 @@ Featuring a **guided character creation & level-up interface**, an **illustrated
 ---
 
 ### 📜 Printable Tabletop Character Sheet
-- High-density, 3-column classic 5e sheet layout with tabbed views: **Combat & Core**, **Features & Traits**, **Inventory & Equipment**, **Spellbook**, and **Roleplay & Backstory**.
+- High-density, 3-column classic 5e sheet layout with three tabs: **Core** (abilities, skills, combat, attacks, features and inventory), **Spellbook**, and **Roleplay & Backstory**.
+- Alignment is a dropdown and Experience Points is a whole-number field shown with thousands separators (e.g. 12,000).
 - **Print-Ready (`@media print`)**: Prints all three pages (Core, Spellbook, Roleplay) on US Letter or A4 from either view. Web chrome, buttons, headers, and tabs are stripped, producing a clean, high-contrast, black-and-white physical character sheet.
 
 ---
@@ -60,9 +61,9 @@ Featuring a **guided character creation & level-up interface**, an **illustrated
 - Advance characters one level at a time from Level 1 to 20 (with *Level Up & Continue* for several levels):
   - **Hit Points Increase**: Choose "Take Average" or "Roll 1dHitDie live" with animated dice rolling.
   - **Class Features Unlocked**: Automatic breakdown of all features granted at the new level.
-  - **Subclass Selection**: Prompts when reaching your class's archetype level (e.g. Level 3 for Fighter/Rogue, Level 2 for Wizard).
+  - **Subclass Selection**: Prompts when reaching your class's subclass level. In SRD 5.2.1 that's level 3 for every class. In SRD 5.1 it's level 1 (Cleric, Sorcerer, Warlock), level 2 (Druid, Wizard) or level 3 (everyone else).
   - **ASI & Feats**: Choose between +2 to one ability, +1 to two abilities, or a Feat (SRD 5.1: Grappler; SRD 5.2.1: General feats, plus Epic Boons at level 19).
-  - **Live Before ➔ After Diff**: Right-hand inspector displays real-time before/after stat increases.
+  - **Hit Dice & Max HP**: Updated automatically, including per-level bonuses such as Dwarven Toughness and Tough.
 
 ---
 
@@ -79,7 +80,7 @@ Featuring a **guided character creation & level-up interface**, an **illustrated
 Just want to roll up a hero? Try it in your browser at **[dnd.stephanis.me](https://dnd.stephanis.me)**. No install needed, and characters stay in your browser's `localStorage`.
 
 ### Prerequisites
-- Node.js (v18.0.0 or higher, v20+ recommended)
+- Node.js 20.19+ or 22.12+ (required by Vite; CI uses Node 22)
 - npm or pnpm
 
 ### Installation
@@ -102,6 +103,18 @@ Open the local URL Vite prints (usually `http://localhost:5173/`). If that port 
 npm run build
 npm run preview
 ```
+
+The build splits React, the icon set, and each SRD version's data into separate files, so browsers can keep them cached when the app code changes.
+
+### Linting & CI
+```bash
+npm run lint
+```
+
+Lint uses oxlint, including accessibility (`jsx-a11y`) rules. GitHub Actions runs lint and the production build on every pull request.
+
+### Reporting Bugs & Ideas
+Use the **"Report it to the Guild of Bug Hunters"** link in the app's footer, or [open an issue](https://github.com/georgestephanis/dnd-char-sheet-creator/issues/new/choose). There are forms for bug reports, rules or content errors (please cite the SRD page), and feature ideas.
 
 ---
 
@@ -127,7 +140,7 @@ dnd-char-sheet-creator/
 │   │   │   ├── Modal.jsx                  # Shared native <dialog> (showModal, Escape, focus return)
 │   │   │   └── DiceRollToast.jsx          # Roll result toast (live region)
 │   │   ├── Modals/
-│   │   │   ├── DiceRollerModal.jsx        # 3D interactive dice tray
+│   │   │   ├── DiceRollerModal.jsx        # Dice tray (any die, modifiers, advantage/disadvantage, history)
 │   │   │   ├── SrdLegalModal.jsx          # SRD 5.1 & 5.2.1 CC-BY-4.0 attribution
 │   │   │   └── Custom*Modal.jsx           # Custom attack, spell, feature & item builders
 │   │   ├── CharacterRosterModal.jsx       # Roster vault, JSON export & import
@@ -135,7 +148,7 @@ dnd-char-sheet-creator/
 │   │   └── ...
 │   ├── data/
 │   │   ├── rulesets.js                    # Version registry: '5.1' / '5.2' → data, PHB mapping, attribution
-│   │   ├── srd51/                         # SRD 5.1 data (2014 PHB)
+│   │   ├── srd51/                         # SRD 5.1 data (2014 PHB), same file names as srd52/
 │   │   ├── srd52/                         # SRD 5.2.1 data (2024 PHB)
 │   │   │   ├── srdRaces.js                #   races / species & subraces
 │   │   │   ├── srdClasses.js              #   12 classes, subclasses & level 1-20 features
@@ -148,8 +161,12 @@ dnd-char-sheet-creator/
 │   │   ├── dndRules.js                    # Modifiers, AC, skills, slots, carrying capacity, point buy
 │   │   ├── a11y.js                        # Keyboard activation helper for role="button" elements
 │   │   └── storage.js                     # LocalStorage CRUD, export/import & character tracking
-│   ├── App.jsx                            # Root application component
+│   ├── App.jsx                            # Root application component (state, rolls, print handling)
 │   └── index.css                          # Core design system & print stylesheet (@media print)
+├── .github/
+│   ├── workflows/ci.yml                   # Lint + build on every PR
+│   └── ISSUE_TEMPLATE/                    # Bug, rules-error and feature-idea forms
+├── vite.config.js                         # Dynamic dev port ($PORT) and build chunk splitting
 └── package.json
 ```
 
