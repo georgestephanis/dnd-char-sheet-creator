@@ -111,7 +111,7 @@ export default function BG3CharacterBuilder({
   // Equipment package
   const [selectedEquipIndex, setSelectedEquipIndex] = useState(0);
 
-  // If initialCharacter is provided, populate state once
+  // If initialCharacter is provided, populate state once (the builder is remounted per opening)
   useEffect(() => {
     if (initialCharacter) {
       setCharName(initialCharacter.name || 'Tav');
@@ -126,15 +126,30 @@ export default function BG3CharacterBuilder({
       setStartingLevel(initialCharacter.level || 1);
       setSelectedBackgroundId(initialCharacter.backgroundId || 'soldier');
       if (initialCharacter.abilityScores) {
-        setPointBuyScores({ ...initialCharacter.abilityScores });
-        setBaseScores({ ...initialCharacter.abilityScores });
+        const stored = { ...initialCharacter.abilityScores };
+        const values = Object.values(stored);
+        const isPointBuy = values.every(v => POINT_BUY_COSTS[v] !== undefined) &&
+          values.reduce((acc, v) => acc + POINT_BUY_COSTS[v], 0) === POINT_BUY_TOTAL;
+        setPointBuyScores(stored);
+        setBaseScores(stored);
+        // Rolled or hand-entered scores can't be represented as a 27-point buy
+        setScoreMethod(isPointBuy ? 'pointbuy' : 'roll');
       }
       if (initialCharacter.skillProficiencies) {
-        setSelectedClassSkills([...initialCharacter.skillProficiencies]);
+        // Background skills are re-added on save; only class picks belong in this list
+        const bg = SRD_BACKGROUNDS.find(b => b.id === initialCharacter.backgroundId);
+        const bgSkills = bg?.skillProficiencies || [];
+        setSelectedClassSkills(initialCharacter.skillProficiencies.filter(sk => !bgSkills.includes(sk)));
       }
       if (initialCharacter.expertiseSkills) {
         setSelectedExpertise([...initialCharacter.expertiseSkills]);
       }
+      if (initialCharacter.fightingStyle) {
+        setFightingStyle(initialCharacter.fightingStyle);
+      }
+      const knownSpells = initialCharacter.spells || [];
+      setSelectedCantrips(knownSpells.filter(sp => sp.level === 0 && SRD_SPELLS.some(s => s.id === sp.id)).map(sp => sp.id));
+      setSelectedFirstLevelSpells(knownSpells.filter(sp => sp.level === 1 && SRD_SPELLS.some(s => s.id === sp.id)).map(sp => sp.id));
       setOriginType('custom');
     }
   }, [initialCharacter]);
@@ -480,8 +495,55 @@ export default function BG3CharacterBuilder({
       avatarUrl: customAvatarUrl
     };
 
-    onCharacterCreated(newCharacter);
+    onCharacterCreated(initialCharacter ? mergeRespec(initialCharacter, newCharacter) : newCharacter);
     onClose();
+  };
+
+  // A respec re-derives what the builder controls and keeps everything else the character earned
+  const mergeRespec = (existing, rebuilt) => {
+    const classChanged = existing.classId !== rebuilt.classId;
+    const builderSpellIds = new Set(rebuilt.spells.map(sp => sp.id));
+    const isBuilderFeature = (f) => /^(rf-|srf-|cf-1-|bg-feat|vf-1)/.test(f.id || '');
+    const isClassLevelFeature = (f) => /^(f-|sf-)/.test(f.id || '');
+
+    const keptFeatures = (existing.features || []).filter(f =>
+      !isBuilderFeature(f) && !(classChanged && isClassLevelFeature(f))
+    );
+    const keptSpells = (existing.spells || []).filter(sp =>
+      !builderSpellIds.has(sp.id) && !((sp.level === 0 || sp.level === 1) && SRD_SPELLS.some(s => s.id === sp.id))
+    );
+
+    // Max HP: level-1 value plus the fixed average for each further level
+    const hitDie = currentClass.hitDie || 8;
+    const extraPerLevel = bonusHpPerLevel + (keptFeatures.some(f => /^feat:\s*tough$/i.test(f.name || '')) ? 2 : 0);
+    const level = rebuilt.level || 1;
+    const maxHp = Math.max(level, startingHp + (level - 1) * (Math.floor(hitDie / 2) + 1 + conMod + extraPerLevel));
+    const damageTaken = Math.max(0, (existing.maxHp || 0) - (existing.currentHp ?? existing.maxHp ?? 0));
+
+    return {
+      ...existing,
+      ...rebuilt,
+      // Earned and hand-entered state the builder doesn't model
+      xp: existing.xp ?? rebuilt.xp,
+      inspiration: existing.inspiration ?? false,
+      customAbilityBonuses: existing.customAbilityBonuses || rebuilt.customAbilityBonuses,
+      features: [...rebuilt.features, ...keptFeatures],
+      spells: [...rebuilt.spells, ...keptSpells],
+      spellSlotsUsed: existing.spellSlotsUsed || rebuilt.spellSlotsUsed,
+      attacks: existing.attacks?.length ? existing.attacks : rebuilt.attacks,
+      equipment: existing.equipment?.length ? existing.equipment : rebuilt.equipment,
+      currency: existing.currency || rebuilt.currency,
+      personality: existing.personality ?? rebuilt.personality,
+      ideals: existing.ideals ?? rebuilt.ideals,
+      bonds: existing.bonds ?? rebuilt.bonds,
+      flaws: existing.flaws ?? rebuilt.flaws,
+      backstory: existing.backstory ?? rebuilt.backstory,
+      deathSaves: existing.deathSaves || rebuilt.deathSaves,
+      exhaustion: existing.exhaustion ?? rebuilt.exhaustion,
+      hitDiceUsed: Math.min(existing.hitDiceUsed || 0, level),
+      maxHp,
+      currentHp: Math.max(0, maxHp - damageTaken)
+    };
   };
 
   const stepsList = [
@@ -1384,6 +1446,13 @@ export default function BG3CharacterBuilder({
               );
             })}
           </div>
+
+          {initialCharacter && (
+            <div style={{ fontSize: '0.75rem', color: '#94a3b8', lineHeight: 1.4, marginBottom: '0.5rem' }}>
+              Respec keeps inventory, attacks, currency, backstory, homebrew, ASIs and level-up features.
+              {initialCharacter.classId !== selectedClassId && ' Changing class removes features gained from the old class.'}
+            </div>
+          )}
 
           {/* Grand Venture Forth Golden Button */}
           <button

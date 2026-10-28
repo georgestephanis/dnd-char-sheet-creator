@@ -372,15 +372,18 @@ export default function App() {
       </main>
 
       {/* Baldur's Gate 3 Character Creation / Respec Forge Modal */}
-      <BG3CharacterBuilder
-        isOpen={isCreationWizardOpen}
-        initialCharacter={editingCharacter}
-        onClose={() => {
-          setIsCreationWizardOpen(false);
-          setEditingCharacter(null);
-        }}
-        onCharacterCreated={handleCharacterSaved}
-      />
+      {isCreationWizardOpen && (
+        <BG3CharacterBuilder
+          key={editingCharacter?.id || 'new-character'}
+          isOpen={isCreationWizardOpen}
+          initialCharacter={editingCharacter}
+          onClose={() => {
+            setIsCreationWizardOpen(false);
+            setEditingCharacter(null);
+          }}
+          onCharacterCreated={handleCharacterSaved}
+        />
+      )}
 
       {/* Baldur's Gate 3 Level Up Modal */}
       <BG3LevelUpModal
