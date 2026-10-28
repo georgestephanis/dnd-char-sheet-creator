@@ -22,9 +22,9 @@ export default function BG3CharacterInspector({
   onCastSpell,
   onLongRest
 }) {
-  if (!character) return null;
-
   const [activeTab, setActiveTab] = useState('combat'); // 'combat', 'spellbook', 'passives'
+
+  if (!character) return null;
 
   const level = character.level || 1;
   const profBonus = getProficiencyBonus(level);

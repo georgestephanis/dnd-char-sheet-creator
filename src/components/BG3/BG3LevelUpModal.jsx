@@ -6,9 +6,21 @@ import { SRD_CLASSES } from '../../data/srdClasses';
 import { SRD_FEATS } from '../../data/srdFeats';
 import { getAbilityModifier, getProficiencyBonus, getSpellSlotsForClass } from '../../utils/dndRules';
 
+// Mount the dialog only while open, keyed to the character's current level, so every
+// opening starts from fresh state instead of the previous session's choices.
 export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeveledCharacter }) {
   if (!isOpen || !character) return null;
+  return (
+    <LevelUpDialog
+      key={`${character.id}-${character.level || 1}`}
+      onClose={onClose}
+      character={character}
+      onSaveLeveledCharacter={onSaveLeveledCharacter}
+    />
+  );
+}
 
+function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
   const currentLevel = character.level || 1;
   const [targetLevel, setTargetLevel] = useState(Math.min(20, currentLevel + 1));
 
@@ -53,7 +65,10 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
   const chosenSubclass = classData.subclasses.find(s => s.id === selectedSubclassId);
   const subclassFeaturesAtTarget = chosenSubclass?.featuresByLevel?.[targetLevel] || [];
 
+  const isMaxLevel = currentLevel >= 20;
+
   const handleApplyLevelUp = () => {
+    if (isMaxLevel) return;
     const hpToAdd = hpMethod === 'average' ? standardAvgGain : manualHpGain;
     const newMaxHp = (character.maxHp || 10) + hpToAdd;
     const newCurrentHp = (character.currentHp || 10) + hpToAdd;
@@ -411,8 +426,10 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
               type="button"
               className="bg3-btn-venture"
               onClick={handleApplyLevelUp}
+              disabled={isMaxLevel}
+              title={isMaxLevel ? 'Already at maximum level (20)' : undefined}
             >
-              <span>Complete Level Up</span>
+              <span>{isMaxLevel ? 'Maximum Level Reached' : 'Complete Level Up'}</span>
               <ChevronRight size={18} />
             </button>
             <button
