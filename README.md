@@ -10,7 +10,7 @@ Featuring a **Baldur's Gate 3 inspired character creation & level-up interface**
 
 ### ⚔️ Baldur’s Gate 3 Character Creation Forge
 - **3-Pillar Layout**: Step navigation on the left, interactive selection stage in the center, and live character summary inspector on the right with the golden *"Venture Forth"* button.
-- **Origin Selection**: Build a custom adventurer ("Tav") or embark immediately with iconic pre-made heroes (*Bruenor Ironfist*, *Altea Stardancer*, *Corin Underbough*).
+- **Origin Selection**: Build a custom adventurer or embark immediately with iconic pre-made heroes (*Bruenor Ironfist*, *Altea Stardancer*, *Corin Underbough*).
 - **Lineage & Subraces**: All 9 SRD races (Dwarf, Elf, Halfling, Human, Dragonborn, Gnome, Half-Elf, Half-Orc, Tiefling) with full subraces, traits, Darkvision, speeds, and Draconic ancestries.
 - **Variant Human Builder**: Select 2 distinct ability score bonuses and any bonus Feat from the SRD feat library.
 - **12 Classes & Level 1 Disciplines**: Barbarian, Bard, Cleric, Druid, Fighter, Monk, Paladin, Ranger, Rogue, Sorcerer, Warlock, Wizard with fighting styles, divine domains, and patrons.

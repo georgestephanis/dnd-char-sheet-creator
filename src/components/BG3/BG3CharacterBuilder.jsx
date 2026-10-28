@@ -37,7 +37,7 @@ const CLASS_RECOMMENDED_SCORES = {
 const FANTASY_NAMES = {
   dwarf: ['Torvin', 'Helgrid', 'Bramdur', 'Kethra', 'Orvald', 'Dagny', 'Rurik', 'Sigra', 'Thrandal', 'Moira'],
   elf: ['Altea', 'Ilvaris', 'Saelith', 'Thenwyn', 'Faelor', 'Yselle', 'Caerith', 'Lithriel', 'Arvanis', 'Nymara'],
-  human: ['Tav', 'Rowan', 'Mira', 'Aldric', 'Seraphina', 'Joren', 'Talia', 'Corwin', 'Elena', 'Bastian'],
+  human: ['Maren', 'Rowan', 'Mira', 'Aldric', 'Seraphina', 'Joren', 'Talia', 'Corwin', 'Elena', 'Bastian'],
   tiefling: ['Ashka', 'Ruin', 'Vexis', 'Morrow', 'Nyxara', 'Cinder', 'Zariel', 'Hollow', 'Vesper', 'Solace'],
   halfling: ['Corin', 'Pip', 'Tamsin', 'Wendel', 'Marigold', 'Odo', 'Fennick', 'Rosie', 'Barley', 'Clover'],
   dragonborn: ['Kaurax', 'Vyrsha', 'Thoravek', 'Sarnith', 'Draxis', 'Ylsira', 'Gorvath', 'Rhessa', 'Torrak', 'Ixalia'],
@@ -75,7 +75,7 @@ export default function BG3CharacterBuilder({
   const [originType, setOriginType] = useState('custom'); // 'custom' or preset character id
 
   // Identity
-  const [charName, setCharName] = useState('Tav');
+  const [charName, setCharName] = useState('Adventurer');
   const [playerName, setPlayerName] = useState('Player');
   const [alignment, setAlignment] = useState('Neutral Good');
   const [avatarIcon, setAvatarIcon] = useState('⚔️');
@@ -114,7 +114,7 @@ export default function BG3CharacterBuilder({
   // If initialCharacter is provided, populate state once (the builder is remounted per opening)
   useEffect(() => {
     if (initialCharacter) {
-      setCharName(initialCharacter.name || 'Tav');
+      setCharName(initialCharacter.name || 'Adventurer');
       setPlayerName(initialCharacter.player || 'Player');
       setAlignment(initialCharacter.alignment || 'Neutral Good');
       setAvatarIcon(initialCharacter.avatarIcon || '⚔️');
@@ -448,7 +448,7 @@ export default function BG3CharacterBuilder({
 
     const newCharacter = {
       id: initialCharacter?.id || generateCharacterId(),
-      name: charName.trim() || 'Tav',
+      name: charName.trim() || 'Adventurer',
       raceId: currentRace.id,
       subraceId: currentSubrace?.id || '',
       raceName: currentSubrace?.name || currentRace.name,
@@ -570,7 +570,7 @@ export default function BG3CharacterBuilder({
     { id: 'skills', label: 'Skills', badge: `${selectedClassSkills.length}/${currentClass.skillChoices?.count || 2}`, status: isSkillsComplete ? 'complete' : 'pending', icon: Check },
     ...(currentClass.spellcaster ? [{ id: 'spells', label: 'Spells', badge: `${selectedCantrips.length} Cantrips`, status: 'complete', icon: Wand2 }] : []),
     { id: 'equipment', label: 'Equipment', badge: 'Selected', status: 'complete', icon: Shield },
-    { id: 'identity', label: 'Identity', badge: charName || 'Tav', status: 'complete', icon: User }
+    { id: 'identity', label: 'Identity', badge: charName || 'Adventurer', status: 'complete', icon: User }
   ];
 
   const currentStepIndex = stepsList.findIndex(s => s.id === activeTab);
@@ -659,7 +659,7 @@ export default function BG3CharacterBuilder({
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
                       <div style={{ fontSize: '1.6rem' }}>⚔️</div>
                       <div>
-                        <div className="bg3-card-header">Custom Adventurer (Tav)</div>
+                        <div className="bg3-card-header">Custom Adventurer</div>
                         <div className="bg3-badge-pill">Free Choice</div>
                       </div>
                     </div>
@@ -1275,7 +1275,7 @@ export default function BG3CharacterBuilder({
                       type="text"
                       className="form-input"
                       value={charName}
-                      placeholder="e.g. Tav, Gale, Shadowheart"
+                      placeholder="e.g. Maren Ashford"
                       onChange={(e) => setCharName(e.target.value)}
                     />
                   </div>
@@ -1371,7 +1371,7 @@ export default function BG3CharacterBuilder({
             )}
           </div>
           <div className="bg3-summary-name">
-            {charName || 'Tav'}
+            {charName || 'Adventurer'}
           </div>
           <div className="bg3-summary-subtitle">
             Level {startingLevel} &bull; {currentSubrace?.name || currentRace.name} &bull; {currentClass.name}
