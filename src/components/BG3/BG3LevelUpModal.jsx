@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Modal from '../Common/Modal';
 import {
   Shield, Heart, Award, Dices, ChevronRight
@@ -70,8 +70,11 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
   const isMaxLevel = currentLevel >= 20;
 
   // continueAfter keeps the dialog open; it remounts for the next level (keyed on level)
+  // Single-shot per level: a double-click must not apply the same level twice
+  const hasAppliedRef = useRef(false);
   const handleApplyLevelUp = (continueAfter = false) => {
-    if (isMaxLevel) return;
+    if (isMaxLevel || hasAppliedRef.current) return;
+    hasAppliedRef.current = true;
     const hpToAdd = hpMethod === 'average' ? standardAvgGain : manualHpGain;
     const newMaxHp = (character.maxHp || 10) + hpToAdd;
     const newCurrentHp = (character.currentHp || 10) + hpToAdd;
