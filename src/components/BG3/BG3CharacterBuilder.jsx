@@ -119,12 +119,21 @@ export default function BG3CharacterBuilder({
       setAlignment(initialCharacter.alignment || 'Neutral Good');
       setAvatarIcon(initialCharacter.avatarIcon || '⚔️');
       setCustomAvatarUrl(initialCharacter.avatarUrl || '');
-      setSelectedRaceId(initialCharacter.raceId || 'human');
-      setSelectedSubraceId(initialCharacter.subraceId || '');
+      // Saved ids may refer to content removed from the SRD dataset; resolve them so the
+      // selected cards match what will actually be saved
+      const race = SRD_RACES.find(r => r.id === initialCharacter.raceId) || SRD_RACES.find(r => r.id === 'human');
+      const subrace = race.subraces?.find(sr => sr.id === initialCharacter.subraceId) || race.subraces?.[0];
+      setSelectedRaceId(race.id);
+      setSelectedSubraceId(subrace?.id || '');
       setSelectedClassId(initialCharacter.classId || 'fighter');
       setSelectedSubclassId(initialCharacter.subclassId || '');
       setStartingLevel(initialCharacter.level || 1);
-      setSelectedBackgroundId(initialCharacter.backgroundId || 'acolyte');
+      // Removed backgrounds become Custom so the character keeps a homebrew background
+      setSelectedBackgroundId(
+        SRD_BACKGROUNDS.some(bg => bg.id === initialCharacter.backgroundId)
+          ? initialCharacter.backgroundId
+          : (initialCharacter.backgroundId ? 'custom' : 'acolyte')
+      );
       if (initialCharacter.abilityScores) {
         const stored = { ...initialCharacter.abilityScores };
         const values = Object.values(stored);
