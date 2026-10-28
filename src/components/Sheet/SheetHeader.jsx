@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { getRuleset } from '../../data/rulesets';
+import { ALIGNMENTS, formatXp } from '../../utils/dndRules';
 
 export default function SheetHeader({ character, onUpdateCharacter }) {
+  const [isEditingXp, setIsEditingXp] = useState(false);
   if (!character) return null;
 
   return (
@@ -60,23 +62,39 @@ export default function SheetHeader({ character, onUpdateCharacter }) {
         </div>
 
         <div className="meta-field">
-          <input aria-label="Alignment"
-            type="text"
-            className="meta-value"
+          <select aria-label="Alignment"
+            className="meta-value meta-select"
             value={character.alignment || ''}
-            placeholder="Alignment"
             onChange={(e) => onUpdateCharacter({ alignment: e.target.value })}
-          />
+          >
+            {!character.alignment && <option value="">Choose…</option>}
+            {/* Keep a hand-entered alignment from older saves selectable */}
+            {character.alignment && !ALIGNMENTS.includes(character.alignment) && (
+              <option value={character.alignment}>{character.alignment}</option>
+            )}
+            {ALIGNMENTS.map(al => <option key={al} value={al}>{al}</option>)}
+          </select>
           <div className="sheet-label">Alignment</div>
         </div>
 
         <div className="meta-field">
+          {/* Text input so XP can show thousands separators; digits only while editing */}
           <input aria-label="Experience points"
             type="text"
+            inputMode="numeric"
+            pattern="[0-9,]*"
             className="meta-value"
-            value={character.xp || '0'}
-            placeholder="XP"
-            onChange={(e) => onUpdateCharacter({ xp: e.target.value })}
+            value={isEditingXp ? String(character.xp ?? '') : formatXp(character.xp)}
+            onFocus={() => setIsEditingXp(true)}
+            onChange={(e) => {
+              const digits = e.target.value.replace(/[^\d]/g, '');
+              onUpdateCharacter({ xp: digits === '' ? '' : parseInt(digits, 10) });
+            }}
+            onBlur={(e) => {
+              setIsEditingXp(false);
+              // Read the field itself; character.xp may not reflect the last keystroke yet
+              if (e.target.value.replace(/[^\d]/g, '') === '') onUpdateCharacter({ xp: 0 });
+            }}
           />
           <div className="sheet-label">Experience Points</div>
         </div>

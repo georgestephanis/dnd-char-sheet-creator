@@ -27,6 +27,10 @@ export function normalizeCharacter(raw) {
     if (!Array.isArray(character[field])) character[field] = [];
   }
   character.features = character.features.filter(f => f && typeof f === 'object' && typeof f.name === 'string');
+  // XP used to be free text; keep it a whole, non-negative number
+  // Strip thousands separators and spaces only, so '1.5' or '1e2' aren't misread as 15 / 12
+  const xp = Math.trunc(Number(String(character.xp ?? '').replace(/[,\s]/g, '')));
+  character.xp = Number.isFinite(xp) ? Math.max(0, xp) : 0;
   // Characters saved before rulesets were versioned use the default (SRD 5.1)
   if (typeof character.srdVersion !== 'string') character.srdVersion = DEFAULT_SRD_VERSION;
   if (!Array.isArray(character.spellSlotsUsed)) character.spellSlotsUsed = [0, 0, 0, 0, 0, 0, 0, 0, 0];
