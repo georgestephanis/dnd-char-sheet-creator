@@ -4,7 +4,7 @@ import {
 } from 'lucide-react';
 import { SRD_CLASSES } from '../../data/srdClasses';
 import { SRD_FEATS } from '../../data/srdFeats';
-import { getAbilityModifier, getProficiencyBonus, getSpellSlotsForClass } from '../../utils/dndRules';
+import { getAbilityModifier, getProficiencyBonus, hasFeat, getCalculatedAbilityScores } from '../../utils/dndRules';
 
 // Mount the dialog only while open, keyed to the character's current level, so every
 // opening starts from fresh state instead of the previous session's choices.
@@ -26,10 +26,10 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
 
   const classData = SRD_CLASSES.find(c => c.id === character.classId) || SRD_CLASSES[0];
   const hitDie = classData.hitDie || 8;
-  const conMod = getAbilityModifier((character.abilityScores?.con || 10) + (character.racialBonuses?.con || 0) + (character.customAbilityBonuses?.con || 0));
+  const conMod = getAbilityModifier(getCalculatedAbilityScores(character).con);
 
   const isHillDwarf = character.subraceId === 'hill-dwarf';
-  const hasToughFeat = character.features?.some(f => f.name.toLowerCase().includes('tough'));
+  const hasToughFeat = hasFeat(character, 'Tough');
   const extraHpPerLevel = (isHillDwarf ? 1 : 0) + (hasToughFeat ? 2 : 0);
 
   const standardAvgGain = Math.max(1, Math.floor(hitDie / 2) + 1 + conMod + extraHpPerLevel);

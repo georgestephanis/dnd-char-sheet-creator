@@ -23,7 +23,13 @@ import {
   setActiveCharacterId
 } from './utils/storage';
 
-import { rollDice } from './utils/dndRules';
+import {
+  rollDice,
+  formatModifier,
+  parseDamageExpression,
+  getSpellSlotsForCharacter,
+  findAvailableSlotIndex
+} from './utils/dndRules';
 
 export default function App() {
   const [characters, setCharacters] = useState(() => loadCharacters());
@@ -100,7 +106,7 @@ export default function App() {
       setEditingCharacter(null);
       showToast({
         title: `${savedChar.name} Respec Saved!`,
-        dieRoll: 20,
+        dieRoll: null,
         total: `Level ${savedChar.level} ${savedChar.className}`,
         breakdown: 'Updated character in local vault'
       });
@@ -111,7 +117,7 @@ export default function App() {
       saveSingleCharacter(savedChar);
       showToast({
         title: `${savedChar.name} Created!`,
-        dieRoll: 20,
+        dieRoll: null,
         total: `Level ${savedChar.level} ${savedChar.className}`,
         breakdown: 'Character saved to local vault'
       });
@@ -125,7 +131,7 @@ export default function App() {
       title: `Advanced to Level ${leveledChar.level}!`,
       total: `${leveledChar.className} Lvl ${leveledChar.level}`,
       breakdown: `Max HP increased to ${leveledChar.maxHp}`,
-      dieRoll: 20
+      dieRoll: null
     });
   };
 
@@ -135,10 +141,9 @@ export default function App() {
 
   // Mirror dice tray results into the roll toast
   const handleDiceTrayRoll = (entry) => {
-    const isSingleD20 = entry.sides === 20 && (entry.isAdvDis || entry.rolls.length === 1);
     showToast({
       title: entry.title,
-      dieRoll: isSingleD20 ? (entry.picked ?? entry.rolls[0]) : null,
+      dieRoll: entry.sides === 20 ? entry.natural : null,
       total: entry.total,
       breakdown: entry.isAdvDis
         ? `kept ${entry.picked}, dropped ${entry.dropped}`
@@ -187,41 +192,51 @@ export default function App() {
     const d20 = Math.floor(Math.random() * 20) + 1;
     const toHitTotal = d20 + toHitBonus;
 
-    let damageTotal = 0;
-    let damageRolls = [];
-    if (atk.damageDice) {
-      const match = atk.damageDice.match(/(\d+)d(\d+)/);
-      if (match) {
-        const count = parseInt(match[1], 10);
-        const sides = parseInt(match[2], 10);
-        const res = rollDice(count, sides, abilityMod);
-        damageTotal = res.total;
-        damageRolls = res.rolls;
-      }
-    }
+    const damage = parseDamageExpression(atk.damageDice);
+    const damageRes = damage ? rollDice(damage.count, damage.sides, damage.flat + abilityMod) : null;
+    const damageTotal = damageRes ? Math.max(1, damageRes.total) : null;
+    const damageBreakdown = damageRes
+      ? ` • Dmg: [${damageRes.rolls.length > 0 ? damageRes.rolls.join(', ') : '—'}] ${formatModifier(damageRes.modifier)} (${atk.damageType || ''})`
+      : '';
 
     showToast({
       title: `${atk.name} Attack`,
       dieRoll: d20,
-      total: `Atk: ${toHitTotal} | Dmg: ${damageTotal > 0 ? damageTotal : '—'}`,
-      breakdown: `To Hit: [d20 (${d20}) ${toHitBonus >= 0 ? `+ ${toHitBonus}` : `- ${Math.abs(toHitBonus)}`}] ${damageRolls.length > 0 ? `• Dmg dice: [${damageRolls.join(', ')}] ${abilityMod >= 0 ? `+${abilityMod}` : abilityMod} (${atk.damageType || ''})` : ''}`
+      total: `Atk: ${toHitTotal} | Dmg: ${damageTotal ?? '—'}`,
+      breakdown: `To Hit: [d20 (${d20}) ${toHitBonus >= 0 ? `+ ${toHitBonus}` : `- ${Math.abs(toHitBonus)}`}]${damageBreakdown}`
     });
   };
 
   // Cast spell (expends spell slot)
   const handleCastSpell = (spell) => {
-    if (spell.level > 0) {
-      const slotIndex = spell.level - 1;
-      const currentUsed = activeCharacter.spellSlotsUsed?.[slotIndex] || 0;
-      const nextArr = [...(activeCharacter.spellSlotsUsed || [0, 0, 0, 0, 0, 0, 0, 0, 0])];
-      nextArr[slotIndex] = currentUsed + 1;
-      handleUpdateCharacter({ spellSlotsUsed: nextArr });
+    if (!activeCharacter) return;
+    if (spell.level === 0) {
+      showToast({ title: `Cast: ${spell.name}`, dieRoll: null, total: 'Cantrip', breakdown: `${spell.castingTime} • ${spell.range}` });
+      return;
     }
 
+    const maxSlots = getSpellSlotsForCharacter(activeCharacter);
+    const used = activeCharacter.spellSlotsUsed || [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const slotIndex = findAvailableSlotIndex(maxSlots, used, spell.level);
+    if (slotIndex < 0) {
+      showToast({
+        title: `Cannot Cast: ${spell.name}`,
+        dieRoll: null,
+        total: 'No Slots',
+        breakdown: `No spell slots of level ${spell.level} or higher remain. Take a rest to recover.`
+      });
+      return;
+    }
+
+    const nextArr = [...used];
+    nextArr[slotIndex] = (nextArr[slotIndex] || 0) + 1;
+    handleUpdateCharacter({ spellSlotsUsed: nextArr });
+
+    const upcast = slotIndex + 1 > spell.level ? ` (upcast from ${spell.level})` : '';
     showToast({
       title: `Cast: ${spell.name}`,
-      dieRoll: 10,
-      total: spell.level === 0 ? 'Cantrip' : `Slot Lvl ${spell.level} Expended`,
+      dieRoll: null,
+      total: `Lvl ${slotIndex + 1} Slot Expended${upcast}`,
       breakdown: `${spell.castingTime} • ${spell.range}`
     });
   };
@@ -245,7 +260,7 @@ export default function App() {
 
     showToast({
       title: 'Long Rest Finished',
-      dieRoll: 20,
+      dieRoll: null,
       total: `HP Restored to ${maxHp}`,
       breakdown: `All spell slots restored & ${restoredDice} Hit Dice recovered`
     });

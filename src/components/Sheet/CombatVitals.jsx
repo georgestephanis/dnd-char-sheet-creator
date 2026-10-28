@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Shield, Zap, Wind, Heart, RotateCcw, BedDouble } from 'lucide-react';
-import { calculateArmorClass, getAbilityModifier, formatModifier } from '../../utils/dndRules';
+import { calculateArmorClass, getAbilityModifier, formatModifier, hasFeat, getHitDiceLabel } from '../../utils/dndRules';
 
 export default function CombatVitals({ character, scores, onUpdateCharacter, onLongRest }) {
   const [damageInput, setDamageInput] = useState('');
@@ -10,7 +10,7 @@ export default function CombatVitals({ character, scores, onUpdateCharacter, onL
   const calculatedAc = calculateArmorClass(character, scores);
 
   // Initiative: DEX mod + feat bonus (e.g. Alert +5)
-  const hasAlertFeat = character.features?.some(f => f.name.toLowerCase().includes('alert'));
+  const hasAlertFeat = hasFeat(character, 'Alert');
   const initiativeMod = dexMod + (hasAlertFeat ? 5 : 0);
 
   const speed = character.speed || 30;
@@ -147,7 +147,12 @@ export default function CombatVitals({ character, scores, onUpdateCharacter, onL
               type="number"
               className="hp-large-input"
               value={currentHp}
-              onChange={(e) => onUpdateCharacter({ currentHp: parseInt(e.target.value, 10) || 0 })}
+              min={0}
+              max={maxHp}
+              onChange={(e) => {
+                const val = parseInt(e.target.value, 10);
+                if (!isNaN(val)) onUpdateCharacter({ currentHp: Math.max(0, Math.min(maxHp, val)) });
+              }}
             />
             <span className="sheet-label" style={{ marginTop: '0.2rem' }}>Current HP</span>
           </div>
@@ -188,7 +193,8 @@ export default function CombatVitals({ character, scores, onUpdateCharacter, onL
                 placeholder="0"
                 style={{ width: '55px', padding: '0.15rem', borderRadius: '4px', border: '1px solid var(--parchment-border)', textAlign: 'center', fontFamily: 'var(--font-ui)' }}
                 value={tempHp || ''}
-                onChange={(e) => onUpdateCharacter({ tempHp: parseInt(e.target.value, 10) || 0 })}
+                min={0}
+                onChange={(e) => onUpdateCharacter({ tempHp: Math.max(0, parseInt(e.target.value, 10) || 0) })}
               />
             </div>
           </div>
@@ -205,7 +211,7 @@ export default function CombatVitals({ character, scores, onUpdateCharacter, onL
             </div>
             <div style={{ textAlign: 'center', padding: '0.3rem 0' }}>
               <div style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', fontWeight: 800, color: 'var(--parchment-text)' }}>
-                {Math.max(0, (character.level || 1) - (character.hitDiceUsed || 0))} / {character.hitDiceMax || `${character.level || 1}d8`}
+                {Math.max(0, (character.level || 1) - (character.hitDiceUsed || 0))} / {getHitDiceLabel(character)}
               </div>
               <div className="sheet-label">Remaining</div>
             </div>

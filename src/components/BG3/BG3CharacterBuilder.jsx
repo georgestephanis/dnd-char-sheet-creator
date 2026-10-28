@@ -101,6 +101,7 @@ export default function BG3CharacterBuilder({
 
   // Skills
   const [selectedClassSkills, setSelectedClassSkills] = useState(['Athletics', 'Perception']);
+  const [selectedExpertise, setSelectedExpertise] = useState([]);
 
   // Spells
   const [selectedCantrips, setSelectedCantrips] = useState([]);
@@ -129,6 +130,9 @@ export default function BG3CharacterBuilder({
       }
       if (initialCharacter.skillProficiencies) {
         setSelectedClassSkills([...initialCharacter.skillProficiencies]);
+      }
+      if (initialCharacter.expertiseSkills) {
+        setSelectedExpertise([...initialCharacter.expertiseSkills]);
       }
       setOriginType('custom');
     }
@@ -329,7 +333,22 @@ export default function BG3CharacterBuilder({
   const calculatedAc = calculateArmorClass(mockChar, finalScores);
 
   // Validation checks for pillar badges
-  const isSkillsComplete = selectedClassSkills.length === (currentClass.skillChoices?.count || 2);
+  // Rogues choose two proficient skills for Expertise at 1st level
+  const expertiseCount = currentClass.id === 'rogue' ? 2 : 0;
+  const allProficientSkills = Array.from(new Set([...(currentBackground.skillProficiencies || []), ...selectedClassSkills]));
+  const validExpertise = selectedExpertise.filter(sk => allProficientSkills.includes(sk)).slice(0, expertiseCount);
+  const handleToggleExpertise = (sk) => {
+    if (validExpertise.includes(sk)) {
+      setSelectedExpertise(validExpertise.filter(s => s !== sk));
+    } else if (validExpertise.length < expertiseCount) {
+      setSelectedExpertise([...validExpertise, sk]);
+    } else {
+      setSelectedExpertise([...validExpertise.slice(1), sk]);
+    }
+  };
+
+  const isSkillsComplete = selectedClassSkills.length === (currentClass.skillChoices?.count || 2) &&
+    validExpertise.length === expertiseCount;
   const isAbilitiesComplete = scoreMethod === 'pointbuy' ? pointBuyRemaining === 0 : true;
 
   // Handle finalize character
@@ -431,8 +450,8 @@ export default function BG3CharacterBuilder({
       racialBonuses,
       customAbilityBonuses: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
       savingThrowsProficient: currentClass.savingThrows || ['str', 'con'],
-      skillProficiencies: Array.from(new Set([...(currentBackground.skillProficiencies || []), ...selectedClassSkills])),
-      expertiseSkills: currentClass.id === 'rogue' ? selectedClassSkills.slice(0, 2) : [],
+      skillProficiencies: allProficientSkills,
+      expertiseSkills: validExpertise,
       equippedArmor: mockChar.equippedArmor,
       equippedShield: mockChar.equippedShield,
       fightingStyle: fightingStyle,
@@ -1060,6 +1079,35 @@ export default function BG3CharacterBuilder({
                     );
                   })}
                 </div>
+
+                {expertiseCount > 0 && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 700, marginBottom: '0.75rem' }}>
+                      Expertise: {validExpertise.length} of {expertiseCount} Selected
+                      <span style={{ fontWeight: 400, color: '#94a3b8' }}> — double your proficiency bonus for two proficient skills</span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.75rem' }}>
+                      {allProficientSkills.map(sk => {
+                        const isExpert = validExpertise.includes(sk);
+                        return (
+                          <button
+                            type="button"
+                            key={sk}
+                            onClick={() => handleToggleExpertise(sk)}
+                            className={`bg3-card ${isExpert ? 'selected' : ''}`}
+                            aria-pressed={isExpert}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                              <span className="bg3-card-header" style={{ margin: 0 }}>{sk}</span>
+                              {isExpert && <Star size={16} style={{ color: 'var(--text-gold)' }} />}
+                            </div>
+                            <div className="bg3-card-desc">{isExpert ? 'Expertise' : 'Click to choose'}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

@@ -18,7 +18,9 @@ export default function DiceRollerModal({ isOpen, onClose, onRollComplete }) {
       const entry = {
         title: `${count}d${sides}${mod ? (mod > 0 ? `+${mod}` : `${mod}`) : ''}`,
         sides,
+        modifier: mod,
         rolls: res.rolls,
+        natural: count === 1 ? res.rolls[0] : null,
         total: res.total,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
       };
@@ -34,7 +36,9 @@ export default function DiceRollerModal({ isOpen, onClose, onRollComplete }) {
       const entry = {
         title: `1d20 ${rollMode.toUpperCase()} (${mod >= 0 ? `+${mod}` : mod})`,
         sides: 20,
+        modifier: mod,
         rolls: [r1, r2],
+        natural: picked,
         picked,
         dropped,
         total: picked + mod,
@@ -111,6 +115,8 @@ export default function DiceRollerModal({ isOpen, onClose, onRollComplete }) {
               className="form-select"
               value={rollMode}
               onChange={(e) => setRollMode(e.target.value)}
+              disabled={selectedDie !== 20 || dieCount > 1}
+              title={selectedDie !== 20 || dieCount > 1 ? 'Advantage and disadvantage apply to a single d20' : undefined}
             >
               <option value="normal">Normal</option>
               <option value="advantage">Advantage</option>
@@ -149,7 +155,7 @@ export default function DiceRollerModal({ isOpen, onClose, onRollComplete }) {
               fontFamily: 'var(--font-heading)',
               fontSize: '3.2rem',
               fontWeight: 800,
-              color: currentResult.total === 20 && selectedDie === 20 ? '#10b981' : currentResult.total === 1 && selectedDie === 20 ? '#ef4444' : 'var(--text-main)',
+              color: currentResult.sides === 20 && currentResult.natural === 20 ? '#10b981' : currentResult.sides === 20 && currentResult.natural === 1 ? '#ef4444' : 'var(--text-main)',
               lineHeight: 1.1,
               margin: '0.2rem 0'
             }}>
@@ -163,7 +169,7 @@ export default function DiceRollerModal({ isOpen, onClose, onRollComplete }) {
                 </span>
               ) : (
                 <span>
-                  Dice: [{currentResult.rolls.join(', ')}] {modifier !== 0 && `(Mod: ${modifier >= 0 ? `+${modifier}` : modifier})`}
+                  Dice: [{currentResult.rolls.join(', ')}] {currentResult.modifier !== 0 && `(Mod: ${currentResult.modifier >= 0 ? `+${currentResult.modifier}` : currentResult.modifier})`}
                 </span>
               )}
             </div>

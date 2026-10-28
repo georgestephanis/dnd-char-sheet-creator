@@ -1,5 +1,7 @@
 // D&D 5e Rules Engine & Calculation Utilities (SRD 5.1 compliant)
 
+import { SRD_CLASSES } from '../data/srdClasses';
+
 export const ABILITIES = [
   { id: 'str', name: 'Strength', short: 'STR' },
   { id: 'dex', name: 'Dexterity', short: 'DEX' },
@@ -147,6 +149,63 @@ export function getSpellSlotsForClass(casterType, level) {
     return slots;
   }
   return [0, 0, 0, 0, 0, 0, 0, 0, 0];
+}
+
+// Resolve a class id to its caster type ('full' | 'half' | 'pact' | 'none')
+export function getCasterType(classId) {
+  const classData = SRD_CLASSES.find(c => c.id === classId);
+  if (!classData) return 'none';
+  return classData.spellcasterType || (classData.spellcaster ? 'full' : 'none');
+}
+
+export function getSpellSlotsForCharacter(character) {
+  return getSpellSlotsForClass(getCasterType(character.classId), character.level || 1);
+}
+
+// Lowest slot level (0-based index) at or above the spell's level with a slot remaining, or -1
+export function findAvailableSlotIndex(maxSlots, slotsUsed, spellLevel) {
+  for (let i = Math.max(0, spellLevel - 1); i < maxSlots.length; i++) {
+    if ((maxSlots[i] || 0) > (slotsUsed[i] || 0)) return i;
+  }
+  return -1;
+}
+
+export function getHitDieSize(classId) {
+  return SRD_CLASSES.find(c => c.id === classId)?.hitDie || 8;
+}
+
+export function getHitDiceLabel(character) {
+  return character.hitDiceMax || `${character.level || 1}d${getHitDieSize(character.classId)}`;
+}
+
+// True when the character has a feature granting the named feat (e.g. "Feat: Alert")
+export function hasFeat(character, featName) {
+  const target = featName.toLowerCase();
+  return (character.features || []).some(f => {
+    const name = (f?.name || '').toLowerCase().replace(/^feat:\s*/, '');
+    return name === target;
+  });
+}
+
+// Skill bonus including proficiency, expertise and the Bard's Jack of All Trades
+export function getSkillBonus(character, skillName, abilityScore) {
+  const profBonus = getProficiencyBonus(character.level || 1);
+  const abMod = getAbilityModifier(abilityScore);
+  if (character.expertiseSkills?.includes(skillName)) return abMod + profBonus * 2;
+  if (character.skillProficiencies?.includes(skillName)) return abMod + profBonus;
+  if (character.classId === 'bard' && (character.level || 1) >= 2) return abMod + Math.floor(profBonus / 2);
+  return abMod;
+}
+
+// Parse damage like "1d8", "2d6+1" or a flat "1" into { count, sides, flat }, or null
+export function parseDamageExpression(expr) {
+  const text = String(expr ?? '').replace(/\s+/g, '');
+  const dice = text.match(/^(\d+)d(\d+)([+-]\d+)?$/i);
+  if (dice) {
+    return { count: parseInt(dice[1], 10), sides: parseInt(dice[2], 10), flat: parseInt(dice[3] || '0', 10) };
+  }
+  if (/^\d+$/.test(text)) return { count: 0, sides: 0, flat: parseInt(text, 10) };
+  return null;
 }
 
 // Calculate total ability score including racial bonuses and ASI improvements

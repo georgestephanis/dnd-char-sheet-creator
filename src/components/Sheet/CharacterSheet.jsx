@@ -9,7 +9,7 @@ import FeaturesSection from './FeaturesSection';
 import InventorySection from './InventorySection';
 import SpellsSheet from './SpellsSheet';
 import RoleplaySection from './RoleplaySection';
-import { getCalculatedAbilityScores, getAbilityModifier, getProficiencyBonus } from '../../utils/dndRules';
+import { getCalculatedAbilityScores, getProficiencyBonus, getSkillBonus } from '../../utils/dndRules';
 import { Shield, Sparkles, BookOpen, User, Star } from 'lucide-react';
 
 export default function CharacterSheet({
@@ -40,19 +40,9 @@ export default function CharacterSheet({
   const profBonus = getProficiencyBonus(character.level || 1);
 
   // Passive Senses calculations
-  const wisMod = getAbilityModifier(scores.wis);
-  const intMod = getAbilityModifier(scores.int);
-  const isPerceptionProf = character.skillProficiencies?.includes('Perception');
-  const isPerceptionExp = character.expertiseSkills?.includes('Perception');
-  const passivePerception = 10 + wisMod + (isPerceptionExp ? profBonus * 2 : isPerceptionProf ? profBonus : 0);
-
-  const isInsightProf = character.skillProficiencies?.includes('Insight');
-  const isInsightExp = character.expertiseSkills?.includes('Insight');
-  const passiveInsight = 10 + wisMod + (isInsightExp ? profBonus * 2 : isInsightProf ? profBonus : 0);
-
-  const isInvestigationProf = character.skillProficiencies?.includes('Investigation');
-  const isInvestigationExp = character.expertiseSkills?.includes('Investigation');
-  const passiveInvestigation = 10 + intMod + (isInvestigationExp ? profBonus * 2 : isInvestigationProf ? profBonus : 0);
+  const passivePerception = 10 + getSkillBonus(character, 'Perception', scores.wis);
+  const passiveInsight = 10 + getSkillBonus(character, 'Insight', scores.wis);
+  const passiveInvestigation = 10 + getSkillBonus(character, 'Investigation', scores.int);
 
   const handleToggleSaveProficiency = (abId) => {
     const list = character.savingThrowsProficient || [];

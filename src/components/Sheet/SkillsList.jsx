@@ -1,14 +1,9 @@
 import React from 'react';
-import { SKILLS, getAbilityModifier, getProficiencyBonus, formatModifier } from '../../utils/dndRules';
+import { SKILLS, formatModifier, getSkillBonus } from '../../utils/dndRules';
 
 export default function SkillsList({ character, scores, onRollSkill, onCycleSkillProficiency }) {
-  const profBonus = getProficiencyBonus(character.level || 1);
   const proficientSkills = character.skillProficiencies || [];
   const expertiseSkills = character.expertiseSkills || [];
-
-  // Check if Bard (Jack of All Trades)
-  const isJackOfAllTrades = character.classId === 'bard' && (character.level || 1) >= 2;
-  const jackBonus = Math.floor(profBonus / 2);
 
   return (
     <div className="section-box">
@@ -18,18 +13,9 @@ export default function SkillsList({ character, scores, onRollSkill, onCycleSkil
 
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         {SKILLS.map(sk => {
-          const abMod = getAbilityModifier(scores[sk.ability]);
           const isExp = expertiseSkills.includes(sk.name);
           const isProf = proficientSkills.includes(sk.name);
-
-          let totalMod = abMod;
-          if (isExp) {
-            totalMod += profBonus * 2;
-          } else if (isProf) {
-            totalMod += profBonus;
-          } else if (isJackOfAllTrades) {
-            totalMod += jackBonus;
-          }
+          const totalMod = getSkillBonus(character, sk.name, scores[sk.ability]);
 
           const indicatorClass = isExp ? 'expertise' : isProf ? 'proficient' : '';
 

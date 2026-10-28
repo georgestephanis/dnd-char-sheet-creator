@@ -5,7 +5,8 @@ import {
 } from 'lucide-react';
 import {
   getAbilityModifier, formatModifier, calculateArmorClass,
-  getProficiencyBonus, getCarryingCapacity, getSpellSlotsForClass,
+  getProficiencyBonus, getCarryingCapacity, getSpellSlotsForCharacter,
+  getSkillBonus, getHitDiceLabel, getCalculatedAbilityScores, hasFeat,
   SKILLS
 } from '../../utils/dndRules';
 
@@ -28,14 +29,7 @@ export default function BG3CharacterInspector({
 
   const level = character.level || 1;
   const profBonus = getProficiencyBonus(level);
-  const scores = character.abilityScores || { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 };
-  const racial = character.racialBonuses || {};
-  const customBonuses = character.customAbilityBonuses || {};
-
-  const finalScores = {};
-  for (const ab of ['str', 'dex', 'con', 'int', 'wis', 'cha']) {
-    finalScores[ab] = (scores[ab] || 10) + (racial[ab] || 0) + (customBonuses[ab] || 0);
-  }
+  const finalScores = getCalculatedAbilityScores(character);
 
   const dexMod = getAbilityModifier(finalScores.dex);
   const conMod = getAbilityModifier(finalScores.con);
@@ -48,7 +42,7 @@ export default function BG3CharacterInspector({
   const tempHp = character.tempHp || 0;
 
   const handleAdjustHp = (delta) => {
-    const updated = Math.max(0, Math.min(maxHp + 50, currentHp + delta));
+    const updated = Math.max(0, Math.min(maxHp, currentHp + delta));
     onUpdateCharacter({ currentHp: updated });
   };
 
@@ -58,7 +52,7 @@ export default function BG3CharacterInspector({
   const isEncumbered = currentWeight > capacity;
 
   // Spell Slots
-  const totalSlots = getSpellSlotsForClass(character.classId, level);
+  const totalSlots = getSpellSlotsForCharacter(character);
   const slotsUsed = character.spellSlotsUsed || [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
   const handleToggleSpellSlot = (slotIdx, pipIdx) => {
@@ -185,7 +179,7 @@ export default function BG3CharacterInspector({
                 <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleAdjustHp(-5)}>-5</button>
                 <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleAdjustHp(-1)}>-1</button>
               </div>
-              <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Hit Dice: {character.hitDiceMax || `1d${level}`}</span>
+              <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>Hit Dice: {getHitDiceLabel(character)}</span>
               <div style={{ display: 'flex', gap: '0.25rem' }}>
                 <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleAdjustHp(1)}>+1</button>
                 <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleAdjustHp(5)}>+5</button>
@@ -200,7 +194,7 @@ export default function BG3CharacterInspector({
               <div className="bg3-vital-lbl">Armour Class</div>
             </div>
             <div className="bg3-vital-cell">
-              <div className="bg3-vital-val">{formatModifier(dexMod)}</div>
+              <div className="bg3-vital-val">{formatModifier(dexMod + (hasFeat(character, 'Alert') ? 5 : 0))}</div>
               <div className="bg3-vital-lbl">Initiative</div>
             </div>
             <div className="bg3-vital-cell">
@@ -280,8 +274,7 @@ export default function BG3CharacterInspector({
               {SKILLS.map(sk => {
                 const isProf = character.skillProficiencies?.includes(sk.name);
                 const isExp = character.expertiseSkills?.includes(sk.name);
-                const statMod = getAbilityModifier(finalScores[sk.ability]);
-                const bonus = statMod + (isExp ? profBonus * 2 : isProf ? profBonus : 0);
+                const bonus = getSkillBonus(character, sk.name, finalScores[sk.ability]);
 
                 return (
                   <div
