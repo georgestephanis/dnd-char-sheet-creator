@@ -1675,7 +1675,7 @@ export default function BG3CharacterBuilder({
             <div className="modal-header">
               <div className="modal-title">
                 <AlertTriangle size={20} className="text-gold" />
-                <span id="bg3-confirm-create-title">Venture Forth Unprepared?</span>
+                <span id="bg3-confirm-create-title">Leave the Forge Unfinished?</span>
               </div>
             </div>
             <div className="modal-body" style={{ fontSize: '0.9rem', lineHeight: '1.5' }}>
