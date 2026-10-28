@@ -38,7 +38,7 @@ const FANTASY_NAMES = {
   dwarf: ['Torvin', 'Helgrid', 'Bramdur', 'Kethra', 'Orvald', 'Dagny', 'Rurik', 'Sigra', 'Thrandal', 'Moira'],
   elf: ['Altea', 'Ilvaris', 'Saelith', 'Thenwyn', 'Faelor', 'Yselle', 'Caerith', 'Lithriel', 'Arvanis', 'Nymara'],
   human: ['Maren', 'Rowan', 'Mira', 'Aldric', 'Seraphina', 'Joren', 'Talia', 'Corwin', 'Elena', 'Bastian'],
-  tiefling: ['Ashka', 'Ruin', 'Vexis', 'Morrow', 'Nyxara', 'Cinder', 'Zariel', 'Hollow', 'Vesper', 'Solace'],
+  tiefling: ['Ashka', 'Ruin', 'Vexis', 'Morrow', 'Nyxara', 'Cinder', 'Sarrowyn', 'Hollow', 'Vesper', 'Solace'],
   halfling: ['Corin', 'Pip', 'Tamsin', 'Wendel', 'Marigold', 'Odo', 'Fennick', 'Rosie', 'Barley', 'Clover'],
   dragonborn: ['Kaurax', 'Vyrsha', 'Thoravek', 'Sarnith', 'Draxis', 'Ylsira', 'Gorvath', 'Rhessa', 'Torrak', 'Ixalia'],
   gnome: ['Fizzwick', 'Nim', 'Tibble', 'Quillon', 'Dabber', 'Lissel', 'Wobblenock', 'Pellin', 'Zinnia', 'Glim'],
