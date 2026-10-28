@@ -10,7 +10,19 @@
     "correctness": "error",
     "suspicious": "warn"
   },
+  "env": {
+    "browser": true
+  },
+  "overrides": [
+    {
+      "files": ["vite.config.js"],
+      "env": {
+        "node": true
+      }
+    }
+  ],
   "rules": {
+    "no-undef": "error",
     "react/rules-of-hooks": "error",
     "react/only-export-components": [
       "warn",
