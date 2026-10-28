@@ -32,7 +32,7 @@ Featuring a **guided character creation & level-up interface**, an **illustrated
   - **Point Buy (27 Points)** with standard costs (8 to 15), live budget progress meter, and `[-]`/`[+]` spinners.
   - **⭐ Class Recommended (1-Click)**: Instantly assign optimal 27-point stats tailored to your class.
   - **Standard Array** (15, 14, 13, 12, 10, 8) and **Roll 4d6 Drop Lowest** with interactive dice rolls.
-  - Clear **+2 / +1 racial bonus tags** and live modifier calculations.
+  - Clear **ability bonus tags** and live modifier calculations. Bonuses come from race/subrace in SRD 5.1, and from the background (+2/+1 or +1/+1/+1, chosen on the Background step) in SRD 5.2.1.
 - **Background & Skill Selection**: SRD 5.1 has Acolyte; SRD 5.2.1 has Acolyte, Criminal, Sage and Soldier, each with ability increases and an Origin feat. Both versions also offer a custom/homebrew background. Rogues choose their two Expertise skills. Auto-pruning prevents locked states when switching classes; locks granted background proficiencies with a shield badge and allows dynamic skill swapping.
 - **Spells & Magic**: Starting Cantrips and 1st-level spells filtered by class with spell slot indicators.
 - **Appearance & Identity**: Curated fantasy character avatar gallery, custom image URL input, alignment matrix, and a **Random Fantasy Name Generator (🎲)** tailored to your race.

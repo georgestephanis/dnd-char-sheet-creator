@@ -16,7 +16,7 @@ This document defines the architectural principles, invariants, coding standards
    - **Tabletop 5e Printable Sheet (`src/components/Sheet/`)**: A high-density, classic 3-column D&D 5e character sheet designed for pen-and-paper tabletop gaming with dedicated `@media print` styling.
 
 3. **SRD 5.1 / 5.2.1 & CC-BY-4.0 Compliance**:
-   - Two rulesets ship side by side: SRD 5.1 (`src/data/srd51/`, matches the 2014 PHB) and SRD 5.2.1 (`src/data/srd52/`, matches the 2024 PHB), registered in `src/data/rulesets.js`. Every character stores `srdVersion` (`'5.1'` | `'5.2'`), set at creation and never changed by a respec. Characters without one are treated as 5.1.
+   - Two rulesets ship side by side: SRD 5.1 (`src/data/srd51/`, matches the 2014 PHB) and SRD 5.2.1 (`src/data/srd52/`, matches the 2024 PHB), registered in `src/data/rulesets.js`. Every character stores `srdVersion`, a `RULESETS` key: `'5.1'` (label “SRD 5.1”) or `'5.2'` (label “SRD 5.2.1”, the current 5.2 release). It's set at creation and never changed by a respec. Characters without one are treated as 5.1.
    - Components must read SRD data through `getRuleset(version)` / `getCharacterRuleset(character)`, never by importing a version's files directly. Rule differences go behind ruleset fields (e.g. `abilityBonusSource`, `halfCasterType`) or a version check in `dndRules.js`.
    - Each version's data must come only from that SRD document (5.2.1: https://www.dndbeyond.com/srd); never fill gaps with Player's Handbook text.
    - Content included in static datasets (`src/data/`) must originate from the official **System Reference Document** released under **Creative Commons Attribution 4.0 International (CC-BY-4.0)**.
