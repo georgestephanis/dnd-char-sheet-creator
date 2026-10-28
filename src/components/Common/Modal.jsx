@@ -13,9 +13,16 @@ export default function Modal({ onClose, className = 'modal-dialog', style, labe
   useEffect(() => {
     const dialog = dialogRef.current;
     const opener = document.activeElement;
-    if (dialog && !dialog.open) dialog.showModal();
+    if (dialog && !dialog.open) {
+      // Fall back to a non-modal open dialog where showModal is unavailable
+      if (typeof dialog.showModal === 'function') dialog.showModal();
+      else dialog.setAttribute('open', '');
+    }
     return () => {
-      if (dialog?.open) dialog.close();
+      if (dialog?.open) {
+        if (typeof dialog.close === 'function') dialog.close();
+        else dialog.removeAttribute('open');
+      }
       if (opener && typeof opener.focus === 'function' && document.contains(opener)) opener.focus();
     };
   }, []);
