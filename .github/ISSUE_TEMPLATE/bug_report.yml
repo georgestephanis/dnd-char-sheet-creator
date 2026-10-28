@@ -1,0 +1,73 @@
+name: 🐛 Bug report
+description: Something in the Character Forge isn't working the way it should.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a mimic in the code! A few details help us find it fast.
+        Your characters live only in your browser, so we can't see them. If the bug involves a character, attaching an export helps a lot (see the last field).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe what went wrong.
+      placeholder: When I level my Paladin from 4 to 5, the spell slots don't change.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Create a new character (SRD 5.2.1, Dwarf Paladin)
+        2. Open Level Up
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where in the app?
+      options:
+        - Character Forge (creating or respeccing a character)
+        - Level Up
+        - Tabletop Sheet
+        - Adventurer View
+        - Printing
+        - Dice roller
+        - Roster / import / export
+        - Something else
+    validations:
+      required: true
+  - type: dropdown
+    id: rules-version
+    attributes:
+      label: Rules version of the character
+      description: Shown on the sheet next to "Rules", and in the roster.
+      options:
+        - SRD 5.1 (2014 Player's Handbook)
+        - SRD 5.2.1 (2024 Player's Handbook)
+        - Not about a specific character
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: Firefox 140 on Windows 11 / Safari on iPhone 16
+  - type: textarea
+    id: character
+    attributes:
+      label: Character export (optional)
+      description: |
+        In the Roster, use **Export JSON** on the character and paste the file's contents here, or drag the file in.
+        It contains only what you entered for that character, but don't include anything you'd rather keep private.
+      render: json

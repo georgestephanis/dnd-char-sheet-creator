@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📖 Try the app
+    url: https://dnd.stephanis.me
+    about: Check whether the problem still happens on the latest version.
+  - name: 📚 SRD 5.2.1 (official rules reference)
+    url: https://www.dndbeyond.com/srd
+    about: The free System Reference Document this app's 5.2.1 content comes from.

@@ -399,7 +399,7 @@ export default function App() {
       <footer className="app-footer no-print">
         <span>Spotted a mimic lurking in the code?</span>
         <a
-          href="https://github.com/georgestephanis/dnd-char-sheet-creator/issues/new"
+          href="https://github.com/georgestephanis/dnd-char-sheet-creator/issues/new/choose"
           target="_blank"
           rel="noopener noreferrer"
         >
