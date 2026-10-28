@@ -4,11 +4,8 @@ import {
   Shield, Sword, Wand2, Sparkles, User, BookOpen, Check, Dices, Star, ChevronRight,
   ChevronLeft, Award, ArrowLeft, RefreshCw
 } from 'lucide-react';
-import { SRD_RACES } from '../../data/srdRaces';
-import { SRD_CLASSES } from '../../data/srdClasses';
-import { SRD_BACKGROUNDS } from '../../data/srdBackgrounds';
-import { SRD_SPELLS } from '../../data/srdSpells';
 import { SAMPLE_CHARACTERS } from '../../data/sampleCharacters';
+import { getRuleset, DEFAULT_SRD_VERSION } from '../../data/rulesets';
 import { generateCharacterId } from '../../utils/storage';
 import {
   POINT_BUY_COSTS, POINT_BUY_TOTAL, roll4d6DropLowest, getAbilityModifier,
@@ -68,6 +65,11 @@ export default function BG3CharacterBuilder({
   onCharacterCreated,
   initialCharacter = null
 }) {
+  // The SRD version is fixed per character: chosen at creation, kept on respec
+  const [srdVersion, setSrdVersion] = useState(initialCharacter?.srdVersion || DEFAULT_SRD_VERSION);
+  const ruleset = getRuleset(srdVersion);
+  const { races: SRD_RACES, classes: SRD_CLASSES, backgrounds: SRD_BACKGROUNDS, spells: SRD_SPELLS } = ruleset;
+
   const [activeTab, setActiveTab] = useState('origin'); // 'origin', 'race', 'class', 'abilities', 'background', 'skills', 'spells', 'equipment', 'identity'
 
   // Origin Type
@@ -113,6 +115,9 @@ export default function BG3CharacterBuilder({
   // If initialCharacter is provided, populate state once (the builder is remounted per opening)
   useEffect(() => {
     if (initialCharacter) {
+      // Look up the character's own ruleset so this effect doesn't depend on render state
+      const { races: SRD_RACES, classes: SRD_CLASSES, backgrounds: SRD_BACKGROUNDS, spells: SRD_SPELLS } =
+        getRuleset(initialCharacter.srdVersion);
       setCharName(initialCharacter.name || 'Adventurer');
       setPlayerName(initialCharacter.player || 'Player');
       setAlignment(initialCharacter.alignment || 'Neutral Good');
@@ -468,6 +473,7 @@ export default function BG3CharacterBuilder({
 
     const newCharacter = {
       id: initialCharacter?.id || generateCharacterId(),
+      srdVersion,
       name: charName.trim() || 'Adventurer',
       raceId: currentRace.id,
       subraceId: currentSubrace?.id || '',

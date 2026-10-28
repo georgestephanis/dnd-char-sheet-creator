@@ -3,8 +3,7 @@ import Modal from '../Common/Modal';
 import {
   Shield, Heart, Award, Dices, ChevronRight
 } from 'lucide-react';
-import { SRD_CLASSES } from '../../data/srdClasses';
-import { SRD_FEATS } from '../../data/srdFeats';
+import { getCharacterRuleset } from '../../data/rulesets';
 import { getAbilityModifier, getProficiencyBonus, hasFeat, getCalculatedAbilityScores } from '../../utils/dndRules';
 import { activateOnKey } from '../../utils/a11y';
 
@@ -26,7 +25,9 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
   const currentLevel = character.level || 1;
   const targetLevel = Math.min(20, currentLevel + 1);
 
-  const classData = SRD_CLASSES.find(c => c.id === character.classId) || SRD_CLASSES[0];
+  const ruleset = getCharacterRuleset(character);
+  const SRD_FEATS = ruleset.feats;
+  const classData = ruleset.classes.find(c => c.id === character.classId) || ruleset.classes[0];
   const hitDie = classData.hitDie || 8;
   const conMod = getAbilityModifier(getCalculatedAbilityScores(character).con);
 

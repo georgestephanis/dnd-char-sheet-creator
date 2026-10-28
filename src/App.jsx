@@ -471,6 +471,7 @@ export default function App() {
           isOpen={isAddAttackOpen}
           onClose={() => setIsAddAttackOpen(false)}
           onSaveAttack={handleSaveAttack}
+          srdVersion={activeCharacter?.srdVersion}
         />
       )}
 
@@ -479,6 +480,7 @@ export default function App() {
           isOpen={isAddSpellOpen}
           onClose={() => setIsAddSpellOpen(false)}
           onSaveSpell={handleSaveSpell}
+          srdVersion={activeCharacter?.srdVersion}
         />
       )}
 
@@ -495,6 +497,7 @@ export default function App() {
           isOpen={isAddItemOpen}
           onClose={() => setIsAddItemOpen(false)}
           onSaveItem={handleSaveItem}
+          srdVersion={activeCharacter?.srdVersion}
         />
       )}
 

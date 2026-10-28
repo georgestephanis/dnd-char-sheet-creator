@@ -1,10 +1,11 @@
 import React from 'react';
 import { Plus, Trash2, Wand2 } from 'lucide-react';
-import { SRD_CLASSES } from '../../data/srdClasses';
+import { getCharacterRuleset } from '../../data/rulesets';
 import { getAbilityModifier, getProficiencyBonus, getSpellSlotsForClass, formatModifier } from '../../utils/dndRules';
 
 export default function SpellsSheet({ character, scores, onUpdateCharacter, onOpenAddSpell, onRemoveSpell, onCastSpell }) {
-  const classData = SRD_CLASSES.find(c => c.id === character.classId) || SRD_CLASSES[0];
+  const { classes } = getCharacterRuleset(character);
+  const classData = classes.find(c => c.id === character.classId) || classes[0];
   const spellAbility = character.spellcastingAbility || classData.spellcastingAbility || 'int';
   const profBonus = getProficiencyBonus(character.level || 1);
 

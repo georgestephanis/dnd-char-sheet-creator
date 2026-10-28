@@ -1,6 +1,6 @@
 // D&D 5e Rules Engine & Calculation Utilities (SRD 5.1 compliant)
 
-import { SRD_CLASSES } from '../data/srdClasses';
+import { getRuleset } from '../data/rulesets';
 
 export const ABILITIES = [
   { id: 'str', name: 'Strength', short: 'STR' },
@@ -152,14 +152,14 @@ export function getSpellSlotsForClass(casterType, level) {
 }
 
 // Resolve a class id to its caster type ('full' | 'half' | 'pact' | 'none')
-export function getCasterType(classId) {
-  const classData = SRD_CLASSES.find(c => c.id === classId);
+export function getCasterType(classId, srdVersion) {
+  const classData = getRuleset(srdVersion).classes.find(c => c.id === classId);
   if (!classData) return 'none';
   return classData.spellcasterType || (classData.spellcaster ? 'full' : 'none');
 }
 
 export function getSpellSlotsForCharacter(character) {
-  return getSpellSlotsForClass(getCasterType(character.classId), character.level || 1);
+  return getSpellSlotsForClass(getCasterType(character.classId, character.srdVersion), character.level || 1);
 }
 
 // Lowest slot level (0-based index) at or above the spell's level with a slot remaining, or -1
@@ -170,12 +170,12 @@ export function findAvailableSlotIndex(maxSlots, slotsUsed, spellLevel) {
   return -1;
 }
 
-export function getHitDieSize(classId) {
-  return SRD_CLASSES.find(c => c.id === classId)?.hitDie || 8;
+export function getHitDieSize(classId, srdVersion) {
+  return getRuleset(srdVersion).classes.find(c => c.id === classId)?.hitDie || 8;
 }
 
 export function getHitDiceLabel(character) {
-  return character.hitDiceMax || `${character.level || 1}d${getHitDieSize(character.classId)}`;
+  return character.hitDiceMax || `${character.level || 1}d${getHitDieSize(character.classId, character.srdVersion)}`;
 }
 
 // True when the character has a feature granting the named feat (e.g. "Feat: Alert")

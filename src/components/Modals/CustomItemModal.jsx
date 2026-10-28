@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import Modal from '../Common/Modal';
 import { X, Backpack } from 'lucide-react';
-import { SRD_ARMOR, SRD_WEAPONS, SRD_ADVENTURING_PACKS } from '../../data/srdEquipment';
+import { getRuleset } from '../../data/rulesets';
 
-export default function CustomItemModal({ isOpen, onClose, onSaveItem }) {
+export default function CustomItemModal({ isOpen, onClose, onSaveItem, srdVersion }) {
+  const { armor: SRD_ARMOR, weapons: SRD_WEAPONS, packs: SRD_ADVENTURING_PACKS } = getRuleset(srdVersion);
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [weight, setWeight] = useState(1);

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import Modal from '../Common/Modal';
 import { X, Sparkles } from 'lucide-react';
-import { SRD_SPELLS } from '../../data/srdSpells';
+import { getRuleset } from '../../data/rulesets';
 
-export default function CustomSpellModal({ isOpen, onClose, onSaveSpell }) {
+export default function CustomSpellModal({ isOpen, onClose, onSaveSpell, srdVersion }) {
+  const { spells: SRD_SPELLS } = getRuleset(srdVersion);
   const [activeTab, setActiveTab] = useState('srd'); // 'srd' or 'custom'
   const [filterClass, setFilterClass] = useState('all');
   const [filterLevel, setFilterLevel] = useState('all');
