@@ -28,7 +28,7 @@ export default function AttacksSection({ character, scores, onRollAttack, onOpen
               <th>Name</th>
               <th style={{ width: '55px', textAlign: 'center' }}>Atk Bonus</th>
               <th>Damage / Type</th>
-              <th className="no-print" style={{ width: '30px' }}></th>
+              <th className="no-print" style={{ width: '30px' }}><span className="visually-hidden">Actions</span></th>
             </tr>
           </thead>
           <tbody>

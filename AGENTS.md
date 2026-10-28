@@ -51,6 +51,7 @@ export PATH="/Users/georgestephanis/.nvm/versions/node/v22.22.2/bin:/opt/homebre
 
 ### Essential Commands
 - **Start Development Server**: `npm run dev`. Vite prints the URL; it starts at 5173 (or `$PORT`) and moves to the next free port if that's taken, so never assume 5173.
+- **Lint**: `npm run lint` (oxlint with React, `jsx-a11y` and import rules; config in `.oxlintrc.json`). CI (`.github/workflows/ci.yml`) runs lint and build on every PR and fails on any lint error.
 - **Production Build Check**: `npm run build` (uses `vite build`). Always run this before completing complex tasks to verify zero bundling or syntax errors.
 - **Preview Production Bundle**: `npm run preview`.
 
