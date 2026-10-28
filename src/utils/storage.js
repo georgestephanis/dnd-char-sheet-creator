@@ -42,7 +42,7 @@ export function loadCharacters() {
     const parsed = JSON.parse(raw);
     // An empty array is a deliberate empty roster; only seed samples when the key is absent
     if (Array.isArray(parsed)) {
-      const entries = parsed.filter(c => c && typeof c === 'object');
+      const entries = parsed.filter(c => c && typeof c === 'object' && !Array.isArray(c));
       const characters = entries.map(normalizeCharacter);
       // Persist ids generated for legacy entries so they stay stable across reloads
       if (entries.some(c => !c.id)) saveCharacters(characters);
@@ -144,7 +144,7 @@ export function importCharactersFromJson(jsonString) {
 
     if (Array.isArray(data)) {
       data.forEach(item => {
-        if (item && typeof item === 'object' && item.name) {
+        if (item && typeof item === 'object' && !Array.isArray(item) && item.name) {
           existing.unshift(normalizeCharacter({ ...item, id: generateCharacterId() }));
           importedCount++;
         }
