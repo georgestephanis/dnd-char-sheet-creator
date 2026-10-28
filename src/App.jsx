@@ -403,7 +403,7 @@ export default function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          🐛 Report it to the Guild of Bug Hunters
+          <span aria-hidden="true">🐛 </span>Report it to the Guild of Bug Hunters
           <span className="visually-hidden"> (opens GitHub in a new tab)</span>
         </a>
       </footer>
