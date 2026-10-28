@@ -1043,6 +1043,19 @@ export const SRD_SPELLS = [
     description: 'You create an Invisible, mindless Medium force (AC 10, 1 HP, Strength 2, can’t attack) that performs simple tasks. As a Bonus Action you can command it to move up to 15 feet and interact with an object; the spell ends if it would go more than 60 feet from you.',
   },
   {
+    id: 'darkness',
+    name: 'Darkness',
+    level: 2,
+    school: 'Evocation',
+    castingTime: 'Action',
+    range: '60 feet',
+    components: 'V, M (bat fur and a piece of coal)',
+    duration: 'Concentration, up to 10 minutes',
+    classes: ['sorcerer', 'warlock', 'wizard'],
+    concentration: true,
+    description: 'Magical Darkness fills a 15-foot-radius Sphere centered on a point within range (or a 15-foot Emanation from an unworn, uncarried object). Darkvision can’t see through it and nonmagical light can’t illuminate it; covering the object blocks it. It dispels overlapping light from spells of level 2 or lower.'
+  },
+  {
     id: 'hold-person',
     name: 'Hold Person',
     level: 2,
@@ -1079,6 +1092,32 @@ export const SRD_SPELLS = [
     duration: 'Instantaneous',
     classes: ['sorcerer', 'warlock', 'wizard'],
     description: 'You teleport up to 30 feet to an unoccupied space you can see.',
+  },
+  {
+    id: 'pass-without-trace',
+    name: 'Pass without Trace',
+    level: 2,
+    school: 'Abjuration',
+    castingTime: 'Action',
+    range: 'Self',
+    components: 'V, S, M (ashes from burned mistletoe)',
+    duration: 'Concentration, up to 1 hour',
+    classes: ['druid', 'ranger'],
+    concentration: true,
+    description: 'You radiate a concealing aura in a 30-foot Emanation. While in the aura, you and each creature you choose have a +10 bonus to Dexterity (Stealth) checks and leave no tracks.'
+  },
+  {
+    id: 'ray-of-enfeeblement',
+    name: 'Ray of Enfeeblement',
+    level: 2,
+    school: 'Necromancy',
+    castingTime: 'Action',
+    range: '60 feet',
+    components: 'V, S',
+    duration: 'Concentration, up to 1 minute',
+    classes: ['warlock', 'wizard'],
+    concentration: true,
+    description: 'A creature within range makes a Constitution saving throw. On a failed save, it has Disadvantage on Strength-based D20 Tests and subtracts 1d8 from its damage rolls for the duration, repeating the save at the end of each of its turns. On a successful save, it has Disadvantage on its next attack roll before the start of your next turn.'
   },
   {
     id: 'scorching-ray',
