@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Modal from '../Common/Modal';
 import {
   Shield, Sword, Wand2, Sparkles, User, BookOpen, Check, Dices, Star, ChevronRight,
-  ChevronLeft, Award, ArrowLeft, RefreshCw
+  ChevronLeft, Award, ArrowLeft, RefreshCw, AlertTriangle
 } from 'lucide-react';
 import { SAMPLE_CHARACTERS } from '../../data/sampleCharacters';
 import { getRuleset, DEFAULT_SRD_VERSION, RULESET_LIST } from '../../data/rulesets';
@@ -169,6 +169,14 @@ export default function BG3CharacterBuilder({
   const { races: SRD_RACES, classes: SRD_CLASSES, backgrounds: SRD_BACKGROUNDS, spells: SRD_SPELLS } = ruleset;
 
   const [activeTab, setActiveTab] = useState('origin'); // 'origin', 'race', 'class', 'abilities', 'background', 'skills', 'spells', 'equipment', 'identity'
+  // Steps the player has opened, so Create Hero can warn about ones they skipped
+  const [visitedSteps, setVisitedSteps] = useState(() => new Set(['origin']));
+  const [isConfirmingCreate, setIsConfirmingCreate] = useState(false);
+  const keepForgingRef = useRef(null);
+  const goToStep = (stepId) => {
+    setActiveTab(stepId);
+    setVisitedSteps(prev => (prev.has(stepId) ? prev : new Set(prev).add(stepId)));
+  };
 
   // Origin Type
   const [originType, setOriginType] = useState('custom'); // 'custom' or preset character id
@@ -693,10 +701,21 @@ export default function BG3CharacterBuilder({
 
   const currentStepIndex = stepsList.findIndex(s => s.id === activeTab);
   const handlePrevStep = () => {
-    if (currentStepIndex > 0) setActiveTab(stepsList[currentStepIndex - 1].id);
+    if (currentStepIndex > 0) goToStep(stepsList[currentStepIndex - 1].id);
   };
   const handleNextStep = () => {
-    if (currentStepIndex < stepsList.length - 1) setActiveTab(stepsList[currentStepIndex + 1].id);
+    if (currentStepIndex < stepsList.length - 1) goToStep(stepsList[currentStepIndex + 1].id);
+  };
+
+  // A new hero confirms before finishing with skipped or incomplete steps; respec saves straight away
+  const unfinishedSteps = stepsList.filter(s => !visitedSteps.has(s.id) || s.status !== 'complete');
+  const handleCreateClick = () => {
+    if (!initialCharacter && unfinishedSteps.length > 0) setIsConfirmingCreate(true);
+    else handleVentureForth();
+  };
+  const handleKeepForging = () => {
+    setIsConfirmingCreate(false);
+    goToStep(unfinishedSteps[0].id);
   };
 
   return (
@@ -727,7 +746,7 @@ export default function BG3CharacterBuilder({
                   key={step.id}
                   type="button"
                   className={`bg3-step-item ${activeTab === step.id ? 'active' : ''}`}
-                  onClick={() => setActiveTab(step.id)}
+                  onClick={() => goToStep(step.id)}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                     <StepIcon size={16} style={{ color: activeTab === step.id ? 'var(--accent-gold)' : '#94a3b8' }} />
@@ -1644,12 +1663,46 @@ export default function BG3CharacterBuilder({
           <button
             type="button"
             className="bg3-btn-venture"
-            onClick={handleVentureForth}
+            onClick={handleCreateClick}
           >
             <span>{initialCharacter ? 'Save Changes' : 'Create Hero'}</span>
             <ChevronRight size={18} />
           </button>
         </div>
+
+        {isConfirmingCreate && (
+          <Modal onClose={() => setIsConfirmingCreate(false)} labelledBy="bg3-confirm-create-title" style={{ maxWidth: '460px' }} initialFocusRef={keepForgingRef}>
+            <div className="modal-header">
+              <div className="modal-title">
+                <AlertTriangle size={20} className="text-gold" />
+                <span id="bg3-confirm-create-title">Venture Forth Unprepared?</span>
+              </div>
+            </div>
+            <div className="modal-body" style={{ fontSize: '0.9rem', lineHeight: '1.5' }}>
+              <p style={{ marginBottom: '0.75rem' }}>
+                Your hero is not finished yet. These steps haven&rsquo;t been reviewed or still need choices:
+              </p>
+              <ul style={{ paddingLeft: '1.25rem', marginBottom: '0.75rem' }}>
+                {unfinishedSteps.map(s => (
+                  <li key={s.id}>
+                    <strong>{s.label}</strong>
+                    {s.status !== 'complete' ? ' (needs choices)' : ' (not reviewed)'}
+                  </li>
+                ))}
+              </ul>
+              <p>Anything you skip keeps its default.</p>
+            </div>
+            {/* The safe choice is focused on open, so Enter never creates by accident */}
+            <div className="modal-footer">
+              <button type="button" className="btn btn-primary" onClick={handleKeepForging} ref={keepForgingRef}>
+                Keep Forging: {unfinishedSteps[0]?.label}
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={handleVentureForth}>
+                Create Anyway
+              </button>
+            </div>
+          </Modal>
+        )}
 
       </div>
     </Modal>

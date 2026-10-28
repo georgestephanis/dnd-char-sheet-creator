@@ -2,7 +2,8 @@ import React, { useEffect, useRef } from 'react';
 
 // Native modal <dialog>: opened with showModal() so it gets a backdrop, inert page behind,
 // focus containment and Escape-to-close. Focus returns to the opener when it unmounts.
-export default function Modal({ onClose, className = 'modal-dialog', style, labelledBy, closeOnBackdrop = true, children }) {
+// initialFocusRef picks the element focused on open; otherwise the browser focuses the first focusable one.
+export default function Modal({ onClose, className = 'modal-dialog', style, labelledBy, closeOnBackdrop = true, initialFocusRef, children }) {
   const dialogRef = useRef(null);
   const onCloseRef = useRef(onClose);
 
@@ -27,9 +28,16 @@ export default function Modal({ onClose, className = 'modal-dialog', style, labe
     };
   }, []);
 
+  // Declared after the effect above, so this runs once the dialog is open (and only again if the ref changes)
+  useEffect(() => {
+    initialFocusRef?.current?.focus();
+  }, [initialFocusRef]);
+
   const handleCancel = (e) => {
     // Let React own the open state instead of the browser closing the dialog itself
     e.preventDefault();
+    // React propagates cancel through the component tree; keep Escape in a nested dialog from closing its parent
+    e.stopPropagation();
     onCloseRef.current?.();
   };
 
