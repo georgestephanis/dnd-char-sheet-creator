@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Modal from '../Common/Modal';
 import {
   Shield, Sword, Wand2, Sparkles, User, BookOpen, Check, Dices, Star, ChevronRight,
@@ -61,14 +61,110 @@ const FANTASY_AVATARS = [
   { id: 'av-elf', label: 'Elf', icon: '🧝‍♀️', role: 'Elven Noble' }
 ];
 
+// Derive initial builder state from initialCharacter (if provided on respec) or defaults.
+// The builder is remounted per opening (keyed in App.jsx), so state initialized directly
+// starts fresh without requiring synchronous effect updates or cascading re-renders.
+function getInitialBuilderState(initialCharacter) {
+  if (!initialCharacter) {
+    return {
+      srdVersion: DEFAULT_SRD_VERSION,
+      charName: 'Adventurer',
+      playerName: 'Player',
+      alignment: 'Neutral Good',
+      avatarIcon: '⚔️',
+      customAvatarUrl: '',
+      raceId: 'human',
+      subraceId: '',
+      classId: 'fighter',
+      startingLevel: 1,
+      subclassId: '',
+      fightingStyle: 'defense',
+      scoreMethod: 'pointbuy',
+      pointBuyScores: { str: 14, dex: 13, con: 14, int: 10, wis: 12, cha: 10 },
+      baseScores: { str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 },
+      backgroundId: 'acolyte',
+      bgBonusMode: 'two-one',
+      bgBonusTwo: '',
+      bgBonusOne: '',
+      classSkills: ['Athletics', 'Perception'],
+      expertise: [],
+      cantrips: [],
+      firstLevelSpells: []
+    };
+  }
+
+  const { races: savedRaces, classes: savedClasses, backgrounds: savedBackgrounds, spells: savedSpells } =
+    getRuleset(initialCharacter.srdVersion);
+
+  const race = savedRaces.find(r => r.id === initialCharacter.raceId) || savedRaces.find(r => r.id === 'human');
+  const subrace = race.subraces?.find(sr => sr.id === initialCharacter.subraceId) || race.subraces?.[0];
+
+  let scoreMethod = 'pointbuy';
+  let pointBuyScores = { str: 14, dex: 13, con: 14, int: 10, wis: 12, cha: 10 };
+  let baseScores = { str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 };
+  if (initialCharacter.abilityScores) {
+    const stored = { ...initialCharacter.abilityScores };
+    const values = Object.values(stored);
+    const isPointBuy = values.every(v => POINT_BUY_COSTS[v] !== undefined) &&
+      values.reduce((acc, v) => acc + POINT_BUY_COSTS[v], 0) === POINT_BUY_TOTAL;
+    if (isPointBuy) pointBuyScores = stored;
+    baseScores = stored;
+    scoreMethod = isPointBuy ? 'pointbuy' : 'roll';
+  }
+
+  const bg = savedBackgrounds.find(b => b.id === initialCharacter.backgroundId);
+  const bgSkills = bg?.skillProficiencies || [];
+  const loadedClass = savedClasses.find(c => c.id === initialCharacter.classId);
+  const classOptions = loadedClass?.skillChoices?.options || [];
+  const quota = loadedClass?.skillChoices?.count || 2;
+  const classSkills = (initialCharacter.skillProficiencies || [])
+    .filter(sk => !bgSkills.includes(sk) && classOptions.includes(sk))
+    .slice(0, quota);
+
+  const knownSpells = initialCharacter.spells || [];
+  const isClassSpell = (sp) => savedSpells.some(s => s.id === sp.id && s.classes.includes(initialCharacter.classId));
+  const cantrips = knownSpells.filter(sp => sp.level === 0 && isClassSpell(sp)).map(sp => sp.id);
+  const firstLevelSpells = knownSpells.filter(sp => sp.level === 1 && isClassSpell(sp)).map(sp => sp.id);
+
+  return {
+    srdVersion: initialCharacter.srdVersion || DEFAULT_SRD_VERSION,
+    charName: initialCharacter.name || 'Adventurer',
+    playerName: initialCharacter.player || 'Player',
+    alignment: initialCharacter.alignment || 'Neutral Good',
+    avatarIcon: initialCharacter.avatarIcon || '⚔️',
+    customAvatarUrl: initialCharacter.avatarUrl || '',
+    raceId: race.id,
+    subraceId: subrace?.id || '',
+    classId: initialCharacter.classId || 'fighter',
+    startingLevel: initialCharacter.level || 1,
+    subclassId: initialCharacter.subclassId || '',
+    fightingStyle: initialCharacter.fightingStyle || 'defense',
+    scoreMethod,
+    pointBuyScores,
+    baseScores,
+    backgroundId: savedBackgrounds.some(b => b.id === initialCharacter.backgroundId)
+      ? initialCharacter.backgroundId
+      : (initialCharacter.backgroundId ? 'custom' : 'acolyte'),
+    bgBonusMode: initialCharacter?.backgroundBonus?.mode || 'two-one',
+    bgBonusTwo: initialCharacter?.backgroundBonus?.two || '',
+    bgBonusOne: initialCharacter?.backgroundBonus?.one || '',
+    classSkills,
+    expertise: [...(initialCharacter.expertiseSkills || [])],
+    cantrips,
+    firstLevelSpells
+  };
+}
+
 export default function BG3CharacterBuilder({
   isOpen,
   onClose,
   onCharacterCreated,
   initialCharacter = null
 }) {
+  const [initialState] = useState(() => getInitialBuilderState(initialCharacter));
+
   // The SRD version is fixed per character: chosen at creation, kept on respec
-  const [srdVersion, setSrdVersion] = useState(initialCharacter?.srdVersion || DEFAULT_SRD_VERSION);
+  const [srdVersion, setSrdVersion] = useState(initialState.srdVersion);
   const ruleset = getRuleset(srdVersion);
   const { races: SRD_RACES, classes: SRD_CLASSES, backgrounds: SRD_BACKGROUNDS, spells: SRD_SPELLS } = ruleset;
 
@@ -78,111 +174,45 @@ export default function BG3CharacterBuilder({
   const [originType, setOriginType] = useState('custom'); // 'custom' or preset character id
 
   // Identity
-  const [charName, setCharName] = useState('Adventurer');
-  const [playerName, setPlayerName] = useState('Player');
-  const [alignment, setAlignment] = useState('Neutral Good');
-  const [avatarIcon, setAvatarIcon] = useState('⚔️');
-  const [customAvatarUrl, setCustomAvatarUrl] = useState('');
+  const [charName, setCharName] = useState(initialState.charName);
+  const [playerName] = useState(initialState.playerName);
+  const [alignment, setAlignment] = useState(initialState.alignment);
+  const [avatarIcon, setAvatarIcon] = useState(initialState.avatarIcon);
+  const [customAvatarUrl, setCustomAvatarUrl] = useState(initialState.customAvatarUrl);
 
   // Race
-  const [selectedRaceId, setSelectedRaceId] = useState('human');
-  const [selectedSubraceId, setSelectedSubraceId] = useState('');
+  const [selectedRaceId, setSelectedRaceId] = useState(initialState.raceId);
+  const [selectedSubraceId, setSelectedSubraceId] = useState(initialState.subraceId);
   const [dragonbornAncestry, setDragonbornAncestry] = useState('Red');
 
   // Class & Level
-  const [selectedClassId, setSelectedClassId] = useState('fighter');
-  const [startingLevel, setStartingLevel] = useState(1);
-  const [selectedSubclassId, setSelectedSubclassId] = useState('');
-  const [fightingStyle, setFightingStyle] = useState('defense');
+  const [selectedClassId, setSelectedClassId] = useState(initialState.classId);
+  const [startingLevel] = useState(initialState.startingLevel);
+  const [selectedSubclassId, setSelectedSubclassId] = useState(initialState.subclassId);
+  const [fightingStyle, setFightingStyle] = useState(initialState.fightingStyle);
 
   // Ability Scores
-  const [scoreMethod, setScoreMethod] = useState('pointbuy'); // 'pointbuy', 'standard', 'roll', 'manual'
-  const [pointBuyScores, setPointBuyScores] = useState({ str: 14, dex: 13, con: 14, int: 10, wis: 12, cha: 10 });
-  const [baseScores, setBaseScores] = useState({ str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 });
+  const [scoreMethod, setScoreMethod] = useState(initialState.scoreMethod);
+  const [pointBuyScores, setPointBuyScores] = useState(initialState.pointBuyScores);
+  const [baseScores, setBaseScores] = useState(initialState.baseScores);
 
   // Background
-  const [selectedBackgroundId, setSelectedBackgroundId] = useState('acolyte');
+  const [selectedBackgroundId, setSelectedBackgroundId] = useState(initialState.backgroundId);
   // SRD 5.2: the background's three abilities get +2/+1 or +1/+1/+1
-  const [bgBonusMode, setBgBonusMode] = useState(initialCharacter?.backgroundBonus?.mode || 'two-one');
-  const [bgBonusTwo, setBgBonusTwo] = useState(initialCharacter?.backgroundBonus?.two || '');
-  const [bgBonusOne, setBgBonusOne] = useState(initialCharacter?.backgroundBonus?.one || '');
+  const [bgBonusMode, setBgBonusMode] = useState(initialState.bgBonusMode);
+  const [bgBonusTwo, setBgBonusTwo] = useState(initialState.bgBonusTwo);
+  const [bgBonusOne, setBgBonusOne] = useState(initialState.bgBonusOne);
 
   // Skills
-  const [selectedClassSkills, setSelectedClassSkills] = useState(['Athletics', 'Perception']);
-  const [selectedExpertise, setSelectedExpertise] = useState([]);
+  const [selectedClassSkills, setSelectedClassSkills] = useState(initialState.classSkills);
+  const [selectedExpertise, setSelectedExpertise] = useState(initialState.expertise);
 
   // Spells
-  const [selectedCantrips, setSelectedCantrips] = useState([]);
-  const [selectedFirstLevelSpells, setSelectedFirstLevelSpells] = useState([]);
+  const [selectedCantrips, setSelectedCantrips] = useState(initialState.cantrips);
+  const [selectedFirstLevelSpells, setSelectedFirstLevelSpells] = useState(initialState.firstLevelSpells);
 
   // Equipment package
   const [selectedEquipIndex, setSelectedEquipIndex] = useState(0);
-
-  // If initialCharacter is provided, populate state once (the builder is remounted per opening)
-  useEffect(() => {
-    if (initialCharacter) {
-      // Look up the character's own ruleset so this effect doesn't depend on render state
-      const { races: savedRaces, classes: savedClasses, backgrounds: savedBackgrounds, spells: savedSpells } =
-        getRuleset(initialCharacter.srdVersion);
-      setCharName(initialCharacter.name || 'Adventurer');
-      setPlayerName(initialCharacter.player || 'Player');
-      setAlignment(initialCharacter.alignment || 'Neutral Good');
-      setAvatarIcon(initialCharacter.avatarIcon || '⚔️');
-      setCustomAvatarUrl(initialCharacter.avatarUrl || '');
-      // Saved ids may refer to content removed from the SRD dataset; resolve them so the
-      // selected cards match what will actually be saved
-      const race = savedRaces.find(r => r.id === initialCharacter.raceId) || savedRaces.find(r => r.id === 'human');
-      const subrace = race.subraces?.find(sr => sr.id === initialCharacter.subraceId) || race.subraces?.[0];
-      setSelectedRaceId(race.id);
-      setSelectedSubraceId(subrace?.id || '');
-      setSelectedClassId(initialCharacter.classId || 'fighter');
-      setSelectedSubclassId(initialCharacter.subclassId || '');
-      setStartingLevel(initialCharacter.level || 1);
-      // Removed backgrounds become Custom so the character keeps a homebrew background
-      setSelectedBackgroundId(
-        savedBackgrounds.some(bg => bg.id === initialCharacter.backgroundId)
-          ? initialCharacter.backgroundId
-          : (initialCharacter.backgroundId ? 'custom' : 'acolyte')
-      );
-      if (initialCharacter.abilityScores) {
-        const stored = { ...initialCharacter.abilityScores };
-        const values = Object.values(stored);
-        const isPointBuy = values.every(v => POINT_BUY_COSTS[v] !== undefined) &&
-          values.reduce((acc, v) => acc + POINT_BUY_COSTS[v], 0) === POINT_BUY_TOTAL;
-        // Only seed point buy with scores it can represent; otherwise keep its valid default
-        if (isPointBuy) setPointBuyScores(stored);
-        setBaseScores(stored);
-        // Rolled or hand-entered scores can't be represented as a 27-point buy
-        setScoreMethod(isPointBuy ? 'pointbuy' : 'roll');
-      }
-      if (initialCharacter.skillProficiencies) {
-        // Background skills are re-added on save; only class picks belong in this list
-        const bg = savedBackgrounds.find(b => b.id === initialCharacter.backgroundId);
-        const bgSkills = bg?.skillProficiencies || [];
-        // Keep only skills this class can pick, up to its quota, so the step starts out valid
-        const loadedClass = savedClasses.find(c => c.id === initialCharacter.classId);
-        const classOptions = loadedClass?.skillChoices?.options || [];
-        const quota = loadedClass?.skillChoices?.count || 2;
-        setSelectedClassSkills(
-          initialCharacter.skillProficiencies
-            .filter(sk => !bgSkills.includes(sk) && classOptions.includes(sk))
-            .slice(0, quota)
-        );
-      }
-      if (initialCharacter.expertiseSkills) {
-        setSelectedExpertise([...initialCharacter.expertiseSkills]);
-      }
-      if (initialCharacter.fightingStyle) {
-        setFightingStyle(initialCharacter.fightingStyle);
-      }
-      // Only preselect SRD spells on this class's list; others stay on the sheet untouched
-      const knownSpells = initialCharacter.spells || [];
-      const isClassSpell = (sp) => savedSpells.some(s => s.id === sp.id && s.classes.includes(initialCharacter.classId));
-      setSelectedCantrips(knownSpells.filter(sp => sp.level === 0 && isClassSpell(sp)).map(sp => sp.id));
-      setSelectedFirstLevelSpells(knownSpells.filter(sp => sp.level === 1 && isClassSpell(sp)).map(sp => sp.id));
-      setOriginType('custom');
-    }
-  }, [initialCharacter]);
 
   if (!isOpen) return null;
 
