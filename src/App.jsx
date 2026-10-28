@@ -394,24 +394,26 @@ export default function App() {
       />
 
       {/* Character Roster / Vault Modal */}
-      <CharacterRosterModal
-        isOpen={isRosterOpen}
-        onClose={() => setIsRosterOpen(false)}
-        characters={characters}
-        activeCharacterId={activeCharacterId}
-        onSelectCharacter={handleSelectCharacter}
-        onDeleteCharacter={handleDeleteCharacter}
-        onDuplicateCharacter={handleDuplicateCharacter}
-        onOpenCreationWizard={() => {
-          setIsRosterOpen(false);
-          setEditingCharacter(null);
-          setIsCreationWizardOpen(true);
-        }}
-        onImportCharacters={(imported) => {
-          setCharacters(imported);
-          if (imported.length > 0) setActiveCharId(imported[0].id);
-        }}
-      />
+      {isRosterOpen && (
+        <CharacterRosterModal
+          isOpen={isRosterOpen}
+          onClose={() => setIsRosterOpen(false)}
+          characters={characters}
+          activeCharacterId={activeCharacterId}
+          onSelectCharacter={handleSelectCharacter}
+          onDeleteCharacter={handleDeleteCharacter}
+          onDuplicateCharacter={handleDuplicateCharacter}
+          onOpenCreationWizard={() => {
+            setIsRosterOpen(false);
+            setEditingCharacter(null);
+            setIsCreationWizardOpen(true);
+          }}
+          onImportCharacters={(imported) => {
+            setCharacters(imported);
+            if (imported.length > 0) setActiveCharId(imported[0].id);
+          }}
+        />
+      )}
 
       {/* Dice Roller Tray Modal */}
       <DiceRollerModal
