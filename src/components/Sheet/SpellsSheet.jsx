@@ -1,7 +1,7 @@
 import React from 'react';
 import { Plus, Trash2, Wand2 } from 'lucide-react';
 import { getCharacterRuleset } from '../../data/rulesets';
-import { getAbilityModifier, getProficiencyBonus, getSpellSlotsForClass, formatModifier } from '../../utils/dndRules';
+import { getAbilityModifier, getProficiencyBonus, getSpellSlotsForCharacter, formatModifier } from '../../utils/dndRules';
 
 export default function SpellsSheet({ character, scores, onUpdateCharacter, onOpenAddSpell, onRemoveSpell, onCastSpell }) {
   const { classes } = getCharacterRuleset(character);
@@ -13,8 +13,7 @@ export default function SpellsSheet({ character, scores, onUpdateCharacter, onOp
   const spellSaveDc = 8 + profBonus + abilityMod;
   const spellAttackBonus = profBonus + abilityMod;
 
-  const casterType = classData.spellcasterType || (classData.spellcaster ? 'full' : 'none');
-  const maxSlots = getSpellSlotsForClass(casterType, character.level || 1);
+  const maxSlots = getSpellSlotsForCharacter(character);
   const usedSlots = character.spellSlotsUsed || [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
   const spells = character.spells || [];
