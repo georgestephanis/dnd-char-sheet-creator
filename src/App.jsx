@@ -194,7 +194,7 @@ export default function App() {
 
     const damage = parseDamageExpression(atk.damageDice);
     const damageRes = damage ? rollDice(damage.count, damage.sides, damage.flat + abilityMod) : null;
-    const damageTotal = damageRes ? Math.max(1, damageRes.total) : null;
+    const damageTotal = damageRes ? Math.max(0, damageRes.total) : null;
     const damageBreakdown = damageRes
       ? ` • Dmg: [${damageRes.rolls.length > 0 ? damageRes.rolls.join(', ') : '—'}] ${formatModifier(damageRes.modifier)} (${atk.damageType || ''})`
       : '';
