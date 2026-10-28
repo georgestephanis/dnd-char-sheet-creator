@@ -114,6 +114,10 @@ html, body {
   filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.5));
 }
 
+.text-gold {
+  color: var(--text-gold);
+}
+
 .brand-title {
   font-family: var(--font-heading);
   font-size: 1.25rem;

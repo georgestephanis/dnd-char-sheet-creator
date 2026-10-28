@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Modal from '../Common/Modal';
 import {
   Shield, Sword, Wand2, Sparkles, User, BookOpen, Check, Dices, Star, ChevronRight,
@@ -172,6 +172,7 @@ export default function BG3CharacterBuilder({
   // Steps the player has opened, so Create Hero can warn about ones they skipped
   const [visitedSteps, setVisitedSteps] = useState(() => new Set(['origin']));
   const [isConfirmingCreate, setIsConfirmingCreate] = useState(false);
+  const keepForgingRef = useRef(null);
   const goToStep = (stepId) => {
     setActiveTab(stepId);
     setVisitedSteps(prev => (prev.has(stepId) ? prev : new Set(prev).add(stepId)));
@@ -1670,7 +1671,7 @@ export default function BG3CharacterBuilder({
         </div>
 
         {isConfirmingCreate && (
-          <Modal onClose={() => setIsConfirmingCreate(false)} labelledBy="bg3-confirm-create-title" style={{ maxWidth: '460px' }}>
+          <Modal onClose={() => setIsConfirmingCreate(false)} labelledBy="bg3-confirm-create-title" style={{ maxWidth: '460px' }} initialFocusRef={keepForgingRef}>
             <div className="modal-header">
               <div className="modal-title">
                 <AlertTriangle size={20} className="text-gold" />
@@ -1691,9 +1692,9 @@ export default function BG3CharacterBuilder({
               </ul>
               <p>Anything you skip keeps its default.</p>
             </div>
-            {/* Safe choice first: the dialog focuses it on open, so Enter never creates by accident */}
+            {/* The safe choice is focused on open, so Enter never creates by accident */}
             <div className="modal-footer">
-              <button type="button" className="btn btn-primary" onClick={handleKeepForging}>
+              <button type="button" className="btn btn-primary" onClick={handleKeepForging} ref={keepForgingRef}>
                 Keep Forging: {unfinishedSteps[0]?.label}
               </button>
               <button type="button" className="btn btn-secondary" onClick={handleVentureForth}>
