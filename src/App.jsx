@@ -30,7 +30,7 @@ import {
 export default function App() {
   const [characters, setCharacters] = useState(() => loadCharacters());
   const [activeCharacterId, setActiveCharId] = useState(() => getActiveCharacterId(characters));
-  const [viewMode, setViewMode] = useState('sheet'); // 'sheet' (Tabletop) or 'bg3_view' (BG3 Inspector)
+  const [viewMode, setViewMode] = useState('sheet'); // 'sheet' (Tabletop) or 'bg3_view' (Adventurer View)
 
   // Creation & Respec Forge
   const [isCreationWizardOpen, setIsCreationWizardOpen] = useState(false);
@@ -263,7 +263,7 @@ export default function App() {
   };
 
   // Print Character Sheet
-  // Printing always uses the tabletop sheet; the BG3 view is restored afterwards.
+  // Printing always uses the tabletop sheet; the Adventurer View is restored afterwards.
   // Handles both the Print button and the browser's own Ctrl/Cmd+P.
   const viewBeforePrintRef = useRef(null);
   const viewModeRef = useRef(viewMode);
@@ -379,7 +379,7 @@ export default function App() {
               Welcome to D&amp;D 5e Character Forge
             </h2>
             <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', maxWidth: '500px', margin: '0 auto 1.5rem auto' }}>
-              Create a new character using the Baldur&rsquo;s Gate 3 inspired character creator or choose a sample hero.
+              Create a new character in the guided Character Forge, or start from a sample hero.
             </p>
             <button
               type="button"
@@ -390,7 +390,7 @@ export default function App() {
                 setIsCreationWizardOpen(true);
               }}
             >
-              Venture Forth &amp; Create Hero
+              Forge a New Hero
             </button>
           </div>
         )}
@@ -408,7 +408,7 @@ export default function App() {
         </a>
       </footer>
 
-      {/* Baldur's Gate 3 Character Creation / Respec Forge Modal */}
+      {/* Character Forge: creation and respec */}
       {isCreationWizardOpen && (
         <BG3CharacterBuilder
           key={editingCharacter?.id || 'new-character'}
@@ -422,7 +422,7 @@ export default function App() {
         />
       )}
 
-      {/* Baldur's Gate 3 Level Up Modal */}
+      {/* Level Up Modal */}
       <BG3LevelUpModal
         isOpen={isLevelUpOpen}
         onClose={() => setIsLevelUpOpen(false)}

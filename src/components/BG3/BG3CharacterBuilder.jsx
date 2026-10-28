@@ -16,7 +16,7 @@ import {
 } from '../../utils/dndRules';
 import { activateOnKey } from '../../utils/a11y';
 
-// Recommended 27-point buy scores per class (BG3 & 5e optimal arrays)
+// Recommended 27-point buy scores per class (5e optimal arrays)
 const CLASS_RECOMMENDED_SCORES = {
   barbarian: { str: 15, con: 14, dex: 13, wis: 12, cha: 10, int: 8 },
   bard: { cha: 15, dex: 14, con: 13, wis: 12, int: 10, str: 8 },
@@ -310,7 +310,7 @@ export default function BG3CharacterBuilder({
     }
   };
 
-  // Load an Origin Preset Hero (sample characters)
+  // Load a sample starter hero
   const handleSelectOrigin = (originId) => {
     if (originId === 'custom') {
       setOriginType('custom');
@@ -590,7 +590,7 @@ export default function BG3CharacterBuilder({
   };
 
   const stepsList = [
-    { id: 'origin', label: 'Origin', badge: originType === 'custom' ? 'Custom Hero' : 'Origin Hero', status: 'complete', icon: User },
+    { id: 'origin', label: 'Start', badge: originType === 'custom' ? 'Custom Hero' : 'Sample Hero', status: 'complete', icon: User },
     { id: 'race', label: 'Race', badge: currentSubrace?.name || currentRace.name, status: 'complete', icon: Sparkles },
     { id: 'class', label: 'Class', badge: currentClass.name, status: 'complete', icon: Sword },
     { id: 'abilities', label: 'Abilities', badge: scoreMethod === 'pointbuy' && pointBuyRemaining !== 0 ? `${pointBuyRemaining} pts` : 'Ready', status: isAbilitiesComplete ? 'complete' : 'pending', icon: Award },
@@ -672,7 +672,7 @@ export default function BG3CharacterBuilder({
               <div>
                 <div className="bg3-section-title">
                   <User size={24} />
-                  <span>CHOOSE ORIGIN ARCHETYPE</span>
+                  <span>CHOOSE YOUR STARTING POINT</span>
                 </div>
                 <div className="bg3-section-subtitle">
                   Forge your own legend from scratch as a Custom Adventurer, or embark on your journey as an iconic pre-made hero.
@@ -696,7 +696,7 @@ export default function BG3CharacterBuilder({
                     </div>
                   </div>
 
-                  {/* Origin Starter Heroes */}
+                  {/* Sample Starter Heroes */}
                   {SAMPLE_CHARACTERS.map(orig => (
                     <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={originType === orig.id}
                       key={orig.id}
@@ -1065,7 +1065,7 @@ export default function BG3CharacterBuilder({
               <div>
                 <div className="bg3-section-title">
                   <BookOpen size={24} />
-                  <span>CHOOSE BACKGROUND &amp; ORIGIN LORE</span>
+                  <span>CHOOSE BACKGROUND &amp; HISTORY</span>
                 </div>
                 <div className="bg3-section-subtitle">
                   Your background reveals where you came from, your place in the world, and your core proficiencies.
@@ -1394,7 +1394,7 @@ export default function BG3CharacterBuilder({
           </div>
         </div>
 
-        {/* PILLAR 3: RIGHT CHARACTER SUMMARY (BG3 LIVE INSPECTOR) */}
+        {/* PILLAR 3: RIGHT CHARACTER SUMMARY (LIVE INSPECTOR) */}
         <div className="bg3-summary-pillar">
           <div className="bg3-portrait-frame">
             {customAvatarUrl ? (
@@ -1471,13 +1471,13 @@ export default function BG3CharacterBuilder({
             </div>
           )}
 
-          {/* Grand Venture Forth Golden Button */}
+          {/* Grand Create Hero Golden Button */}
           <button
             type="button"
             className="bg3-btn-venture"
             onClick={handleVentureForth}
           >
-            <span>{initialCharacter ? 'Save Changes' : 'Venture Forth'}</span>
+            <span>{initialCharacter ? 'Save Changes' : 'Create Hero'}</span>
             <ChevronRight size={18} />
           </button>
         </div>

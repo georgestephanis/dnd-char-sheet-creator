@@ -21,7 +21,7 @@ export default function Header({
         <div className="brand-icon">⚔️</div>
         <div>
           <div className="brand-title">D&amp;D 5e Character Forge</div>
-          <div className="brand-subtitle">BG3-Style Intuitive Creator &bull; Level-Up &bull; SRD 5.1 &bull; Printable</div>
+          <div className="brand-subtitle">Guided Creator &bull; Level-Up &bull; SRD 5.1 &bull; Printable</div>
         </div>
       </div>
 
@@ -43,7 +43,7 @@ export default function Header({
           </select>
         )}
 
-        {/* View Mode Switcher: Tabletop Sheet vs BG3 Companion View */}
+        {/* View Mode Switcher: Tabletop Sheet vs Adventurer View */}
         <div style={{ display: 'flex', background: 'rgba(0, 0, 0, 0.45)', padding: '2px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
           <button
             type="button"
@@ -78,10 +78,10 @@ export default function Header({
               gap: '0.35rem'
             }}
             onClick={() => onSetViewMode('bg3_view')}
-            title="Switch to Baldur's Gate 3 Character Companion Inspector"
+            title="Switch to the illustrated Adventurer View"
           >
             <Sparkles size={14} />
-            <span>BG3 View</span>
+            <span>Adventurer View</span>
           </button>
         </div>
 
@@ -93,7 +93,7 @@ export default function Header({
             className="btn btn-primary"
             style={{ fontWeight: 800 }}
             onClick={onOpenLevelUp}
-            title="Level up this character (BG3 Interface)"
+            title="Level up this character"
           >
             <TrendingUp size={16} />
             <span>Level Up</span>
@@ -106,7 +106,7 @@ export default function Header({
           id="btn-new-hero"
           className="btn btn-secondary"
           onClick={onOpenCreationWizard}
-          title="Open the Baldur's Gate 3 Character Creation Forge"
+          title="Open the Character Forge"
           style={{ borderColor: 'var(--border-gold)', color: 'var(--text-gold)', fontWeight: 700 }}
         >
           <UserPlus size={16} />

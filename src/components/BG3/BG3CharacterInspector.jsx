@@ -100,7 +100,7 @@ export default function BG3CharacterInspector({
             className="btn btn-primary"
             style={{ fontWeight: 800, padding: '0.5rem 1rem' }}
             onClick={onOpenLevelUp}
-            title="Open BG3 Level Up advancement modal"
+            title="Level up this character"
           >
             <TrendingUp size={16} />
             <span>Level Up</span>
@@ -110,7 +110,7 @@ export default function BG3CharacterInspector({
             type="button"
             className="btn btn-secondary"
             onClick={onOpenRespecForge}
-            title="Edit character stats and options in BG3 Character Forge"
+            title="Edit character stats and options in the Character Forge"
             style={{ color: 'var(--text-gold)', borderColor: 'var(--border-gold)' }}
           >
             <Sparkles size={16} />
@@ -139,7 +139,7 @@ export default function BG3CharacterInspector({
         </div>
       </div>
 
-      {/* 3-COLUMN BG3 INSPECTOR GRID */}
+      {/* 3-COLUMN INSPECTOR GRID */}
       <div className="bg3-inspector-grid">
 
         {/* COLUMN 1: VITALS, ATTRIBUTES & SKILLS */}
@@ -376,12 +376,6 @@ export default function BG3CharacterInspector({
                       {atk.notes && <span>&bull; {atk.notes}</span>}
                     </div>
 
-                    {/* BG3 Iconic Weapon Actions */}
-                    <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
-                      <span className="bg3-badge-pill" style={{ margin: 0, fontSize: '0.68rem' }}>Pommel Strike</span>
-                      <span className="bg3-badge-pill" style={{ margin: 0, fontSize: '0.68rem' }}>Cleave</span>
-                      <span className="bg3-badge-pill" style={{ margin: 0, fontSize: '0.68rem' }}>Lacerate</span>
-                    </div>
                   </div>
                 );
               })}

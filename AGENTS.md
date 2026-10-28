@@ -18,6 +18,7 @@ This document defines the architectural principles, invariants, coding standards
 3. **SRD 5.1 & CC-BY-4.0 Compliance**:
    - Content included in static datasets (`src/data/`) must originate from the official **System Reference Document 5.1 (SRD 5.1)** released under **Creative Commons Attribution 4.0 International (CC-BY-4.0)**.
    - Do **NOT** hardcode non-SRD copyrighted intellectual property (e.g. non-SRD subclasses, proprietary monsters, or campaign-specific lore).
+   - The UI is visually *inspired by* Baldur's Gate 3, but must not use its names, terms or assets in user-facing text: no "Tav", "Origin" heroes, "Venture Forth", BG3 weapon actions, companion names, or "BG3"/"Baldur's Gate" labels. `BG3*` component names and `bg3-` CSS classes are internal and fine.
    - Support homebrew and personal customization through the provided custom attack, spell, feature, and item creation modals.
 
 ---
@@ -49,7 +50,7 @@ export PATH="/Users/georgestephanis/.nvm/versions/node/v22.22.2/bin:/opt/homebre
 ```
 
 ### Essential Commands
-- **Start Development Server**: `npm run dev` (runs on `http://localhost:5173/`).
+- **Start Development Server**: `npm run dev`. Vite prints the URL; it starts at 5173 (or `$PORT`) and moves to the next free port if that's taken, so never assume 5173.
 - **Production Build Check**: `npm run build` (uses `vite build`). Always run this before completing complex tasks to verify zero bundling or syntax errors.
 - **Preview Production Bundle**: `npm run preview`.
 

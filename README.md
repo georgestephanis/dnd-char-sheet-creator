@@ -5,15 +5,17 @@
 
 A responsive, client-side web application for creating, managing, leveling up, and printing **Dungeons & Dragons 5th Edition** characters using official **System Reference Document 5.1 (SRD 5.1)** content under Creative Commons (CC-BY-4.0).
 
-Featuring a **Baldur's Gate 3 inspired character creation & level-up interface**, an **interactive party member companion view**, and a **high-density tabletop character sheet** cleanly styled for physical printing.
+Featuring a **guided character creation & level-up interface**, an **illustrated Adventurer View** for play, and a **high-density tabletop character sheet** cleanly styled for physical printing.
+
+> **Design inspiration:** the creator and Adventurer View take visual cues from the character screens of *Baldur's Gate 3* (dark panels, gold filigree, a three-column layout). That's the only connection. This is an independent fan project, not affiliated with or endorsed by Larian Studios or Wizards of the Coast, and it uses no assets, names, or content from the game. All game content comes from the SRD 5.1.
 
 ---
 
 ## ✨ Features
 
-### ⚔️ Baldur’s Gate 3 Character Creation Forge
-- **3-Pillar Layout**: Step navigation on the left, interactive selection stage in the center, and live character summary inspector on the right with the golden *"Venture Forth"* button.
-- **Origin Selection**: Build a custom adventurer or embark immediately with iconic pre-made heroes (*Torvin Stonehelm*, *Altea Stardancer*, *Corin Underbough*).
+### ⚔️ Character Creation Forge
+- **3-Pillar Layout**: Step navigation on the left, interactive selection stage in the center, and live character summary inspector on the right with the golden *"Create Hero"* button.
+- **Starting Point**: Build a custom adventurer or start from a sample hero (*Torvin Stonehelm*, *Altea Stardancer*, *Corin Underbough*).
 - **Lineage & Subraces**: All 9 SRD races (Dwarf, Elf, Halfling, Human, Dragonborn, Gnome, Half-Elf, Half-Orc, Tiefling) with their SRD subraces (Hill Dwarf, High Elf, Lightfoot Halfling, Rock Gnome), traits, Darkvision, speeds, and Draconic ancestries.
 - **12 Classes & Level 1 Disciplines**: Barbarian, Bard, Cleric, Druid, Fighter, Monk, Paladin, Ranger, Rogue, Sorcerer, Warlock, Wizard with fighting styles, divine domains, and patrons.
 - **Ability Score Allocation**:
@@ -27,14 +29,14 @@ Featuring a **Baldur's Gate 3 inspired character creation & level-up interface**
 
 ---
 
-### 🛡️ Baldur’s Gate 3 In-Game Companion View
-- Inspect your active character in an authentic BG3 in-game party HUD.
+### 🛡️ Adventurer View
+- Inspect your active character in an illustrated, game-style character panel.
 - **Live Vitals**: Interactive Hit Points bar with `+1`, `-1`, `+5`, `-5` quick adjustments, Temp HP, Armor Class, Initiative, and Speed.
 - **Attribute & Skill Checks**: Click any ability or skill to roll 1d20 + modifier with animated toast feedback (saving throws roll from the tabletop sheet).
-- **Weapons & Attack Actions**: Equipped weapons display to-hit bonuses, damage dice, and BG3 weapon actions (*Pommel Strike*, *Cleave*, *Topple*, *Lacerate*).
+- **Weapons & Attacks**: Equipped weapons display to-hit bonuses and damage dice; click to roll.
 - **Interactive Spell Slots**: Clickable pips to expend and restore spell slots level 1 through 9. Casting uses the lowest free slot at or above the spell's level.
 - **Carrying Capacity**: Live encumbrance meter tracking backpack gear weight against Strength capacity.
-- **Forge / Respec Button**: Re-open any character in the BG3 Character Creation Forge to re-allocate stats, equipment, or spells.
+- **Forge / Respec Button**: Re-open any character in the Character Forge to re-allocate stats, equipment, or spells.
 
 ---
 
@@ -44,10 +46,10 @@ Featuring a **Baldur's Gate 3 inspired character creation & level-up interface**
 
 ---
 
-### 📈 Baldur’s Gate 3 Level-Up Advancement Modal
-- Advance characters seamlessly from Level 1 to 20:
+### 📈 Level-Up Advancement
+- Advance characters one level at a time from Level 1 to 20 (with *Level Up & Continue* for several levels):
   - **Hit Points Increase**: Choose "Take Average" or "Roll 1dHitDie live" with animated dice rolling.
-  - **Class Features Unlocked**: Automatic breakdown of all features granted at the target level.
+  - **Class Features Unlocked**: Automatic breakdown of all features granted at the new level.
   - **Subclass Selection**: Prompts when reaching your class's archetype level (e.g. Level 3 for Fighter/Rogue, Level 2 for Wizard).
   - **ASI & Feats**: Choose between +2 to one ability, +1 to two abilities, or a Feat (SRD 5.1 includes Grappler).
   - **Live Before ➔ After Diff**: Right-hand inspector displays real-time before/after stat increases.
@@ -83,7 +85,7 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:5173/` in your browser.
+Open the local URL Vite prints (usually `http://localhost:5173/`). If that port is busy, Vite picks the next free one automatically; set `PORT=4000 npm run dev` to choose one yourself.
 
 ### Building for Production
 ```bash
@@ -100,9 +102,9 @@ dnd-char-sheet-creator/
 ├── src/
 │   ├── components/
 │   │   ├── BG3/
-│   │   │   ├── BG3CharacterBuilder.jsx    # 3-pillar BG3 character creation forge
-│   │   │   ├── BG3CharacterInspector.jsx  # In-game BG3 companion HUD view
-│   │   │   ├── BG3LevelUpModal.jsx        # BG3 level-up advancement modal
+│   │   │   ├── BG3CharacterBuilder.jsx    # 3-pillar character creation forge
+│   │   │   ├── BG3CharacterInspector.jsx  # Adventurer View character panel
+│   │   │   ├── BG3LevelUpModal.jsx        # Level-up advancement modal
 │   │   │   └── bg3.css                    # Gothic obsidian, gold filigree & ornate styles
 │   │   ├── Sheet/
 │   │   │   ├── CharacterSheet.jsx         # Tabletop 5e main sheet container
@@ -119,7 +121,7 @@ dnd-char-sheet-creator/
 │   │   │   ├── SrdLegalModal.jsx          # SRD 5.1 CC-BY-4.0 attribution
 │   │   │   └── Custom*Modal.jsx           # Custom attack, spell, feature & item builders
 │   │   ├── CharacterRosterModal.jsx       # Roster vault, JSON export & import
-│   │   ├── Header.jsx                     # Top bar: Tabletop vs BG3 view, Level Up, + New Hero
+│   │   ├── Header.jsx                     # Top bar: Tabletop vs Adventurer View, Level Up, + New Hero
 │   │   └── ...
 │   ├── data/
 │   │   ├── srdRaces.js                    # 9 SRD races, SRD subraces, traits & stat bonuses
