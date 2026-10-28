@@ -117,7 +117,7 @@ export default function InventorySection({ character, scores, onUpdateCharacter,
               )}
             </div>
 
-            <button aria-label="Remove item"
+            <button aria-label={`Remove ${item.name}`}
               type="button"
               className="no-print"
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)', padding: '0.1rem' }}

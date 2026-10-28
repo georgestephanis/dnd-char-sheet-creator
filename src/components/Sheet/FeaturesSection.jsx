@@ -96,7 +96,7 @@ export default function FeaturesSection({ character, onOpenAddFeature, onRemoveF
                   )}
                 </button>
 
-                <button aria-label="Remove feature"
+                <button aria-label={`Remove ${feat.name}`}
                   type="button"
                   className="no-print"
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)', padding: '0.1rem' }}

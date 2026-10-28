@@ -214,7 +214,7 @@ export default function SpellsSheet({ character, scores, onUpdateCharacter, onOp
                             <span>Cast</span>
                           </button>
                         )}
-                        <button aria-label="Remove spell"
+                        <button aria-label={`Remove ${sp.name}`}
                           type="button"
                           className="no-print"
                           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)', padding: '0.1rem' }}

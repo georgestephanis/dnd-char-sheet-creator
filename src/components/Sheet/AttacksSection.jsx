@@ -75,7 +75,7 @@ export default function AttacksSection({ character, scores, onRollAttack, onOpen
                     {damageWithMod}
                   </td>
                   <td className="no-print" style={{ textAlign: 'center' }}>
-                    <button aria-label="Remove attack"
+                    <button aria-label={`Remove ${atk.name}`}
                       type="button"
                       style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)' }}
                       title="Remove attack"
