@@ -538,8 +538,10 @@ export default function BG3CharacterBuilder({
     const level = rebuilt.level || 1;
     // Same rules as level-up: each level grants at least 1 HP
     const toughPerLevel = hasTough ? 2 : 0;
-    const firstLevelHp = Math.max(1, startingHp + toughPerLevel);
-    const perLevelHp = Math.max(1, Math.floor(hitDie / 2) + 1 + conMod + bonusHpPerLevel + toughPerLevel);
+    // CON for HP includes the ASI/feat bonuses this respec preserves
+    const hpConMod = getAbilityModifier(finalScores.con + (existing.customAbilityBonuses?.con || 0));
+    const firstLevelHp = Math.max(1, (currentClass.hitDie || 8) + hpConMod + bonusHpPerLevel + toughPerLevel);
+    const perLevelHp = Math.max(1, Math.floor(hitDie / 2) + 1 + hpConMod + bonusHpPerLevel + toughPerLevel);
     const maxHp = firstLevelHp + (level - 1) * perLevelHp;
     const damageTaken = Math.max(0, (existing.maxHp || 0) - (existing.currentHp ?? existing.maxHp ?? 0));
 
