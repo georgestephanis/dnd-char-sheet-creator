@@ -1,4 +1,4 @@
-// D&D 5e Rules Engine & Calculation Utilities (SRD 5.1 compliant)
+// D&D 5e Rules Engine & Calculation Utilities (ruleset-aware: SRD data is looked up per character version)
 
 import { getRuleset } from '../data/rulesets';
 

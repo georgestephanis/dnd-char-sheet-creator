@@ -66,7 +66,7 @@ export default function BG3CharacterBuilder({
   initialCharacter = null
 }) {
   // The SRD version is fixed per character: chosen at creation, kept on respec
-  const [srdVersion, setSrdVersion] = useState(initialCharacter?.srdVersion || DEFAULT_SRD_VERSION);
+  const [srdVersion] = useState(initialCharacter?.srdVersion || DEFAULT_SRD_VERSION);
   const ruleset = getRuleset(srdVersion);
   const { races: SRD_RACES, classes: SRD_CLASSES, backgrounds: SRD_BACKGROUNDS, spells: SRD_SPELLS } = ruleset;
 
