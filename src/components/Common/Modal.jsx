@@ -30,6 +30,8 @@ export default function Modal({ onClose, className = 'modal-dialog', style, labe
   const handleCancel = (e) => {
     // Let React own the open state instead of the browser closing the dialog itself
     e.preventDefault();
+    // React propagates cancel through the component tree; keep Escape in a nested dialog from closing its parent
+    e.stopPropagation();
     onCloseRef.current?.();
   };
 
