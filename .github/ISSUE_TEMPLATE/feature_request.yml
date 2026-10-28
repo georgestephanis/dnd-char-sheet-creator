@@ -1,0 +1,17 @@
+name: ✨ Feature idea
+description: Suggest something new for the Character Forge.
+title: "[Idea]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: Describe the idea and what you'd use it for.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What problem does it solve?
+      placeholder: When I'm at the table I keep having to…

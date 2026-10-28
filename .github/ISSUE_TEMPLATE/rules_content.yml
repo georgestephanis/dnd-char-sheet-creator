@@ -1,0 +1,35 @@
+name: 📜 Rules or content error
+description: A rule, number or description doesn't match the SRD (wrong spell slots, AC, feature text, missing spell…).
+title: "[Rules]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This app only uses content from the free System Reference Documents (SRD 5.1 and SRD 5.2.1), not the full Player's Handbook.
+        If something from the Player's Handbook is missing, it's probably not in the SRD and can't be included, but you can still add it to your character with the custom feature, spell and item buttons.
+  - type: dropdown
+    id: rules-version
+    attributes:
+      label: Which rules version?
+      options:
+        - SRD 5.1 (2014 Player's Handbook)
+        - SRD 5.2.1 (2024 Player's Handbook)
+        - Both
+    validations:
+      required: true
+  - type: textarea
+    id: whats-wrong
+    attributes:
+      label: What's wrong?
+      placeholder: My level 5 Ranger shows the wrong number of spell slots on the Tabletop Sheet.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: What does the SRD say?
+      description: A page number from the SRD PDF is perfect. SRD 5.2.1 is at https://www.dndbeyond.com/srd
+      placeholder: SRD 5.2.1, p. 77, Wizard Features table
+    validations:
+      required: true
