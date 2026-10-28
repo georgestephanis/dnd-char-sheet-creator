@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { getRuleset } from '../../data/rulesets';
-import { ALIGNMENTS } from '../../utils/dndRules';
+import { ALIGNMENTS, formatXp } from '../../utils/dndRules';
 
 export default function SheetHeader({ character, onUpdateCharacter }) {
+  const [isEditingXp, setIsEditingXp] = useState(false);
   if (!character) return null;
 
   return (
@@ -77,19 +78,22 @@ export default function SheetHeader({ character, onUpdateCharacter }) {
         </div>
 
         <div className="meta-field">
+          {/* Text input so XP can show thousands separators; digits only while editing */}
           <input aria-label="Experience points"
-            type="number"
+            type="text"
             inputMode="numeric"
-            min={0}
-            step={1}
+            pattern="[0-9,]*"
             className="meta-value"
-            value={character.xp ?? 0}
+            value={isEditingXp ? String(character.xp ?? '') : formatXp(character.xp)}
+            onFocus={() => setIsEditingXp(true)}
             onChange={(e) => {
-              const val = parseInt(e.target.value, 10);
-              // Allow clearing the field while typing; store whole, non-negative numbers
-              onUpdateCharacter({ xp: Number.isFinite(val) ? Math.max(0, val) : '' });
+              const digits = e.target.value.replace(/[^\d]/g, '');
+              onUpdateCharacter({ xp: digits === '' ? '' : parseInt(digits, 10) });
             }}
-            onBlur={() => { if (character.xp === '') onUpdateCharacter({ xp: 0 }); }}
+            onBlur={() => {
+              setIsEditingXp(false);
+              if (character.xp === '') onUpdateCharacter({ xp: 0 });
+            }}
           />
           <div className="sheet-label">Experience Points</div>
         </div>

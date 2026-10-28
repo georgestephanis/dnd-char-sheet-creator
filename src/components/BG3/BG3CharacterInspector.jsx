@@ -5,7 +5,7 @@ import {
 import {
   getAbilityModifier, formatModifier, calculateArmorClass,
   getProficiencyBonus, getCarryingCapacity, getSpellSlotsForCharacter,
-  getSkillBonus, getHitDiceLabel, getCalculatedAbilityScores, getInitiativeModifier,
+  getSkillBonus, getHitDiceLabel, getCalculatedAbilityScores, getInitiativeModifier, formatXp,
   SKILLS
 } from '../../utils/dndRules';
 import { activateOnKey } from '../../utils/a11y';
@@ -87,7 +87,7 @@ export default function BG3CharacterInspector({
               )}
             </div>
             <div style={{ fontSize: '0.82rem', color: '#94a3b8', marginTop: '0.2rem' }}>
-              {character.raceName} &bull; {character.backgroundName} &bull; {character.alignment} &bull; XP: {character.xp || 0}
+              {character.raceName} &bull; {character.backgroundName} &bull; {character.alignment} &bull; XP: {formatXp(character.xp)}
             </div>
           </div>
         </div>

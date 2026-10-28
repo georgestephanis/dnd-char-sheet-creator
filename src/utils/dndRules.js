@@ -11,6 +11,12 @@ export const ABILITIES = [
   { id: 'cha', name: 'Charisma', short: 'CHA' }
 ];
 
+// Experience points with thousands separators, e.g. 12000 → "12,000"
+export function formatXp(xp) {
+  const n = parseInt(xp, 10);
+  return (Number.isFinite(n) ? Math.max(0, n) : 0).toLocaleString('en-US');
+}
+
 // The nine alignments (SRD 5.1 and 5.2.1)
 export const ALIGNMENTS = [
   'Lawful Good', 'Neutral Good', 'Chaotic Good',
