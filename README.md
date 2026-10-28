@@ -21,7 +21,7 @@ Featuring a **guided character creation & level-up interface**, an **illustrated
 ## ✨ Features
 
 ### ⚔️ Character Creation Forge
-- **3-Pillar Layout**: Step navigation on the left, interactive selection stage in the center, and live character summary inspector on the right with the golden *"Create Hero"* button.
+- **3-Pillar Layout**: Step navigation on the left, interactive selection stage in the center, and live character summary inspector on the right with the golden *"Create Hero"* button. Clicking it before every step has been reviewed asks for confirmation first, listing the skipped or incomplete steps.
 - **Rules Version**: Pick SRD 5.1 (2014 PHB) or SRD 5.2.1 (2024 PHB) on the first step. The rest of the creator adapts to that version's species, backgrounds, feats and spells.
 - **Starting Point**: Build a custom adventurer or start from a sample hero (*Torvin Stonehelm*, *Altea Stardancer*, *Corin Underbough*).
 - **Lineage & Subraces**:
