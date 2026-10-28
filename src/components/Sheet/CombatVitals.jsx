@@ -8,7 +8,7 @@ export default function CombatVitals({ character, scores, onUpdateCharacter, onL
 
   const calculatedAc = calculateArmorClass(character, scores);
 
-  // Initiative: DEX mod + feat bonus (e.g. Alert +5)
+  // Initiative: DEX mod + Alert (SRD 5.1: +5; SRD 5.2.1: + proficiency bonus)
   const initiativeMod = getInitiativeModifier(character, scores);
 
   const speed = character.speed || 30;

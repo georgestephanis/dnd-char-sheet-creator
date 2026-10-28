@@ -155,7 +155,8 @@ export function getSpellSlotsForClass(casterType, level) {
   return [0, 0, 0, 0, 0, 0, 0, 0, 0];
 }
 
-// Resolve a class id to its caster type ('full' | 'half' | 'pact' | 'none')
+// Resolve a class id to its caster type: 'full' | 'pact' | 'none', or the ruleset's
+// half-caster type ('half' in 5.1, 'half-5.2' in 5.2, whose casters get slots at level 1)
 export function getCasterType(classId, srdVersion) {
   const ruleset = getRuleset(srdVersion);
   const classData = ruleset.classes.find(c => c.id === classId);

@@ -295,7 +295,7 @@ export default function BG3CharacterBuilder({
     setSelectedEquipIndex(0);
   };
 
-  // Background Selection Handler
+  // Rules Version Selection Handler: resets choices that may not exist in the other ruleset
   const handleSelectSrdVersion = (version) => {
     if (version === srdVersion) return;
     const next = getRuleset(version);
@@ -316,6 +316,7 @@ export default function BG3CharacterBuilder({
     setSelectedFirstLevelSpells(next.spells.filter(sp => sp.level === 1 && sp.classes.includes(cls.id)).slice(0, 2).map(sp => sp.id));
   };
 
+  // Background Selection Handler
   const handleSelectBackground = (bgId) => {
     const newBg = SRD_BACKGROUNDS.find(b => b.id === bgId);
     if (!newBg) return;
