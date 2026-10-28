@@ -11,7 +11,7 @@ export default function CharacterRosterModal({
   onDeleteCharacter,
   onDuplicateCharacter,
   onOpenCreationWizard,
-  onRefreshList
+  onImportCharacters
 }) {
   const fileInputRef = useRef(null);
 
@@ -28,7 +28,7 @@ export default function CharacterRosterModal({
         const res = importCharactersFromJson(text);
         if (res.success) {
           alert(`Successfully imported ${res.count} character(s)!`);
-          onRefreshList();
+          onImportCharacters(res.list);
         } else {
           alert(`Error importing characters: ${res.error}`);
         }

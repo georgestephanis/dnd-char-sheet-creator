@@ -133,6 +133,19 @@ export default function App() {
     setRollToast(toastData);
   };
 
+  // Mirror dice tray results into the roll toast
+  const handleDiceTrayRoll = (entry) => {
+    const isSingleD20 = entry.sides === 20 && (entry.isAdvDis || entry.rolls.length === 1);
+    showToast({
+      title: entry.title,
+      dieRoll: isSingleD20 ? (entry.picked ?? entry.rolls[0]) : null,
+      total: entry.total,
+      breakdown: entry.isAdvDis
+        ? `kept ${entry.picked}, dropped ${entry.dropped}`
+        : `rolls: ${entry.rolls.join(', ')}`
+    });
+  };
+
   // Roll standard ability check (1d20 + mod)
   const handleRollCheck = (abilityName, mod) => {
     const d20 = Math.floor(Math.random() * 20) + 1;
@@ -371,7 +384,7 @@ export default function App() {
         onSelectCharacter={handleSelectCharacter}
         onDeleteCharacter={handleDeleteCharacter}
         onDuplicateCharacter={handleDuplicateCharacter}
-        onNewCharacter={() => {
+        onOpenCreationWizard={() => {
           setIsRosterOpen(false);
           setEditingCharacter(null);
           setIsCreationWizardOpen(true);
@@ -386,7 +399,7 @@ export default function App() {
       <DiceRollerModal
         isOpen={isDiceRollerOpen}
         onClose={() => setIsDiceRollerOpen(false)}
-        onDiceRolled={showToast}
+        onRollComplete={handleDiceTrayRoll}
       />
 
       {/* SRD Legal Modal */}
@@ -422,7 +435,7 @@ export default function App() {
 
       {/* Live Dice Roll Toast Feedback */}
       <DiceRollToast
-        rollData={rollToast}
+        rollToast={rollToast}
         onDismiss={() => setRollToast(null)}
       />
     </div>

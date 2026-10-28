@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, Dices, RotateCcw } from 'lucide-react';
 import { rollDice } from '../../utils/dndRules';
 
-export default function DiceRollerModal({ isOpen, onClose, initialRollData, onRollComplete }) {
+export default function DiceRollerModal({ isOpen, onClose, onRollComplete }) {
   const [selectedDie, setSelectedDie] = useState(20);
   const [dieCount, setDieCount] = useState(1);
   const [modifier, setModifier] = useState(0);
@@ -17,6 +17,7 @@ export default function DiceRollerModal({ isOpen, onClose, initialRollData, onRo
       const res = rollDice(count, sides, mod);
       const entry = {
         title: `${count}d${sides}${mod ? (mod > 0 ? `+${mod}` : `${mod}`) : ''}`,
+        sides,
         rolls: res.rolls,
         total: res.total,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
@@ -32,6 +33,7 @@ export default function DiceRollerModal({ isOpen, onClose, initialRollData, onRo
       const dropped = rollMode === 'advantage' ? Math.min(r1, r2) : Math.max(r1, r2);
       const entry = {
         title: `1d20 ${rollMode.toUpperCase()} (${mod >= 0 ? `+${mod}` : mod})`,
+        sides: 20,
         rolls: [r1, r2],
         picked,
         dropped,
