@@ -1,5 +1,8 @@
 # D&D 5e Character Forge & Level-Up Sheet (SRD 5.1)
 
+[![Try it live](https://img.shields.io/badge/try_it_live-dnd.stephanis.me-dfb85a?style=for-the-badge&labelColor=151b26)](https://dnd.stephanis.me)
+[![License: CC BY 4.0 (SRD content)](https://img.shields.io/badge/SRD_5.1-CC_BY_4.0-0b0e14?style=for-the-badge&labelColor=151b26)](https://creativecommons.org/licenses/by/4.0/)
+
 A responsive, client-side web application for creating, managing, leveling up, and printing **Dungeons & Dragons 5th Edition** characters using official **System Reference Document 5.1 (SRD 5.1)** content under Creative Commons (CC-BY-4.0).
 
 Featuring a **Baldur's Gate 3 inspired character creation & level-up interface**, an **interactive party member companion view**, and a **high-density tabletop character sheet** cleanly styled for physical printing.
@@ -60,6 +63,8 @@ Featuring a **Baldur's Gate 3 inspired character creation & level-up interface**
 ---
 
 ## 🚀 Getting Started
+
+Just want to roll up a hero? Try it in your browser at **[dnd.stephanis.me](https://dnd.stephanis.me)**. No install needed, and characters stay in your browser's local storage.
 
 ### Prerequisites
 - Node.js (v18.0.0 or higher, v20+ recommended)
