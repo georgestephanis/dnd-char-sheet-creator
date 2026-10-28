@@ -134,14 +134,15 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
       }
     }
 
+    // Only assign a subclass once the class's subclass level is reached
+    const finalSubclassId = character.subclassId || (targetLevel >= classData.subclassLevel ? selectedSubclassId : '');
+
     const updated = {
       ...character,
       level: targetLevel,
-      // Only assign a subclass once the class's subclass level is reached
-      subclassId: character.subclassId || (targetLevel >= classData.subclassLevel ? selectedSubclassId : ''),
-      subclassName: character.subclassId
-        ? character.subclassName
-        : (targetLevel >= classData.subclassLevel ? chosenSubclass?.name || '' : ''),
+      subclassId: finalSubclassId,
+      // Derived from the saved id so the two fields can't disagree
+      subclassName: classData.subclasses.find(sc => sc.id === finalSubclassId)?.name || '',
       maxHp: newMaxHp,
       currentHp: newCurrentHp,
       hitDiceMax: `${targetLevel}d${hitDie}`,
