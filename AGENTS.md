@@ -57,6 +57,10 @@ export PATH="/Users/georgestephanis/.nvm/versions/node/v22.22.2/bin:/opt/homebre
 - **Lint**: `npm run lint` (oxlint with React, `jsx-a11y` and import rules; config in `.oxlintrc.json`). CI (`.github/workflows/ci.yml`) runs lint and build on every PR and fails on any lint error.
 - **Production Build Check**: `npm run build` (uses `vite build`). Always run this before completing complex tasks to verify zero bundling or syntax errors.
 - **Preview Production Bundle**: `npm run preview`.
+- **Node version**: 20.19+ or 22.12+ (Vite's requirement); CI uses Node 22.
+
+### Build Output
+`vite.config.js` splits the bundle with `manualChunks`: `react-vendor`, `lucide-vendor`, and one chunk per SRD data folder (`srd51-data`, `srd52-data`). When adding a new `src/data/srdXX/` folder, add a matching rule there so its data gets its own cacheable chunk.
 
 ---
 
@@ -126,7 +130,10 @@ All mathematical formulas and 5e mechanics must be kept in pure utility function
 - `getSpellSlotsForClass(casterType, level)`: Progression tables for full casters (Wizard, Cleric, Druid, Bard, Sorcerer), half casters (Paladin, Ranger), and Pact Magic (Warlock). Takes a caster type (`'full' | 'half' | 'pact'`), **not** a class id — use `getSpellSlotsForCharacter(character)` from components.
 - `findAvailableSlotIndex(maxSlots, slotsUsed, spellLevel)`: lowest free slot at or above a spell's level.
 - `getSkillBonus(character, skillName, score)`: proficiency, expertise and Jack of All Trades; use it for passives too.
+- `getCasterType(classId, srdVersion)`: `'full' | 'pact' | 'none'` or the ruleset's half-caster type (`'half'` in 5.1, `'half-5.2'` in 5.2, which has slots at level 1).
+- `getInitiativeModifier(character, scores)`: DEX plus Alert (5.1: +5; 5.2: + proficiency bonus). Use it instead of adding Alert by hand.
 - `getHitDiceLabel(character)`, `parseDamageExpression(expr)`, `hasFeat(character, name)`.
+- `ALIGNMENTS` (the nine alignments, shared by the Forge and the sheet) and `formatXp(xp)` (thousands separators; XP is stored as a whole number).
 
 ---
 
@@ -142,7 +149,7 @@ All mathematical formulas and 5e mechanics must be kept in pure utility function
 
 3. **Accessibility & Responsive Fallbacks**:
    - Always ensure interactive buttons and cards have descriptive labels, `title` attributes, and keyboard focus outlines.
-   - The 3-pillar BG3 layout gracefully collapses on smaller viewports (`@media (max-width: 1100px)` and `@media (max-width: 900px)`).
+   - The 3-pillar BG3 layout collapses on smaller viewports (breakpoints at 1200px, 1100px and 900px in `bg3.css`; the sheet uses 1100px, 860px, 768px and 600px in `index.css`).
 
 ---
 
@@ -151,7 +158,7 @@ All mathematical formulas and 5e mechanics must be kept in pure utility function
 - **Adding a New SRD Subclass or Feature**: Update `src/data/<srd51|srd52>/srdClasses.js` with the archetype name, description, and `featuresByLevel` map.
 - **Adding a New Spell**: Add the spell record to that version's `srdSpells.js` with `level`, `school`, `castingTime`, `range`, `classes`, and `description`.
 - **Adding New Feats**: Add the entry to that version's `srdFeats.js`. SRD 5.1 contains only Grappler; SRD 5.2.1 feats carry a `category` (`origin`, `general`, `fighting-style`, `epic-boon`). Non-SRD feats belong in homebrew, not the dataset.
-- **Adding another SRD version**: add a `src/data/srdXX/` folder with the same file and export names, then register it in `RULESETS` with `label`, `playersHandbook`, `summary`, `attribution`, `abilityBonusSource` and `halfCasterType`.
+- **Adding another SRD version**: add a `src/data/srdXX/` folder with the same file and export names, then register it in `RULESETS` with `label`, `playersHandbook`, `summary`, `attribution`, `abilityBonusSource` and `halfCasterType`. Also add a chunk rule in `vite.config.js`, a rules-version option to `.github/ISSUE_TEMPLATE/bug_report.yml` and `rules_content.yml`, and its attribution to the README.
 - **Detecting a feat in rules code**: use `hasFeat(character, 'Name')` from `dndRules.js`, not substring matches on feature names.
 
 ## 🧱 7. Component Conventions
@@ -160,3 +167,5 @@ All mathematical formulas and 5e mechanics must be kept in pure utility function
 - **Interactive elements**: use `<button type="button">`. Where a rich card must stay a `div`, add `role="button"`, `tabIndex={0}`, `onKeyDown={activateOnKey}` (from `src/utils/a11y.js`) and `aria-pressed` for selection state.
 - **Hooks**: never call hooks after an early `return`; render an inner component instead.
 - **Print**: hide inactive tabs with classes (not inline `display: none`) so `@media print` can reveal them.
+- **Character data in the Forge**: derive initial state from `initialCharacter` in `getInitialBuilderState()` (the builder remounts per opening), not with an effect that copies it into state.
+- **Character fields**: `normalizeCharacter()` in `storage.js` is the single place that repairs or migrates saved data (missing arrays, `srdVersion`, string XP…). Add migrations there, not in components.
