@@ -113,7 +113,7 @@ export default function DiceRollerModal({ isOpen, onClose, onRollComplete }) {
             <label className="form-label">Mode (d20)</label>
             <select
               className="form-select"
-              value={rollMode}
+              value={selectedDie !== 20 || dieCount > 1 ? 'normal' : rollMode}
               onChange={(e) => setRollMode(e.target.value)}
               disabled={selectedDie !== 20 || dieCount > 1}
               title={selectedDie !== 20 || dieCount > 1 ? 'Advantage and disadvantage apply to a single d20' : undefined}
