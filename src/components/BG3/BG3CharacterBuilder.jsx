@@ -9,6 +9,7 @@ import { SRD_BACKGROUNDS } from '../../data/srdBackgrounds';
 import { SRD_FEATS } from '../../data/srdFeats';
 import { SRD_SPELLS } from '../../data/srdSpells';
 import { SAMPLE_CHARACTERS } from '../../data/sampleCharacters';
+import { generateCharacterId } from '../../utils/storage';
 import {
   POINT_BUY_COSTS, POINT_BUY_TOTAL, STANDARD_ARRAY,
   roll4d6DropLowest, getAbilityModifier, formatModifier,
@@ -430,7 +431,7 @@ export default function BG3CharacterBuilder({
     });
 
     const newCharacter = {
-      id: initialCharacter?.id || `char-${Date.now()}`,
+      id: initialCharacter?.id || generateCharacterId(),
       name: charName.trim() || 'Tav',
       raceId: currentRace.id,
       subraceId: currentSubrace?.id || '',

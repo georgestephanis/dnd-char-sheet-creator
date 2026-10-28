@@ -97,7 +97,7 @@ export default function App() {
   const handleDuplicateCharacter = (id) => {
     const res = duplicateCharacterById(id);
     setCharacters(res.updatedList);
-    setActiveCharId(res.newCharacterId);
+    if (res.newCharacterId) setActiveCharId(res.newCharacterId);
   };
 
   const handleCharacterSaved = (savedChar) => {
