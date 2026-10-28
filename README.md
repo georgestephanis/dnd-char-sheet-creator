@@ -18,7 +18,7 @@ Featuring a **Baldur's Gate 3 inspired character creation & level-up interface**
   - **⭐ Class Recommended (1-Click)**: Instantly assign optimal 27-point stats tailored to your class.
   - **Standard Array** (15, 14, 13, 12, 10, 8) and **Roll 4d6 Drop Lowest** with interactive dice rolls.
   - Clear **+2 / +1 racial bonus tags** and live modifier calculations.
-- **Background & Skill Selection**: Auto-pruning prevents locked states when switching classes; locks granted background proficiencies with a shield badge and allows dynamic skill swapping.
+- **Background & Skill Selection**: The SRD Acolyte background or a custom/homebrew background. Rogues choose their two Expertise skills. Auto-pruning prevents locked states when switching classes; locks granted background proficiencies with a shield badge and allows dynamic skill swapping.
 - **Spells & Magic**: Starting Cantrips and 1st-level spells filtered by class with spell slot indicators.
 - **Appearance & Identity**: Curated fantasy character avatar gallery, custom image URL input, alignment matrix, and a **Random Fantasy Name Generator (🎲)** tailored to your race.
 
@@ -27,9 +27,9 @@ Featuring a **Baldur's Gate 3 inspired character creation & level-up interface**
 ### 🛡️ Baldur’s Gate 3 In-Game Companion View
 - Inspect your active character in an authentic BG3 in-game party HUD.
 - **Live Vitals**: Interactive Hit Points bar with `+1`, `-1`, `+5`, `-5` quick adjustments, Temp HP, Armor Class, Initiative, and Speed.
-- **Attribute Checks & Saves**: Click any ability or saving throw diamond to roll 1d20 + modifier with animated toast feedback.
+- **Attribute & Skill Checks**: Click any ability or skill to roll 1d20 + modifier with animated toast feedback (saving throws roll from the tabletop sheet).
 - **Weapons & Attack Actions**: Equipped weapons display to-hit bonuses, damage dice, and BG3 weapon actions (*Pommel Strike*, *Cleave*, *Topple*, *Lacerate*).
-- **Interactive Spell Slots**: Clickable pips to expend and restore spell slots level 1 through 9.
+- **Interactive Spell Slots**: Clickable pips to expend and restore spell slots level 1 through 9. Casting uses the lowest free slot at or above the spell's level.
 - **Carrying Capacity**: Live encumbrance meter tracking backpack gear weight against Strength capacity.
 - **Forge / Respec Button**: Re-open any character in the BG3 Character Creation Forge to re-allocate stats, equipment, or spells.
 
@@ -37,7 +37,7 @@ Featuring a **Baldur's Gate 3 inspired character creation & level-up interface**
 
 ### 📜 Printable Tabletop Character Sheet
 - High-density, 3-column classic 5e sheet layout with tabbed views: **Combat & Core**, **Features & Traits**, **Inventory & Equipment**, **Spellbook**, and **Roleplay & Backstory**.
-- **Print-Ready (`@media print`)**: Formatted specifically for US Letter / A4 paper. Web chrome, buttons, headers, and tabs are automatically stripped, producing a clean, high-contrast, black-and-white physical character sheet.
+- **Print-Ready (`@media print`)**: Prints all three pages (Core, Spellbook, Roleplay) on US Letter or A4 from either view. Web chrome, buttons, headers, and tabs are stripped, producing a clean, high-contrast, black-and-white physical character sheet.
 
 ---
 
@@ -46,7 +46,7 @@ Featuring a **Baldur's Gate 3 inspired character creation & level-up interface**
   - **Hit Points Increase**: Choose "Take Average" or "Roll 1dHitDie live" with animated dice rolling.
   - **Class Features Unlocked**: Automatic breakdown of all features granted at the target level.
   - **Subclass Selection**: Prompts when reaching your class's archetype level (e.g. Level 3 for Fighter/Rogue, Level 2 for Wizard).
-  - **ASI & Feats**: Choose between +2 to one ability, +1 to two abilities, or any Feat from the SRD Feat library.
+  - **ASI & Feats**: Choose between +2 to one ability, +1 to two abilities, or a Feat (SRD 5.1 includes Grappler).
   - **Live Before ➔ After Diff**: Right-hand inspector displays real-time before/after stat increases.
 
 ---
@@ -106,23 +106,27 @@ dnd-char-sheet-creator/
 │   │   │   ├── AttacksSection.jsx         # Weapons & attack actions
 │   │   │   ├── SpellsSheet.jsx            # Spellbook & spell slot tracking
 │   │   │   └── ...                        # Features, Inventory, Roleplay, Skills
+│   │   ├── Common/
+│   │   │   ├── Modal.jsx                  # Shared native <dialog> (showModal, Escape, focus return)
+│   │   │   └── DiceRollToast.jsx          # Roll result toast (live region)
 │   │   ├── Modals/
-│   │   │   ├── CharacterRosterModal.jsx   # Roster vault, JSON export & import
 │   │   │   ├── DiceRollerModal.jsx        # 3D interactive dice tray
 │   │   │   ├── SrdLegalModal.jsx          # SRD 5.1 CC-BY-4.0 attribution
 │   │   │   └── Custom*Modal.jsx           # Custom attack, spell, feature & item builders
+│   │   ├── CharacterRosterModal.jsx       # Roster vault, JSON export & import
 │   │   ├── Header.jsx                     # Top bar: Tabletop vs BG3 view, Level Up, + New Hero
 │   │   └── ...
 │   ├── data/
-│   │   ├── srdRaces.js                    # 9 SRD races, subraces, traits & stat bonuses
+│   │   ├── srdRaces.js                    # 9 SRD races, SRD subraces, traits & stat bonuses
 │   │   ├── srdClasses.js                  # 12 SRD classes, archetypes & level 1-20 features
 │   │   ├── srdBackgrounds.js              # SRD backgrounds, skill proficiencies & features
-│   │   ├── srdFeats.js                    # SRD feats library
+│   │   ├── srdFeats.js                    # SRD feats (Grappler)
 │   │   ├── srdSpells.js                   # SRD spell library (Cantrips through 5th level)
 │   │   ├── srdEquipment.js                # Weapons, armor, packs & gear
 │   │   └── sampleCharacters.js            # Starter heroes (Torvin, Altea, Corin)
 │   ├── utils/
-│   │   ├── dndRules.js                    # Modifiers, AC, carrying capacity, prof bonus, point buy
+│   │   ├── dndRules.js                    # Modifiers, AC, skills, slots, carrying capacity, point buy
+│   │   ├── a11y.js                        # Keyboard activation helper for role="button" elements
 │   │   └── storage.js                     # LocalStorage CRUD, export/import & character tracking
 │   ├── App.jsx                            # Root application component
 │   └── index.css                          # Core design system & print stylesheet (@media print)

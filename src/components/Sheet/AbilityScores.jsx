@@ -1,7 +1,7 @@
 import React from 'react';
 import { ABILITIES, getAbilityModifier, formatModifier } from '../../utils/dndRules';
 
-export default function AbilityScores({ scores, onRollCheck, onUpdateScore }) {
+export default function AbilityScores({ scores, onRollCheck }) {
   return (
     <div className="abilities-sidebar">
       {ABILITIES.map(ab => {

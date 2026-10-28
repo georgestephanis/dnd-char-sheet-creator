@@ -1,11 +1,7 @@
 import React from 'react';
-import { Sparkles, Star } from 'lucide-react';
-import { getProficiencyBonus } from '../../utils/dndRules';
 
 export default function SheetHeader({ character, onUpdateCharacter }) {
   if (!character) return null;
-
-  const profBonus = getProficiencyBonus(character.level || 1);
 
   return (
     <div className="sheet-header-box">

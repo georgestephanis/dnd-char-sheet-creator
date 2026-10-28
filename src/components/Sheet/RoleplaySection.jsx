@@ -1,5 +1,4 @@
 import React from 'react';
-import { User, Scroll, Shield } from 'lucide-react';
 
 export default function RoleplaySection({ character, onUpdateCharacter }) {
   if (!character) return null;

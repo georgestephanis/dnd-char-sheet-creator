@@ -62,7 +62,7 @@ A character is stored as a flat, portable JSON-serializable object:
 ```json
 {
   "id": "char-1730000000000",
-  "name": "Bruenor Ironfist",
+  "name": "Torvin Stonehelm",
   "raceId": "dwarf",
   "subraceId": "hill-dwarf",
   "raceName": "Hill Dwarf",
@@ -71,8 +71,8 @@ A character is stored as a flat, portable JSON-serializable object:
   "subclassId": "champion",
   "subclassName": "Champion",
   "level": 3,
-  "backgroundId": "soldier",
-  "backgroundName": "Soldier",
+  "backgroundId": "acolyte",
+  "backgroundName": "Acolyte",
   "alignment": "Lawful Good",
   "player": "Adventurer",
   "abilityScores": { "str": 15, "dex": 12, "con": 14, "int": 8, "wis": 13, "cha": 10 },
@@ -113,7 +113,10 @@ All mathematical formulas and 5e mechanics must be kept in pure utility function
 - `getProficiencyBonus(level)`: `Math.floor((level - 1) / 4) + 2`
 - `calculateArmorClass(character, finalScores)`: Computes base AC (unarmored, light, medium, heavy armor) + Dexterity cap + Shield bonus + Defense fighting style.
 - `getCarryingCapacity(strScore)`: `strScore * 15` lbs.
-- `getSpellSlotsForClass(classId, level)`: Progression tables for full casters (Wizard, Cleric, Druid, Bard, Sorcerer), half casters (Paladin, Ranger), and Pact Magic (Warlock).
+- `getSpellSlotsForClass(casterType, level)`: Progression tables for full casters (Wizard, Cleric, Druid, Bard, Sorcerer), half casters (Paladin, Ranger), and Pact Magic (Warlock). Takes a caster type (`'full' | 'half' | 'pact'`), **not** a class id — use `getSpellSlotsForCharacter(character)` from components.
+- `findAvailableSlotIndex(maxSlots, slotsUsed, spellLevel)`: lowest free slot at or above a spell's level.
+- `getSkillBonus(character, skillName, score)`: proficiency, expertise and Jack of All Trades; use it for passives too.
+- `getHitDiceLabel(character)`, `parseDamageExpression(expr)`, `hasFeat(character, name)`.
 
 ---
 
@@ -137,4 +140,12 @@ All mathematical formulas and 5e mechanics must be kept in pure utility function
 
 - **Adding a New SRD Subclass or Feature**: Update `src/data/srdClasses.js` with the archetype name, description, and `featuresByLevel` map.
 - **Adding a New Spell**: Add the spell record to `src/data/srdSpells.js` with `level`, `school`, `castingTime`, `range`, `classes`, and `description`.
-- **Adding New Feats**: Add the entry to `src/data/srdFeats.js`.
+- **Adding New Feats**: Add the entry to `src/data/srdFeats.js` (SRD 5.1 contains only Grappler; non-SRD feats belong in homebrew, not the dataset).
+- **Detecting a feat in rules code**: use `hasFeat(character, 'Name')` from `dndRules.js`, not substring matches on feature names.
+
+## 🧱 7. Component Conventions
+
+- **Dialogs**: wrap every modal in `src/components/Common/Modal.jsx` (native `showModal()`), and mount it only while open (`{isOpen && <Modal…/>}`) so form state starts fresh.
+- **Interactive elements**: use `<button type="button">`. Where a rich card must stay a `div`, add `role="button"`, `tabIndex={0}`, `onKeyDown={activateOnKey}` (from `src/utils/a11y.js`) and `aria-pressed` for selection state.
+- **Hooks**: never call hooks after an early `return`; render an inner component instead.
+- **Print**: hide inactive tabs with classes (not inline `display: none`) so `@media print` can reveal them.

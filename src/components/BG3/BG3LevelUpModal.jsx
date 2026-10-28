@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '../Common/Modal';
 import {
-  X, TrendingUp, Sparkles, Shield, Heart, Award, Dices, ChevronRight, Check
+  Shield, Heart, Award, Dices, ChevronRight
 } from 'lucide-react';
 import { SRD_CLASSES } from '../../data/srdClasses';
 import { SRD_FEATS } from '../../data/srdFeats';
@@ -234,7 +234,7 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
           </div>
 
           {/* Subclass Selection */}
-          {targetLevel >= classData.subclassLevel && (!character.subclassId || character.subclassId === '') && (
+          {needsSubclass && (
             <div style={{ background: 'linear-gradient(145deg, #18202d 0%, #11151e 100%)', border: '1.5px solid var(--border-gold)', borderRadius: '8px', padding: '1rem', marginBottom: '1.25rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 800 }}>
                 <Shield size={18} />

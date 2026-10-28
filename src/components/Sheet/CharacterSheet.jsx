@@ -10,7 +10,7 @@ import InventorySection from './InventorySection';
 import SpellsSheet from './SpellsSheet';
 import RoleplaySection from './RoleplaySection';
 import { getCalculatedAbilityScores, getProficiencyBonus, getSkillBonus } from '../../utils/dndRules';
-import { Shield, Sparkles, BookOpen, User, Star } from 'lucide-react';
+import { Shield, Sparkles, BookOpen, Star } from 'lucide-react';
 
 export default function CharacterSheet({
   character,

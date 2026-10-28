@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../Common/Modal';
 import {
-  Shield, Sword, Wand2, Sparkles, User, BookOpen, Check,
-  Dices, Star, Heart, Zap, Wind, ChevronRight, ChevronLeft, Award, Plus, Trash2, ArrowLeft, RefreshCw, Flame
+  Shield, Sword, Wand2, Sparkles, User, BookOpen, Check, Dices, Star, ChevronRight,
+  ChevronLeft, Award, ArrowLeft, RefreshCw
 } from 'lucide-react';
 import { SRD_RACES } from '../../data/srdRaces';
 import { SRD_CLASSES } from '../../data/srdClasses';
@@ -11,9 +11,8 @@ import { SRD_SPELLS } from '../../data/srdSpells';
 import { SAMPLE_CHARACTERS } from '../../data/sampleCharacters';
 import { generateCharacterId } from '../../utils/storage';
 import {
-  POINT_BUY_COSTS, POINT_BUY_TOTAL, STANDARD_ARRAY,
-  roll4d6DropLowest, getAbilityModifier, formatModifier,
-  calculateArmorClass, getProficiencyBonus
+  POINT_BUY_COSTS, POINT_BUY_TOTAL, roll4d6DropLowest, getAbilityModifier,
+  formatModifier, calculateArmorClass
 } from '../../utils/dndRules';
 import { activateOnKey } from '../../utils/a11y';
 
@@ -296,7 +295,6 @@ export default function BG3CharacterBuilder({
     const isBgSkill = currentBackground.skillProficiencies?.includes(sk);
     if (isBgSkill) return;
 
-    const availableClassOptions = currentClass.skillChoices?.options || [];
     const isSelected = selectedClassSkills.includes(sk);
     const maxCount = currentClass.skillChoices?.count || 2;
 

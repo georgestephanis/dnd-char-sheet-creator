@@ -15,13 +15,8 @@ import CustomItemModal from './components/Modals/CustomItemModal';
 import DiceRollToast from './components/Common/DiceRollToast';
 
 import {
-  loadCharacters,
-  saveCharacters,
-  saveSingleCharacter,
-  deleteCharacterById,
-  duplicateCharacterById,
-  getActiveCharacterId,
-  setActiveCharacterId
+  loadCharacters, saveSingleCharacter, deleteCharacterById, duplicateCharacterById,
+  getActiveCharacterId, setActiveCharacterId
 } from './utils/storage';
 
 import {
@@ -357,7 +352,6 @@ export default function App() {
               }}
               onSwitchToTabletopSheet={() => setViewMode('sheet')}
               onRollCheck={handleRollCheck}
-              onRollSave={handleRollSave}
               onRollSkill={handleRollSkill}
               onRollAttack={handleRollAttack}
               onCastSpell={handleCastSpell}

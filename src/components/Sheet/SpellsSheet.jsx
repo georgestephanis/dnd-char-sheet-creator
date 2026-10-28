@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Plus, Trash2, Wand2, Sparkles, BookOpen, Check } from 'lucide-react';
+import React from 'react';
+import { Plus, Trash2, Wand2 } from 'lucide-react';
 import { SRD_CLASSES } from '../../data/srdClasses';
 import { getAbilityModifier, getProficiencyBonus, getSpellSlotsForClass, formatModifier } from '../../utils/dndRules';
 

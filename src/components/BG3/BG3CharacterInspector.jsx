@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Shield, Sword, Heart, Zap, Wind, Award, Wand2, Star, Sparkles,
-  TrendingUp, RefreshCw, Scroll, User, ChevronRight, Dices, Plus, Minus, Moon, Sun, Check
+  Sword, Heart, Wand2, Sparkles, TrendingUp, Scroll, Dices, Moon
 } from 'lucide-react';
 import {
   getAbilityModifier, formatModifier, calculateArmorClass,
@@ -18,7 +17,6 @@ export default function BG3CharacterInspector({
   onOpenRespecForge,
   onSwitchToTabletopSheet,
   onRollCheck,
-  onRollSave,
   onRollSkill,
   onRollAttack,
   onCastSpell,
@@ -33,7 +31,6 @@ export default function BG3CharacterInspector({
   const finalScores = getCalculatedAbilityScores(character);
 
   const dexMod = getAbilityModifier(finalScores.dex);
-  const conMod = getAbilityModifier(finalScores.con);
   const calculatedAc = calculateArmorClass(character, finalScores);
   const speed = character.speed || 30;
 
