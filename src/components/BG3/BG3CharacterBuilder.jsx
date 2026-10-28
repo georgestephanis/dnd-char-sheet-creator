@@ -347,10 +347,17 @@ export default function BG3CharacterBuilder({
   const startingHp = (currentClass.hitDie || 8) + conMod + bonusHpPerLevel;
   const speed = currentSubrace?.speed || currentRace.speed || 30;
 
+  // A subclass is only chosen once the character reaches the class's subclass level
+  const subclassLevel = currentClass.subclassLevel || 3;
+  const isSubclassAvailable = startingLevel >= subclassLevel;
+  const effectiveSubclass = isSubclassAvailable
+    ? (currentClass.subclasses?.find(s => s.id === selectedSubclassId) || currentClass.subclasses?.[0] || null)
+    : null;
+
   // Mock character for AC calculation
   const mockChar = {
     classId: currentClass.id,
-    subclassId: selectedSubclassId,
+    subclassId: effectiveSubclass?.id || '',
     equippedArmor: currentClass.id === 'fighter' || currentClass.id === 'paladin'
       ? { ac: 16, category: 'Heavy' }
       : currentClass.id === 'rogue' || currentClass.id === 'ranger'
@@ -392,6 +399,12 @@ export default function BG3CharacterBuilder({
     if (currentClass.featuresByLevel?.[1]) {
       currentClass.featuresByLevel[1].forEach((cf, i) => {
         features.push({ id: `cf-1-${i}`, name: cf.name, source: `${currentClass.name} (Lvl 1)`, description: cf.description });
+      });
+    }
+    // Cleric, Sorcerer and Warlock pick their subclass at 1st level and gain its features then
+    if (effectiveSubclass && subclassLevel === 1) {
+      (effectiveSubclass.featuresByLevel?.[1] || []).forEach((sf, i) => {
+        features.push({ id: `scf-1-${i}`, name: sf.name, source: `${effectiveSubclass.name} (Lvl 1)`, description: sf.description });
       });
     }
     // Custom backgrounds only carry a placeholder feature; don't add it to the sheet
@@ -461,8 +474,8 @@ export default function BG3CharacterBuilder({
       raceName: currentSubrace?.name || currentRace.name,
       classId: currentClass.id,
       className: currentClass.name,
-      subclassId: selectedSubclassId || currentClass.subclasses?.[0]?.id || '',
-      subclassName: currentClass.subclasses?.find(s => s.id === selectedSubclassId)?.name || '',
+      subclassId: effectiveSubclass?.id || '',
+      subclassName: effectiveSubclass?.name || '',
       level: startingLevel,
       backgroundId: currentBackground.id,
       backgroundName: currentBackground.name,
@@ -511,7 +524,9 @@ export default function BG3CharacterBuilder({
   const mergeRespec = (existing, rebuilt) => {
     const classChanged = existing.classId !== rebuilt.classId;
     const builderSpellIds = new Set(rebuilt.spells.map(sp => sp.id));
-    const isBuilderFeature = (f) => /^(rf-|srf-|cf-1-|bg-feat|vf-1)/.test(f.id || ''); // vf-1: legacy Variant Human feat
+    const isBuilderFeature = (f) => /^(rf-|srf-|cf-1-|scf-1-|bg-feat|vf-1)/.test(f.id || ''); // vf-1: legacy Variant Human feat
+    const subclassChanged = (existing.subclassId || '') !== (rebuilt.subclassId || '');
+    const isSubclassLevelFeature = (f) => /^sf-/.test(f.id || '');
     const isClassLevelFeature = (f) => /^(f-|sf-)/.test(f.id || '');
 
     // Also drop older copies of features the builder just regenerated (e.g. sample characters' own ids)
@@ -519,6 +534,7 @@ export default function BG3CharacterBuilder({
     const keptFeatures = (existing.features || []).filter(f =>
       !isBuilderFeature(f) &&
       !(classChanged && isClassLevelFeature(f)) &&
+      !(subclassChanged && isSubclassLevelFeature(f)) &&
       !rebuiltNames.has((f.name || '').toLowerCase())
     );
     const keptSpells = (existing.spells || []).filter(sp =>
@@ -809,17 +825,22 @@ export default function BG3CharacterBuilder({
                   })}
                 </div>
 
-                {/* Subclass Selection if available at Level 1 */}
-                {currentClass.subclasses && currentClass.subclasses.length > 0 && (
+                {/* Subclass selection once the class's subclass level is reached */}
+                {!isSubclassAvailable && currentClass.subclasses?.length > 0 && (
+                  <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1.25rem' }}>
+                    {currentClass.name}s choose their subclass at level {subclassLevel}. You'll pick it when you level up.
+                  </div>
+                )}
+                {isSubclassAvailable && currentClass.subclasses && currentClass.subclasses.length > 0 && (
                   <div style={{ background: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(223, 184, 90, 0.3)', borderRadius: '8px', padding: '1.25rem', marginBottom: '1.25rem' }}>
                     <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.75rem' }}>
                       SUBCLASS / ARCHETYPE ({currentClass.name})
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem' }}>
                       {currentClass.subclasses.map(sub => (
-                        <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={selectedSubclassId === sub.id}
+                        <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={effectiveSubclass?.id === sub.id}
                           key={sub.id}
-                          className={`bg3-card ${selectedSubclassId === sub.id ? 'selected' : ''}`}
+                          className={`bg3-card ${effectiveSubclass?.id === sub.id ? 'selected' : ''}`}
                           onClick={() => setSelectedSubclassId(sub.id)}
                         >
                           <div className="bg3-card-header">{sub.name}</div>

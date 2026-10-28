@@ -88,7 +88,7 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
       }
     });
 
-    if (chosenSubclass) {
+    if (chosenSubclass && targetLevel >= classData.subclassLevel) {
       subclassFeaturesAtTarget.forEach(sf => {
         if (!newFeatures.some(ex => ex.name === sf.name)) {
           newFeatures.push({
@@ -137,8 +137,11 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
     const updated = {
       ...character,
       level: targetLevel,
-      subclassId: selectedSubclassId || character.subclassId,
-      subclassName: chosenSubclass?.name || character.subclassName,
+      // Only assign a subclass once the class's subclass level is reached
+      subclassId: character.subclassId || (targetLevel >= classData.subclassLevel ? selectedSubclassId : ''),
+      subclassName: character.subclassId
+        ? character.subclassName
+        : (targetLevel >= classData.subclassLevel ? chosenSubclass?.name || '' : ''),
       maxHp: newMaxHp,
       currentHp: newCurrentHp,
       hitDiceMax: `${targetLevel}d${hitDie}`,
