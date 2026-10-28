@@ -90,9 +90,10 @@ export default function SheetHeader({ character, onUpdateCharacter }) {
               const digits = e.target.value.replace(/[^\d]/g, '');
               onUpdateCharacter({ xp: digits === '' ? '' : parseInt(digits, 10) });
             }}
-            onBlur={() => {
+            onBlur={(e) => {
               setIsEditingXp(false);
-              if (character.xp === '') onUpdateCharacter({ xp: 0 });
+              // Read the field itself; character.xp may not reflect the last keystroke yet
+              if (e.target.value.replace(/[^\d]/g, '') === '') onUpdateCharacter({ xp: 0 });
             }}
           />
           <div className="sheet-label">Experience Points</div>
