@@ -64,7 +64,7 @@ export default function AttacksSection({ character, scores, onRollAttack, onOpen
                     <button
                       type="button"
                       className="btn-reset"
-                      style={{ fontWeight: 800, fontFamily: 'var(--font-heading)', cursor: 'pointer' }}
+                      style={{ fontWeight: 800, fontFamily: 'var(--font-heading)', cursor: 'pointer', width: '100%', padding: '0.25rem 0' }}
                       aria-label={`Roll ${atk.name} attack, ${formatModifier(bonus)} to hit`}
                       onClick={() => onRollAttack && onRollAttack(atk, bonus, abMod)}
                     >
