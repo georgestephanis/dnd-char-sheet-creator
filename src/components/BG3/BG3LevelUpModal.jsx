@@ -24,7 +24,7 @@ export default function BG3LevelUpModal({ isOpen, onClose, character, onSaveLeve
 
 function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
   const currentLevel = character.level || 1;
-  const [targetLevel, setTargetLevel] = useState(Math.min(20, currentLevel + 1));
+  const targetLevel = Math.min(20, currentLevel + 1);
 
   const classData = SRD_CLASSES.find(c => c.id === character.classId) || SRD_CLASSES[0];
   const hitDie = classData.hitDie || 8;
@@ -69,7 +69,8 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
 
   const isMaxLevel = currentLevel >= 20;
 
-  const handleApplyLevelUp = () => {
+  // continueAfter keeps the dialog open; it remounts for the next level (keyed on level)
+  const handleApplyLevelUp = (continueAfter = false) => {
     if (isMaxLevel) return;
     const hpToAdd = hpMethod === 'average' ? standardAvgGain : manualHpGain;
     const newMaxHp = (character.maxHp || 10) + hpToAdd;
@@ -151,7 +152,7 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
     };
 
     onSaveLeveledCharacter(updated);
-    onClose();
+    if (!continueAfter) onClose();
   };
 
   return (
@@ -172,22 +173,13 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Target Level:</span>
-              <select
-                className="form-select"
-                style={{ width: '90px', fontWeight: 'bold', background: '#11151e', borderColor: 'var(--border-gold)', color: 'var(--text-gold)' }}
-                value={isMaxLevel ? currentLevel : targetLevel}
-                disabled={isMaxLevel}
-                onChange={(e) => setTargetLevel(parseInt(e.target.value, 10))}
-              >
-                {isMaxLevel ? (
-                  <option value={currentLevel}>Lvl 20</option>
-                ) : (
-                  Array.from({ length: 20 - currentLevel }, (_, i) => currentLevel + 1 + i).map(lvl => (
-                    <option key={lvl} value={lvl}>Lvl {lvl}</option>
-                  ))
-                )}
-              </select>
+              {/* One level per step, so every level's HP, ASI and subclass choice is made */}
+              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                {isMaxLevel ? 'Maximum level' : `Lvl ${currentLevel} → `}
+              </span>
+              <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, color: 'var(--text-gold)' }}>
+                Lvl {isMaxLevel ? currentLevel : targetLevel}
+              </span>
             </div>
           </div>
 
@@ -436,13 +428,23 @@ function LevelUpDialog({ onClose, character, onSaveLeveledCharacter }) {
             <button
               type="button"
               className="bg3-btn-venture"
-              onClick={handleApplyLevelUp}
+              onClick={() => handleApplyLevelUp(false)}
               disabled={isMaxLevel}
               title={isMaxLevel ? 'Already at maximum level (20)' : undefined}
             >
               <span>{isMaxLevel ? 'Maximum Level Reached' : 'Complete Level Up'}</span>
               <ChevronRight size={18} />
             </button>
+            {targetLevel < 20 && !isMaxLevel && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ width: '100%', justifyContent: 'center', color: 'var(--text-gold)', borderColor: 'var(--border-gold)' }}
+                onClick={() => handleApplyLevelUp(true)}
+              >
+                Level Up &amp; Continue to Lvl {targetLevel + 1}
+              </button>
+            )}
             <button
               type="button"
               className="btn btn-secondary"
