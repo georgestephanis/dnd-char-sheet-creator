@@ -66,7 +66,7 @@ Featuring a **guided character creation & level-up interface**, an **illustrated
 
 ## 🚀 Getting Started
 
-Just want to roll up a hero? Try it in your browser at **[dnd.stephanis.me](https://dnd.stephanis.me)**. No install needed, and characters stay in your browser's local storage.
+Just want to roll up a hero? Try it in your browser at **[dnd.stephanis.me](https://dnd.stephanis.me)**. No install needed, and characters stay in your browser's `localStorage`.
 
 ### Prerequisites
 - Node.js (v18.0.0 or higher, v20+ recommended)
