@@ -7,7 +7,6 @@ import {
 import { SRD_RACES } from '../../data/srdRaces';
 import { SRD_CLASSES } from '../../data/srdClasses';
 import { SRD_BACKGROUNDS } from '../../data/srdBackgrounds';
-import { SRD_FEATS } from '../../data/srdFeats';
 import { SRD_SPELLS } from '../../data/srdSpells';
 import { SAMPLE_CHARACTERS } from '../../data/sampleCharacters';
 import { generateCharacterId } from '../../utils/storage';
@@ -34,16 +33,17 @@ const CLASS_RECOMMENDED_SCORES = {
   wizard: { int: 15, dex: 14, con: 13, wis: 12, cha: 10, str: 8 },
 };
 
+// Original names for the random name generator (no names from published settings or games)
 const FANTASY_NAMES = {
-  dwarf: ['Bruenor', 'Thorin', 'Morgran', 'Balin', 'Brakka', 'Helga', 'Vondal', 'Duerg', 'Thorgar', 'Orsik'],
-  elf: ['Altea', 'Astarion', 'Aelar', 'Caelynn', 'Feyre', 'Legolas', 'Elysia', 'Valerius', 'Theadrin', 'Xiloscient'],
-  human: ['Tav', 'Gale', 'Wyll', 'Valen', 'Seraphina', 'Rowan', 'Kaelen', 'Aric', 'Gareth', 'Lyra'],
-  tiefling: ['Karlach', 'Akmenos', 'Barakas', 'Damakos', 'Kallista', 'Lilith', 'Malakor', 'Vesper', 'Zephyr', 'Mephist'],
-  halfling: ['Corin', 'Alton', 'Cade', 'Eldon', 'Lyle', 'Bree', 'Callie', 'Kithri', 'Verna', 'Finnick'],
-  dragonborn: ['Arjhan', 'Balasar', 'Donaar', 'Ghesh', 'Heskan', 'Kriv', 'Medrash', 'Patrin', 'Rhogar', 'Torinn'],
-  gnome: ['Boddynock', 'Dimble', 'Fonkin', 'Gimble', 'Gnim', 'Namfoodle', 'Seebo', 'Wrenn', 'Zook', 'Ellywick'],
-  'half-elf': ['Shadowheart', 'Tanis', 'Rhiannon', 'Faerand', 'Silas', 'Corvin', 'Vaelin', 'Aria', 'Dorian', 'Kyra'],
-  'half-orc': ['Krag', 'Gore', 'Dench', 'Feng', 'Gell', 'Henk', 'Holg', 'Imsh', 'Mhurren', 'Ront', 'Thokk']
+  dwarf: ['Torvin', 'Helgrid', 'Bramdur', 'Kethra', 'Orvald', 'Dagny', 'Rurik', 'Sigra', 'Thrandal', 'Moira'],
+  elf: ['Altea', 'Ilvaris', 'Saelith', 'Thenwyn', 'Faelor', 'Yselle', 'Caerith', 'Lithriel', 'Arvanis', 'Nymara'],
+  human: ['Tav', 'Rowan', 'Mira', 'Aldric', 'Seraphina', 'Joren', 'Talia', 'Corwin', 'Elena', 'Bastian'],
+  tiefling: ['Ashka', 'Ruin', 'Vexis', 'Morrow', 'Nyxara', 'Cinder', 'Zariel', 'Hollow', 'Vesper', 'Solace'],
+  halfling: ['Corin', 'Pip', 'Tamsin', 'Wendel', 'Marigold', 'Odo', 'Fennick', 'Rosie', 'Barley', 'Clover'],
+  dragonborn: ['Kaurax', 'Vyrsha', 'Thoravek', 'Sarnith', 'Draxis', 'Ylsira', 'Gorvath', 'Rhessa', 'Torrak', 'Ixalia'],
+  gnome: ['Fizzwick', 'Nim', 'Tibble', 'Quillon', 'Dabber', 'Lissel', 'Wobblenock', 'Pellin', 'Zinnia', 'Glim'],
+  'half-elf': ['Sorrel', 'Kaelen', 'Avelyn', 'Doran', 'Liora', 'Merrick', 'Isra', 'Tobin', 'Calla', 'Riven'],
+  'half-orc': ['Grask', 'Murga', 'Thokra', 'Brul', 'Vashka', 'Korrin', 'Ugra', 'Drak', 'Hesk', 'Orla']
 };
 
 const FANTASY_AVATARS = [
@@ -83,10 +83,8 @@ export default function BG3CharacterBuilder({
 
   // Race
   const [selectedRaceId, setSelectedRaceId] = useState('human');
-  const [selectedSubraceId, setSelectedSubraceId] = useState('human-standard');
+  const [selectedSubraceId, setSelectedSubraceId] = useState('');
   const [dragonbornAncestry, setDragonbornAncestry] = useState('Red');
-  const [variantHumanStats, setVariantHumanStats] = useState(['str', 'dex']);
-  const [variantHumanFeatId, setVariantHumanFeatId] = useState('alert');
 
   // Class & Level
   const [selectedClassId, setSelectedClassId] = useState('fighter');
@@ -100,7 +98,7 @@ export default function BG3CharacterBuilder({
   const [baseScores, setBaseScores] = useState({ str: 15, dex: 14, con: 13, int: 12, wis: 10, cha: 8 });
 
   // Background
-  const [selectedBackgroundId, setSelectedBackgroundId] = useState('soldier');
+  const [selectedBackgroundId, setSelectedBackgroundId] = useState('acolyte');
 
   // Skills
   const [selectedClassSkills, setSelectedClassSkills] = useState(['Athletics', 'Perception']);
@@ -122,11 +120,11 @@ export default function BG3CharacterBuilder({
       setAvatarIcon(initialCharacter.avatarIcon || '⚔️');
       setCustomAvatarUrl(initialCharacter.avatarUrl || '');
       setSelectedRaceId(initialCharacter.raceId || 'human');
-      setSelectedSubraceId(initialCharacter.subraceId || 'human-standard');
+      setSelectedSubraceId(initialCharacter.subraceId || '');
       setSelectedClassId(initialCharacter.classId || 'fighter');
       setSelectedSubclassId(initialCharacter.subclassId || '');
       setStartingLevel(initialCharacter.level || 1);
-      setSelectedBackgroundId(initialCharacter.backgroundId || 'soldier');
+      setSelectedBackgroundId(initialCharacter.backgroundId || 'acolyte');
       if (initialCharacter.abilityScores) {
         const stored = { ...initialCharacter.abilityScores };
         const values = Object.values(stored);
@@ -184,11 +182,6 @@ export default function BG3CharacterBuilder({
   if (currentSubrace?.abilityScoreBonuses) {
     Object.entries(currentSubrace.abilityScoreBonuses).forEach(([k, v]) => {
       racialBonuses[k] = (racialBonuses[k] || 0) + v;
-    });
-  }
-  if (selectedRaceId === 'human' && selectedSubraceId === 'human-variant') {
-    variantHumanStats.forEach(stat => {
-      racialBonuses[stat] = 1;
     });
   }
 
@@ -310,7 +303,7 @@ export default function BG3CharacterBuilder({
     }
   };
 
-  // Load an Origin Preset Hero (Bruenor, Altea, Corin)
+  // Load an Origin Preset Hero (sample characters)
   const handleSelectOrigin = (originId) => {
     if (originId === 'custom') {
       setOriginType('custom');
@@ -342,7 +335,7 @@ export default function BG3CharacterBuilder({
   // Vitals calculation for right inspector
   const conMod = getAbilityModifier(finalScores.con);
   const dexMod = getAbilityModifier(finalScores.dex);
-  const isHillDwarf = selectedSubraceId === 'hill-dwarf';
+  const isHillDwarf = currentSubrace?.id === 'hill-dwarf';
   const bonusHpPerLevel = isHillDwarf ? 1 : 0;
   const startingHp = (currentClass.hitDie || 8) + conMod + bonusHpPerLevel;
   const speed = currentSubrace?.speed || currentRace.speed || 30;
@@ -402,12 +395,6 @@ export default function BG3CharacterBuilder({
         source: `Background (${currentBackground.name})`,
         description: currentBackground.feature.description
       });
-    }
-    if (selectedRaceId === 'human' && selectedSubraceId === 'human-variant') {
-      const feat = SRD_FEATS.find(f => f.id === variantHumanFeatId);
-      if (feat) {
-        features.push({ id: `vf-1`, name: `Feat: ${feat.name}`, source: 'Variant Human Feat', description: feat.description });
-      }
     }
 
     const attacks = [];
@@ -517,7 +504,7 @@ export default function BG3CharacterBuilder({
   const mergeRespec = (existing, rebuilt) => {
     const classChanged = existing.classId !== rebuilt.classId;
     const builderSpellIds = new Set(rebuilt.spells.map(sp => sp.id));
-    const isBuilderFeature = (f) => /^(rf-|srf-|cf-1-|bg-feat|vf-1)/.test(f.id || '');
+    const isBuilderFeature = (f) => /^(rf-|srf-|cf-1-|bg-feat|vf-1)/.test(f.id || ''); // vf-1: legacy Variant Human feat
     const isClassLevelFeature = (f) => /^(f-|sf-)/.test(f.id || '');
 
     // Also drop older copies of features the builder just regenerated (e.g. sample characters' own ids)
@@ -732,7 +719,7 @@ export default function BG3CharacterBuilder({
                       <div className="bg3-card-header">{r.name}</div>
                       <div className="bg3-card-desc">{r.description}</div>
                       <div className="bg3-badge-pill">
-                        Speed: {r.speed}ft &bull; {r.subraces ? `${r.subraces.length} Subraces` : 'Standard'}
+                        Speed: {r.speed}ft &bull; {r.subraces?.length > 1 ? `${r.subraces.length} Subraces` : r.subraces?.length === 1 ? r.subraces[0].name : 'Standard'}
                       </div>
                     </div>
                   ))}
@@ -782,37 +769,6 @@ export default function BG3CharacterBuilder({
                   </div>
                 )}
 
-                {/* Variant Human Options */}
-                {selectedRaceId === 'human' && selectedSubraceId === 'human-variant' && (
-                  <div style={{ background: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(223, 184, 90, 0.3)', borderRadius: '8px', padding: '1.25rem', marginBottom: '1.25rem' }}>
-                    <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-                      VARIANT HUMAN TALENTS
-                    </div>
-                    <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '0.75rem' }}>
-                      Choose 2 different ability scores to increase by +1, and select 1 bonus Feat.
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                      <div>
-                        <label htmlFor="bg3characterbuilder-ability-bonus-1" className="form-label">Ability Bonus #1</label>
-                        <select id="bg3characterbuilder-ability-bonus-1" className="form-select" value={variantHumanStats[0]} onChange={(e) => setVariantHumanStats([e.target.value, variantHumanStats[1]])}>
-                          {['str', 'dex', 'con', 'int', 'wis', 'cha'].map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
-                        </select>
-                      </div>
-                      <div>
-                        <label htmlFor="bg3characterbuilder-ability-bonus-2" className="form-label">Ability Bonus #2</label>
-                        <select id="bg3characterbuilder-ability-bonus-2" className="form-select" value={variantHumanStats[1]} onChange={(e) => setVariantHumanStats([variantHumanStats[0], e.target.value])}>
-                          {['str', 'dex', 'con', 'int', 'wis', 'cha'].map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
-                        </select>
-                      </div>
-                    </div>
-                    <div>
-                      <label htmlFor="bg3characterbuilder-bonus-feat" className="form-label">Bonus Feat</label>
-                      <select id="bg3characterbuilder-bonus-feat" className="form-select" value={variantHumanFeatId} onChange={(e) => setVariantHumanFeatId(e.target.value)}>
-                        {SRD_FEATS.map(f => <option key={f.id} value={f.id}>{f.name} &bull; {f.description.substring(0, 60)}...</option>)}
-                      </select>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 

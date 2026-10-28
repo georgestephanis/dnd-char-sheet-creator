@@ -26,16 +26,6 @@ export const SRD_RACES = [
           { name: 'Dwarven Toughness', description: 'Your hit point maximum increases by 1, and it increases by 1 every time you gain a level.' }
         ],
         extraHpPerLevel: 1
-      },
-      {
-        id: 'mountain-dwarf',
-        name: 'Mountain Dwarf',
-        description: 'Strong and hardy, accustomed to a difficult life in rugged terrain.',
-        abilityScoreBonuses: { str: 2 },
-        traits: [
-          { name: 'Dwarven Armor Training', description: 'You have proficiency with light and medium armor.' }
-        ],
-        armorProficiencies: ['light', 'medium']
       }
     ]
   },
@@ -68,33 +58,6 @@ export const SRD_RACES = [
         weaponProficiencies: ['longsword', 'shortsword', 'shortbow', 'longbow'],
         extraCantripsCount: 1,
         cantripSource: 'wizard'
-      },
-      {
-        id: 'wood-elf',
-        name: 'Wood Elf',
-        description: 'As a wood elf, you have keen senses and intuition, and your fleet feet carry you quickly and stealthily.',
-        speed: 35,
-        abilityScoreBonuses: { wis: 1 },
-        traits: [
-          { name: 'Elf Weapon Training', description: 'Proficiency with longsword, shortsword, shortbow, and longbow.' },
-          { name: 'Fleet of Foot', description: 'Your base walking speed increases to 35 feet.' },
-          { name: 'Mask of the Wild', description: 'You can attempt to hide even when you are only lightly obscured by foliage, heavy rain, falling snow, mist, and other natural phenomena.' }
-        ],
-        weaponProficiencies: ['longsword', 'shortsword', 'shortbow', 'longbow']
-      },
-      {
-        id: 'drow',
-        name: 'Drow (Dark Elf)',
-        description: 'Descended from an earlier subrace of elves, drow were banished from the surface world.',
-        abilityScoreBonuses: { cha: 1 },
-        traits: [
-          { name: 'Superior Darkvision', description: 'Your darkvision has a radius of 120 feet.' },
-          { name: 'Sunlight Sensitivity', description: 'You have disadvantage on attack rolls and Wisdom (Perception) checks that rely on sight when you or your target is in direct sunlight.' },
-          { name: 'Drow Magic', description: 'You know the Dancing Lights cantrip. At 3rd level, cast Faerie Fire once per long rest. At 5th level, cast Darkness once per long rest.' },
-          { name: 'Drow Weapon Training', description: 'Proficiency with rapiers, shortswords, and hand crossbows.' }
-        ],
-        weaponProficiencies: ['rapier', 'shortsword', 'hand crossbow'],
-        innateSpells: ['Dancing Lights']
       }
     ]
   },
@@ -120,15 +83,6 @@ export const SRD_RACES = [
         traits: [
           { name: 'Naturally Stealthy', description: 'You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you.' }
         ]
-      },
-      {
-        id: 'stout-halfling',
-        name: 'Stout Halfling',
-        description: 'As a stout halfling, you’re hardier than average and have some resistance to poison.',
-        abilityScoreBonuses: { con: 1 },
-        traits: [
-          { name: 'Stout Resilience', description: 'You have advantage on saving throws against poison, and you have resistance against poison damage.' }
-        ]
       }
     ]
   },
@@ -143,28 +97,7 @@ export const SRD_RACES = [
       { name: 'Versatility', description: 'Humans adapt to any climate, role, or culture.' }
     ],
     languages: ['Common', 'Choice of one extra'],
-    subraces: [
-      {
-        id: 'human-standard',
-        name: 'Standard Human',
-        description: '+1 to all six ability scores, plus an extra language of your choice.',
-        abilityScoreBonuses: { str: 1, dex: 1, con: 1, int: 1, wis: 1, cha: 1 },
-        traits: []
-      },
-      {
-        id: 'human-variant',
-        name: 'Variant Human',
-        description: '+1 to two different ability scores of your choice, 1 skill proficiency, and 1 feat of your choice.',
-        abilityScoreBonuses: {}, // User picks 2
-        isVariant: true,
-        extraSkillCount: 1,
-        extraFeatCount: 1,
-        traits: [
-          { name: 'Skills', description: 'You gain proficiency in one skill of your choice.' },
-          { name: 'Feat', description: 'You gain one feat of your choice.' }
-        ]
-      }
-    ]
+    subraces: []
   },
   {
     id: 'dragonborn',
@@ -205,17 +138,6 @@ export const SRD_RACES = [
     ],
     languages: ['Common', 'Gnomish'],
     subraces: [
-      {
-        id: 'forest-gnome',
-        name: 'Forest Gnome',
-        description: 'As a forest gnome, you have a natural knack for illusion and inherent quickness and stealth.',
-        abilityScoreBonuses: { dex: 1 },
-        traits: [
-          { name: 'Natural Illusionist', description: 'You know the Minor Illusion cantrip. Intelligence is your spellcasting ability for it.' },
-          { name: 'Speak with Small Beasts', description: 'Through sounds and gestures, you can communicate simple ideas with Small or smaller beasts.' }
-        ],
-        innateSpells: ['Minor Illusion']
-      },
       {
         id: 'rock-gnome',
         name: 'Rock Gnome',
