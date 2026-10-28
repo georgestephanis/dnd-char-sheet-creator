@@ -381,7 +381,8 @@ export default function BG3CharacterBuilder({
         features.push({ id: `cf-1-${i}`, name: cf.name, source: `${currentClass.name} (Lvl 1)`, description: cf.description });
       });
     }
-    if (currentBackground.feature) {
+    // Custom backgrounds only carry a placeholder feature; don't add it to the sheet
+    if (currentBackground.feature && !currentBackground.isCustom) {
       features.push({
         id: `bg-feat`,
         name: currentBackground.feature.name,
@@ -506,8 +507,12 @@ export default function BG3CharacterBuilder({
     const isBuilderFeature = (f) => /^(rf-|srf-|cf-1-|bg-feat|vf-1)/.test(f.id || '');
     const isClassLevelFeature = (f) => /^(f-|sf-)/.test(f.id || '');
 
+    // Also drop older copies of features the builder just regenerated (e.g. sample characters' own ids)
+    const rebuiltNames = new Set(rebuilt.features.map(f => (f.name || '').toLowerCase()));
     const keptFeatures = (existing.features || []).filter(f =>
-      !isBuilderFeature(f) && !(classChanged && isClassLevelFeature(f))
+      !isBuilderFeature(f) &&
+      !(classChanged && isClassLevelFeature(f)) &&
+      !rebuiltNames.has((f.name || '').toLowerCase())
     );
     const keptSpells = (existing.spells || []).filter(sp =>
       !builderSpellIds.has(sp.id) && !((sp.level === 0 || sp.level === 1) && SRD_SPELLS.some(s => s.id === sp.id))
