@@ -116,7 +116,7 @@ export default function BG3CharacterBuilder({
   useEffect(() => {
     if (initialCharacter) {
       // Look up the character's own ruleset so this effect doesn't depend on render state
-      const { races: SRD_RACES, classes: SRD_CLASSES, backgrounds: SRD_BACKGROUNDS, spells: SRD_SPELLS } =
+      const { races: savedRaces, classes: savedClasses, backgrounds: savedBackgrounds, spells: savedSpells } =
         getRuleset(initialCharacter.srdVersion);
       setCharName(initialCharacter.name || 'Adventurer');
       setPlayerName(initialCharacter.player || 'Player');
@@ -125,7 +125,7 @@ export default function BG3CharacterBuilder({
       setCustomAvatarUrl(initialCharacter.avatarUrl || '');
       // Saved ids may refer to content removed from the SRD dataset; resolve them so the
       // selected cards match what will actually be saved
-      const race = SRD_RACES.find(r => r.id === initialCharacter.raceId) || SRD_RACES.find(r => r.id === 'human');
+      const race = savedRaces.find(r => r.id === initialCharacter.raceId) || savedRaces.find(r => r.id === 'human');
       const subrace = race.subraces?.find(sr => sr.id === initialCharacter.subraceId) || race.subraces?.[0];
       setSelectedRaceId(race.id);
       setSelectedSubraceId(subrace?.id || '');
@@ -134,7 +134,7 @@ export default function BG3CharacterBuilder({
       setStartingLevel(initialCharacter.level || 1);
       // Removed backgrounds become Custom so the character keeps a homebrew background
       setSelectedBackgroundId(
-        SRD_BACKGROUNDS.some(bg => bg.id === initialCharacter.backgroundId)
+        savedBackgrounds.some(bg => bg.id === initialCharacter.backgroundId)
           ? initialCharacter.backgroundId
           : (initialCharacter.backgroundId ? 'custom' : 'acolyte')
       );
@@ -151,10 +151,10 @@ export default function BG3CharacterBuilder({
       }
       if (initialCharacter.skillProficiencies) {
         // Background skills are re-added on save; only class picks belong in this list
-        const bg = SRD_BACKGROUNDS.find(b => b.id === initialCharacter.backgroundId);
+        const bg = savedBackgrounds.find(b => b.id === initialCharacter.backgroundId);
         const bgSkills = bg?.skillProficiencies || [];
         // Keep only skills this class can pick, up to its quota, so the step starts out valid
-        const loadedClass = SRD_CLASSES.find(c => c.id === initialCharacter.classId);
+        const loadedClass = savedClasses.find(c => c.id === initialCharacter.classId);
         const classOptions = loadedClass?.skillChoices?.options || [];
         const quota = loadedClass?.skillChoices?.count || 2;
         setSelectedClassSkills(
@@ -171,7 +171,7 @@ export default function BG3CharacterBuilder({
       }
       // Only preselect SRD spells on this class's list; others stay on the sheet untouched
       const knownSpells = initialCharacter.spells || [];
-      const isClassSpell = (sp) => SRD_SPELLS.some(s => s.id === sp.id && s.classes.includes(initialCharacter.classId));
+      const isClassSpell = (sp) => savedSpells.some(s => s.id === sp.id && s.classes.includes(initialCharacter.classId));
       setSelectedCantrips(knownSpells.filter(sp => sp.level === 0 && isClassSpell(sp)).map(sp => sp.id));
       setSelectedFirstLevelSpells(knownSpells.filter(sp => sp.level === 1 && isClassSpell(sp)).map(sp => sp.id));
       setOriginType('custom');
