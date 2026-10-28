@@ -21,7 +21,7 @@ export default function Header({
         <div className="brand-icon">⚔️</div>
         <div>
           <div className="brand-title">D&amp;D 5e Character Forge</div>
-          <div className="brand-subtitle">Guided Creator &bull; Level-Up &bull; SRD 5.1 &bull; Printable</div>
+          <div className="brand-subtitle">Guided Creator &bull; Level-Up &bull; SRD 5.1 &amp; 5.2.1 &bull; Printable</div>
         </div>
       </div>
 
@@ -147,11 +147,11 @@ export default function Header({
         </button>
 
         {/* SRD Legal Modal */}
-        <button aria-label="SRD 5.1 CC-BY-4.0 Attribution"
+        <button aria-label="SRD CC-BY-4.0 Attribution"
           type="button"
           className="btn btn-secondary btn-icon"
           onClick={onOpenLegalModal}
-          title="SRD 5.1 CC-BY-4.0 Attribution"
+          title="SRD CC-BY-4.0 Attribution"
         >
           <ShieldAlert size={16} />
         </button>

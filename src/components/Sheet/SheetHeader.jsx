@@ -1,4 +1,5 @@
 import React from 'react';
+import { getRuleset } from '../../data/rulesets';
 
 export default function SheetHeader({ character, onUpdateCharacter }) {
   if (!character) return null;
@@ -31,6 +32,13 @@ export default function SheetHeader({ character, onUpdateCharacter }) {
             {character.backgroundName || 'Background'}
           </div>
           <div className="sheet-label">Background</div>
+        </div>
+
+        <div className="meta-field">
+          <div className="meta-value" title={`Matches the ${getRuleset(character.srdVersion).playersHandbook}`}>
+            {getRuleset(character.srdVersion).label}
+          </div>
+          <div className="sheet-label">Rules</div>
         </div>
 
         <div className="meta-field">

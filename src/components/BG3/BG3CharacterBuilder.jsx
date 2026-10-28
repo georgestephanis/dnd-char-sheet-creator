@@ -5,7 +5,7 @@ import {
   ChevronLeft, Award, ArrowLeft, RefreshCw
 } from 'lucide-react';
 import { SAMPLE_CHARACTERS } from '../../data/sampleCharacters';
-import { getRuleset, DEFAULT_SRD_VERSION } from '../../data/rulesets';
+import { getRuleset, DEFAULT_SRD_VERSION, RULESET_LIST } from '../../data/rulesets';
 import { generateCharacterId } from '../../utils/storage';
 import {
   POINT_BUY_COSTS, POINT_BUY_TOTAL, roll4d6DropLowest, getAbilityModifier,
@@ -28,6 +28,8 @@ const CLASS_RECOMMENDED_SCORES = {
   warlock: { cha: 15, con: 14, dex: 13, wis: 12, int: 10, str: 8 },
   wizard: { int: 15, dex: 14, con: 13, wis: 12, cha: 10, str: 8 },
 };
+
+const ABILITY_NAMES = { str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' };
 
 // Original names for the random name generator (no names from published settings or games)
 const FANTASY_NAMES = {
@@ -100,6 +102,10 @@ export default function BG3CharacterBuilder({
 
   // Background
   const [selectedBackgroundId, setSelectedBackgroundId] = useState('acolyte');
+  // SRD 5.2: the background's three abilities get +2/+1 or +1/+1/+1
+  const [bgBonusMode, setBgBonusMode] = useState(initialCharacter?.backgroundBonus?.mode || 'two-one');
+  const [bgBonusTwo, setBgBonusTwo] = useState(initialCharacter?.backgroundBonus?.two || '');
+  const [bgBonusOne, setBgBonusOne] = useState(initialCharacter?.backgroundBonus?.one || '');
 
   // Skills
   const [selectedClassSkills, setSelectedClassSkills] = useState(['Athletics', 'Perception']);
@@ -185,8 +191,19 @@ export default function BG3CharacterBuilder({
   const currentClass = SRD_CLASSES.find(c => c.id === selectedClassId) || SRD_CLASSES[0];
   const currentBackground = SRD_BACKGROUNDS.find(b => b.id === selectedBackgroundId) || SRD_BACKGROUNDS[0];
 
-  // Calculate racial bonuses
+  // Ability bonuses applied on top of base scores: from species (5.1) or background (5.2)
   const racialBonuses = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
+  const bgAbilities = ruleset.abilityBonusSource === 'background' ? (currentBackground.abilityScores || []) : [];
+  const bgTwo = bgAbilities.includes(bgBonusTwo) ? bgBonusTwo : bgAbilities[0];
+  const bgOne = bgAbilities.includes(bgBonusOne) && bgBonusOne !== bgTwo ? bgBonusOne : bgAbilities.find(a => a !== bgTwo);
+  if (ruleset.abilityBonusSource === 'background') {
+    if (bgBonusMode === 'one-one-one') {
+      bgAbilities.slice(0, 3).forEach(ab => { racialBonuses[ab] += 1; });
+    } else {
+      if (bgTwo) racialBonuses[bgTwo] += 2;
+      if (bgOne) racialBonuses[bgOne] += 1;
+    }
+  }
   if (currentRace.abilityScoreBonuses) {
     Object.entries(currentRace.abilityScoreBonuses).forEach(([k, v]) => {
       racialBonuses[k] = (racialBonuses[k] || 0) + v;
@@ -279,6 +296,26 @@ export default function BG3CharacterBuilder({
   };
 
   // Background Selection Handler
+  const handleSelectSrdVersion = (version) => {
+    if (version === srdVersion) return;
+    const next = getRuleset(version);
+    setSrdVersion(version);
+    setOriginType('custom');
+    const race = next.races.find(r => r.id === selectedRaceId) || next.races.find(r => r.id === 'human') || next.races[0];
+    setSelectedRaceId(race.id);
+    setSelectedSubraceId(race.subraces?.[0]?.id || '');
+    const cls = next.classes.find(c => c.id === selectedClassId) || next.classes[0];
+    setSelectedClassId(cls.id);
+    setSelectedSubclassId('');
+    setSelectedClassSkills((cls.skillChoices?.options || []).slice(0, cls.skillChoices?.count || 2));
+    setSelectedExpertise([]);
+    setSelectedBackgroundId(next.backgrounds[0].id);
+    setBgBonusTwo('');
+    setBgBonusOne('');
+    setSelectedCantrips(next.spells.filter(sp => sp.level === 0 && sp.classes.includes(cls.id)).slice(0, 3).map(sp => sp.id));
+    setSelectedFirstLevelSpells(next.spells.filter(sp => sp.level === 1 && sp.classes.includes(cls.id)).slice(0, 2).map(sp => sp.id));
+  };
+
   const handleSelectBackground = (bgId) => {
     const newBg = SRD_BACKGROUNDS.find(b => b.id === bgId);
     if (!newBg) return;
@@ -323,6 +360,8 @@ export default function BG3CharacterBuilder({
     }
     const sample = SAMPLE_CHARACTERS.find(s => s.id === originId);
     if (sample) {
+      // Sample heroes are built on their own rules version
+      setSrdVersion(sample.srdVersion || DEFAULT_SRD_VERSION);
       setOriginType(originId);
       setCharName(sample.name);
       setAlignment(sample.alignment);
@@ -347,8 +386,8 @@ export default function BG3CharacterBuilder({
   // Vitals calculation for right inspector
   const conMod = getAbilityModifier(finalScores.con);
   const dexMod = getAbilityModifier(finalScores.dex);
-  const isHillDwarf = currentSubrace?.id === 'hill-dwarf';
-  const bonusHpPerLevel = isHillDwarf ? 1 : 0;
+  // Dwarven Toughness: 5.1 puts it on Hill Dwarf, 5.2 on the Dwarf species
+  const bonusHpPerLevel = currentSubrace?.extraHpPerLevel || currentRace.extraHpPerLevel || 0;
   const startingHp = (currentClass.hitDie || 8) + conMod + bonusHpPerLevel;
   const speed = currentSubrace?.speed || currentRace.speed || 30;
 
@@ -413,6 +452,16 @@ export default function BG3CharacterBuilder({
       });
     }
     // Custom backgrounds only carry a placeholder feature; don't add it to the sheet
+    // SRD 5.2 backgrounds grant an Origin feat
+    const originFeat = ruleset.feats.find(f => f.id === currentBackground.originFeat);
+    if (originFeat) {
+      features.push({
+        id: 'bg-origin-feat',
+        name: `Feat: ${currentBackground.originFeatName || originFeat.name}`,
+        source: `Background (${currentBackground.name})`,
+        description: [originFeat.description, ...(originFeat.benefits || [])].join(' ')
+      });
+    }
     if (currentBackground.feature && !currentBackground.isCustom) {
       features.push({
         id: `bg-feat`,
@@ -491,6 +540,7 @@ export default function BG3CharacterBuilder({
       inspiration: false,
       abilityScores: activeBaseScores,
       racialBonuses,
+      backgroundBonus: ruleset.abilityBonusSource === 'background' ? { mode: bgBonusMode, two: bgTwo, one: bgOne } : null,
       customAbilityBonuses: { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 },
       savingThrowsProficient: currentClass.savingThrows || ['str', 'con'],
       skillProficiencies: allProficientSkills,
@@ -530,7 +580,7 @@ export default function BG3CharacterBuilder({
   const mergeRespec = (existing, rebuilt) => {
     const classChanged = existing.classId !== rebuilt.classId;
     const builderSpellIds = new Set(rebuilt.spells.map(sp => sp.id));
-    const isBuilderFeature = (f) => /^(rf-|srf-|cf-1-|scf-1-|bg-feat|vf-1)/.test(f.id || ''); // vf-1: legacy Variant Human feat
+    const isBuilderFeature = (f) => /^(rf-|srf-|cf-1-|scf-1-|bg-feat|bg-origin-feat|vf-1)/.test(f.id || ''); // vf-1: legacy Variant Human feat
     const subclassChanged = (existing.subclassId || '') !== (rebuilt.subclassId || '');
     // Level-up subclass features use sf- ids; older/sample data marks them by source instead
     const oldSubclassName = (existing.subclassName || '').toLowerCase();
@@ -684,6 +734,37 @@ export default function BG3CharacterBuilder({
                   Forge your own legend from scratch as a Custom Adventurer, or embark on your journey as an iconic pre-made hero.
                 </div>
 
+                {/* Rules version: chosen once at creation; a respec keeps the character's version */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <div id="srd-version-label" className="form-label" style={{ color: 'var(--text-gold)', marginBottom: '0.5rem' }}>
+                    Rules Version
+                  </div>
+                  <div role="radiogroup" aria-labelledby="srd-version-label" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '0.75rem' }}>
+                    {RULESET_LIST.map(rs => (
+                      <div
+                        key={rs.version}
+                        role="radio"
+                        tabIndex={0}
+                        onKeyDown={activateOnKey}
+                        aria-checked={srdVersion === rs.version}
+                        aria-disabled={!!initialCharacter || undefined}
+                        className={`bg3-card ${srdVersion === rs.version ? 'selected' : ''}`}
+                        style={initialCharacter && srdVersion !== rs.version ? { opacity: 0.45, cursor: 'not-allowed' } : undefined}
+                        onClick={() => { if (!initialCharacter) handleSelectSrdVersion(rs.version); }}
+                      >
+                        <div className="bg3-card-header">{rs.label}</div>
+                        <div className="bg3-badge-pill">Matches the {rs.playersHandbook}</div>
+                        <div className="bg3-card-desc">{rs.summary}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {initialCharacter && (
+                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.5rem' }}>
+                      A character's rules version is set when it's created. To use the other version, create a new character.
+                    </div>
+                  )}
+                </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                   {/* Custom Hero Card */}
                   <div role="button" tabIndex={0} onKeyDown={activateOnKey} aria-pressed={originType === 'custom'}
@@ -713,6 +794,7 @@ export default function BG3CharacterBuilder({
                         <div style={{ fontSize: '1.6rem' }}>{orig.classId === 'fighter' ? '🛡️' : orig.classId === 'wizard' ? '🧙‍♂️' : '🗡️'}</div>
                         <div>
                           <div className="bg3-card-header">{orig.name}</div>
+                        <div className="bg3-badge-pill">{getRuleset(orig.srdVersion).label}</div>
                           <div className="bg3-badge-pill">{orig.raceName} &bull; {orig.className}</div>
                         </div>
                       </div>
@@ -1092,6 +1174,53 @@ export default function BG3CharacterBuilder({
                     </div>
                   ))}
                 </div>
+
+                {ruleset.abilityBonusSource === 'background' && bgAbilities.length > 0 && (
+                  <div style={{ background: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(223, 184, 90, 0.3)', borderRadius: '8px', padding: '1rem', marginTop: '1rem' }}>
+                    <div style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-gold)', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.5rem' }}>
+                      ABILITY SCORE INCREASES ({currentBackground.name})
+                    </div>
+                    <div role="radiogroup" aria-label="Background ability increase pattern" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+                      {[{ id: 'two-one', label: '+2 / +1' }, { id: 'one-one-one', label: '+1 / +1 / +1' }].map(m => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={bgBonusMode === m.id}
+                          className={`btn btn-sm ${bgBonusMode === m.id ? 'btn-primary' : 'btn-secondary'}`}
+                          onClick={() => setBgBonusMode(m.id)}
+                        >
+                          {m.label}
+                        </button>
+                      ))}
+                    </div>
+                    {bgBonusMode === 'two-one' ? (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                        <div>
+                          <label htmlFor="bg-bonus-two" className="form-label">+2 to</label>
+                          <select id="bg-bonus-two" className="form-select" value={bgTwo} onChange={(e) => setBgBonusTwo(e.target.value)}>
+                            {bgAbilities.map(ab => <option key={ab} value={ab}>{ABILITY_NAMES[ab]}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label htmlFor="bg-bonus-one" className="form-label">+1 to</label>
+                          <select id="bg-bonus-one" className="form-select" value={bgOne} onChange={(e) => setBgBonusOne(e.target.value)}>
+                            {bgAbilities.filter(ab => ab !== bgTwo).map(ab => <option key={ab} value={ab}>{ABILITY_NAMES[ab]}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                        +1 to {bgAbilities.slice(0, 3).map(ab => ABILITY_NAMES[ab]).join(', ')}
+                      </div>
+                    )}
+                    {currentBackground.originFeatName && (
+                      <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.75rem' }}>
+                        <strong style={{ color: 'var(--text-main)' }}>Origin feat:</strong> {currentBackground.originFeatName}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {currentBackground.feature && (
                   <div style={{ background: 'rgba(0, 0, 0, 0.4)', border: '1px solid rgba(223, 184, 90, 0.3)', borderRadius: '8px', padding: '1rem', marginTop: '1rem' }}>

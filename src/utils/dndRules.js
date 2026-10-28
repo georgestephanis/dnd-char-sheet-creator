@@ -138,6 +138,10 @@ export function getSpellSlotsForClass(casterType, level) {
   if (casterType === 'full') {
     return FULL_CASTER_SLOTS[lvl] || [0, 0, 0, 0, 0, 0, 0, 0, 0];
   }
+  // SRD 5.2 half casters (Paladin, Ranger) have two 1st-level slots at level 1
+  if (casterType === 'half-5.2') {
+    return lvl === 1 ? [2, 0, 0, 0, 0, 0, 0, 0, 0] : getSpellSlotsForClass('half', lvl);
+  }
   if (casterType === 'half') {
     const halfSlots = HALF_CASTER_SLOTS[lvl] || [0, 0, 0, 0, 0];
     return [...halfSlots, 0, 0, 0, 0];
@@ -153,9 +157,11 @@ export function getSpellSlotsForClass(casterType, level) {
 
 // Resolve a class id to its caster type ('full' | 'half' | 'pact' | 'none')
 export function getCasterType(classId, srdVersion) {
-  const classData = getRuleset(srdVersion).classes.find(c => c.id === classId);
+  const ruleset = getRuleset(srdVersion);
+  const classData = ruleset.classes.find(c => c.id === classId);
   if (!classData) return 'none';
-  return classData.spellcasterType || (classData.spellcaster ? 'full' : 'none');
+  const type = classData.spellcasterType || (classData.spellcaster ? 'full' : 'none');
+  return type === 'half' ? ruleset.halfCasterType : type;
 }
 
 export function getSpellSlotsForCharacter(character) {
@@ -195,6 +201,13 @@ export function getSkillBonus(character, skillName, abilityScore) {
   if (character.skillProficiencies?.includes(skillName)) return abMod + profBonus;
   if (character.classId === 'bard' && (character.level || 1) >= 2) return abMod + Math.floor(profBonus / 2);
   return abMod;
+}
+
+// Initiative modifier: DEX plus Alert (5.1: +5; 5.2: + proficiency bonus)
+export function getInitiativeModifier(character, scores) {
+  const dexMod = getAbilityModifier(scores.dex);
+  if (!hasFeat(character, 'Alert')) return dexMod;
+  return dexMod + (character.srdVersion === '5.2' ? getProficiencyBonus(character.level || 1) : 5);
 }
 
 // Parse damage like "1d8", "2d6+1" or a flat "1" into { count, sides, flat }, or null
@@ -255,7 +268,9 @@ export function calculateArmorClass(character, scores) {
     } else if (character.classId === 'monk' && !hasShield) {
       baseAc = 10 + dexMod + wisMod;
     } else if (character.subclassId === 'draconic-bloodline') {
-      baseAc = 13 + dexMod;
+      baseAc = 13 + dexMod; // SRD 5.1 Draconic Resilience
+    } else if (character.subclassId === 'draconic-sorcery') {
+      baseAc = 10 + dexMod + getAbilityModifier(scores.cha); // SRD 5.2.1 Draconic Resilience
     } else {
       baseAc = 10 + dexMod;
     }
