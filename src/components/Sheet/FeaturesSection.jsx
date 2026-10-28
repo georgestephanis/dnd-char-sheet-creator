@@ -13,7 +13,7 @@ export default function FeaturesSection({ character, onOpenAddFeature, onRemoveF
   };
 
   const matchesFilter = (f) => {
-    if (sourceFilter !== 'all' && !f.source?.toLowerCase().includes(sourceFilter.toLowerCase())) return false;
+    if (sourceFilter !== 'all' && !(f.source || '').toLowerCase().includes(sourceFilter.toLowerCase())) return false;
     if (search.trim() && !(f.name || '').toLowerCase().includes(search.toLowerCase()) && !f.description?.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   };

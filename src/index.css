@@ -867,6 +867,7 @@ dialog.modal-dialog::backdrop {
     box-shadow: none !important;
     border: none !important;
     padding: 0 !important;
+    margin: 0 !important;
   }
 
   .sheet-header-box,
