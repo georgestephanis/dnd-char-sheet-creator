@@ -271,10 +271,16 @@ export default function App() {
   // Printing always uses the tabletop sheet; the BG3 view is restored afterwards.
   // Handles both the Print button and the browser's own Ctrl/Cmd+P.
   const viewBeforePrintRef = useRef(null);
+  const viewModeRef = useRef(viewMode);
+  useEffect(() => {
+    viewModeRef.current = viewMode;
+  }, [viewMode]);
+
+  // Registered once so the listeners can't be swapped out mid-print
   useEffect(() => {
     const handleBeforePrint = () => {
-      if (viewMode !== 'sheet') {
-        viewBeforePrintRef.current = viewMode;
+      if (viewModeRef.current !== 'sheet') {
+        viewBeforePrintRef.current = viewModeRef.current;
         flushSync(() => setViewMode('sheet'));
       }
     };
@@ -290,7 +296,7 @@ export default function App() {
       window.removeEventListener('beforeprint', handleBeforePrint);
       window.removeEventListener('afterprint', handleAfterPrint);
     };
-  }, [viewMode]);
+  }, []);
 
   const handlePrint = () => {
     window.print();

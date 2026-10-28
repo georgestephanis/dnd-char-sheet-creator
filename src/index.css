@@ -867,7 +867,6 @@ dialog.modal-dialog::backdrop {
     box-shadow: none !important;
     border: none !important;
     padding: 0 !important;
-    page-break-after: always;
   }
 
   .sheet-header-box,
@@ -900,12 +899,13 @@ dialog.modal-dialog::backdrop {
     display: block !important;
   }
 
-  .sheet-tab-panel + .sheet-tab-panel {
-    break-before: page;
+  /* One page break between each sheet page (and none after the last) */
+  .sheet-tab-panel {
+    break-after: page;
   }
 
   .sheet-tab-panel:last-child {
-    page-break-after: auto;
+    break-after: auto;
   }
 
   /* Scrolling lists expand so nothing is clipped on paper */
