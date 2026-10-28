@@ -406,6 +406,8 @@ export default function BG3CharacterInspector({
                               <button
                                 key={pIdx}
                                 type="button"
+                                aria-label={`Level ${levelNum} slot ${pIdx + 1}`}
+                                aria-pressed={isSlotUsed}
                                 onClick={() => handleToggleSpellSlot(idx, pIdx)}
                                 style={{
                                   width: '18px',

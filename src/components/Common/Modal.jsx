@@ -40,7 +40,9 @@ export default function Modal({ onClose, className = 'modal-dialog', style, labe
     if (!inside) onCloseRef.current?.();
   };
 
+  // Backdrop clicks are a mouse convenience; keyboard users close with Escape (onCancel)
   return (
+    // oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <dialog
       ref={dialogRef}
       className={className}

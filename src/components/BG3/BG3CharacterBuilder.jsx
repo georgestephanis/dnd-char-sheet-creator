@@ -1329,10 +1329,10 @@ export default function BG3CharacterBuilder({
 
                 {/* Avatar Gallery */}
                 <div style={{ marginBottom: '1.25rem' }}>
-                  <label className="form-label" style={{ color: 'var(--text-gold)', marginBottom: '0.5rem' }}>
+                  <div id="portrait-gallery-label" className="form-label" style={{ color: 'var(--text-gold)', marginBottom: '0.5rem' }}>
                     Choose Character Portrait
-                  </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.65rem', marginBottom: '0.75rem' }}>
+                  </div>
+                  <div role="group" aria-labelledby="portrait-gallery-label" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.65rem', marginBottom: '0.75rem' }}>
                     {FANTASY_AVATARS.map(av => {
                       const isSel = avatarIcon === av.icon;
                       return (

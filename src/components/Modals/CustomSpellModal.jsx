@@ -38,7 +38,7 @@ export default function CustomSpellModal({ isOpen, onClose, onSaveSpell }) {
       range: spell.range,
       duration: spell.duration,
       description: spell.description,
-      prepared: spell.level === 0 ? true : false,
+      prepared: spell.level === 0,
       ritual: !!spell.ritual
     });
     onClose();
