@@ -68,7 +68,7 @@ Featuring a **guided character creation & level-up interface**, an **illustrated
 ---
 
 ### 🔒 Privacy & Local Vault
-- **100% Client-Side**: No account needed, no server storage, zero data sent to external servers.
+- **100% Client-Side**: No account needed, no server storage, and no character data leaves your browser. (The page loads fonts from Google Fonts, and a custom portrait URL is fetched from wherever it points.)
 - **LocalStorage Persistence**: Characters automatically save to local storage (`dnd_characters_v1`).
 - **Export & Import**: Export single characters or your entire roster as portable JSON files, with full import support.
 - **Custom Homebrew**: Add custom attacks, spells, features, and inventory items.
@@ -77,7 +77,7 @@ Featuring a **guided character creation & level-up interface**, an **illustrated
 
 ## 🚀 Getting Started
 
-Just want to roll up a hero? Try it in your browser at **[dnd.stephanis.me](https://dnd.stephanis.me)**. No install needed, and characters stay in your browser's `localStorage`.
+Just want to roll up a hero? Try it in your browser at **[georgestephanis.github.io/dnd-char-sheet-creator](https://georgestephanis.github.io/dnd-char-sheet-creator/)** or **[dnd.stephanis.me](https://dnd.stephanis.me)**. No install needed, and characters stay in your browser's `localStorage`. Each site keeps its own roster, so use **Export** to move characters between them.
 
 ### Prerequisites
 - Node.js 20.19+ or 22.12+ (required by Vite; CI uses Node 22)
