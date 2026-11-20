@@ -181,3 +181,7 @@ This work includes material from the **System Reference Document 5.2.1 (“SRD 5
 This project is compatible with fifth edition.
 
 *Dungeons & Dragons* and *D&D* are registered trademarks of Wizards of the Coast LLC. This project is an independent community tool and is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC or Larian Studios.
+
+## License
+
+The application code is GPL-3.0-or-later; see [LICENSE](LICENSE). The bundled SRD 5.1 and SRD 5.2.1 game content is from Wizards of the Coast under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
