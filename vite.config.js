@@ -6,6 +6,7 @@ const port = Number(process.env.PORT) || 5173
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: './', // relative paths so dist/ works on GitHub Pages or any subfolder
   plugins: [react()],
   server: { port, strictPort: false },
   preview: { port, strictPort: false },

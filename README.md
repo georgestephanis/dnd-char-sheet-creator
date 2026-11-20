@@ -68,7 +68,7 @@ Featuring a **guided character creation & level-up interface**, an **illustrated
 ---
 
 ### 🔒 Privacy & Local Vault
-- **100% Client-Side**: No account needed, no server storage, zero data sent to external servers.
+- **100% Client-Side**: No account needed, no server storage, and no character data leaves your browser. (The page loads fonts from Google Fonts, and a custom portrait URL is fetched from wherever it points.)
 - **LocalStorage Persistence**: Characters automatically save to local storage (`dnd_characters_v1`).
 - **Export & Import**: Export single characters or your entire roster as portable JSON files, with full import support.
 - **Custom Homebrew**: Add custom attacks, spells, features, and inventory items.
@@ -77,7 +77,7 @@ Featuring a **guided character creation & level-up interface**, an **illustrated
 
 ## 🚀 Getting Started
 
-Just want to roll up a hero? Try it in your browser at **[dnd.stephanis.me](https://dnd.stephanis.me)**. No install needed, and characters stay in your browser's `localStorage`.
+Just want to roll up a hero? Try it in your browser at **[georgestephanis.github.io/dnd-char-sheet-creator](https://georgestephanis.github.io/dnd-char-sheet-creator/)** or **[dnd.stephanis.me](https://dnd.stephanis.me)**. No install needed, and characters stay in your browser's `localStorage`. Each site keeps its own roster, so use **Export** to move characters between them.
 
 ### Prerequisites
 - Node.js 20.19+ or 22.12+ (required by Vite; CI uses Node 22)
@@ -181,3 +181,7 @@ This work includes material from the **System Reference Document 5.2.1 (“SRD 5
 This project is compatible with fifth edition.
 
 *Dungeons & Dragons* and *D&D* are registered trademarks of Wizards of the Coast LLC. This project is an independent community tool and is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC or Larian Studios.
+
+## License
+
+The application code is GPL-3.0-or-later; see [LICENSE](LICENSE). The bundled SRD 5.1 and SRD 5.2.1 game content is from Wizards of the Coast under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
