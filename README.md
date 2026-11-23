@@ -1,8 +1,12 @@
 # D&D 5e Character Forge & Level-Up Sheet (SRD 5.1 & 5.2.1)
 
 > [!TIP]
-> **Look before you build.** [wvw.dev](https://wvw.dev) is a catalog of open-source apps, many of them built with AI.
-> Similar projects there: [Dice Roller](https://wvw.dev/#/discover/dice-roller) (dice notation and roll history for tabletop RPGs), [VOID ATLAS](https://wvw.dev/#/discover/voidatlas) (a planet generator for the Mothership RPG). Before spending tokens on a new app, search wvw.dev for something you can fork, this repo included.
+> **Look before you build.** Similar open-source projects:
+>
+> - [Dungeon Master's Vault](https://github.com/Orcpub/orcpub): 5e character builder, EPL-2.0
+> - [Dice Roller](https://wvw.dev/#/discover/dice-roller): dice for tabletop RPGs, on wvw.dev
+>
+> Before building your own tool, search [AlternativeTo](https://alternativeto.net) (filter to open source), [GitHub](https://github.com/search?type=repositories) and [wvw.dev](https://wvw.dev) for something to fork, this repo included.
 
 [![Try it live](https://img.shields.io/badge/try_it_live-dnd.stephanis.me-dfb85a?style=for-the-badge&labelColor=151b26)](https://dnd.stephanis.me)
 [![License: CC BY 4.0 (SRD content)](https://img.shields.io/badge/SRD_5.1_%26_5.2.1-CC_BY_4.0-0b0e14?style=for-the-badge&labelColor=151b26)](https://creativecommons.org/licenses/by/4.0/)
